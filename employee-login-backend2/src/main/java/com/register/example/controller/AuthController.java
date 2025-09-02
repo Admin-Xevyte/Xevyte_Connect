@@ -134,7 +134,7 @@ public class AuthController {
         String newPassword = request.get("newPassword");
         String confirmPassword = request.get("confirmPassword");
  
-        String passwordPattern = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%?&]).{8,}$";
+      String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$";
         if (!newPassword.matches(passwordPattern)) {
             return ResponseEntity.badRequest().body(Map.of(
                     "message", "Your new password does not meet security requirements. Password must be at least 8 characters and include uppercase letters, numbers, and special characters."
