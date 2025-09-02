@@ -119,15 +119,7 @@ function Performance() {
               <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)' }}>
                   Home
-                  <img
-                    src={require("../assets/home02.png")}
-                    alt="office"
-                    style={{
-                      width: '22px',
-                      height: '22px',
-                      filter: 'invert(1)', // makes dark image appear white
-                    }}
-                  />
+                
                 </span>
               </Link>
             </h3>
