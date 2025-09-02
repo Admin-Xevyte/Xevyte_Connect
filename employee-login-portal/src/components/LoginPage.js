@@ -80,7 +80,7 @@ function LoginPage() {
       </div>
       <div className="right-side">
         <div className="for-container">
-          <h2>Welcome back👋</h2>
+          <h2>Welcome To Xevyte Hub</h2>
           <p>Please enter your details</p>
  
           <form onSubmit={handleLogin}>
