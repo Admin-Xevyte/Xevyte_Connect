@@ -10,7 +10,7 @@ function NewClaim() {
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const [searchTerm, setSearchTerm] = useState("");
   const [receiptPreviewUrl, setReceiptPreviewUrl] = useState(null);
-
+ const [profileOpen, setProfileOpen] = useState(false);
   const fileInputRef = useRef(null);
   const profileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
@@ -354,27 +354,29 @@ function NewClaim() {
           <>
             <img src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")} alt="logo" className="office-vng" />
             <img src={require("../assets/gg_move-left.png")} alt="collapse" className="toggle-btn" onClick={toggleSidebar} style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }} />
-             <h3>
-              <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                  Home
-                  
-                </span>
-              </Link>
-            </h3>
+            <h3><Link to="/hom" className="hom" style={{ textDecoration: 'none' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                Favourites
+                <img
+                  src={require("../assets/star4.png")}
+                  alt="office"
+                  style={{ width: '22px', height: '22px' }}
+                />
+              </span>
+            </Link></h3>
             <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'white' }}>Claims</Link></h3>
-            <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-            <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-            <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-            <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-            <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-            <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-            <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-            <h3><Link to="/home8" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Notifications</Link></h3>
-            <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-            <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Performance</Link></h3>
-            <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-            <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
+            <h3><Link to="/home1" className="side" style={{ textDecoration: 'none' }}>Time Sheet</Link></h3>
+            <h3><Link to="/home2" className="side" style={{ textDecoration: 'none' }}>Employee Handbook</Link></h3>
+            <h3><Link to="/home3" className="side" style={{ textDecoration: 'none' }}>Employee Directory</Link></h3>
+            <h3><Link to="/home4" className="side" style={{ textDecoration: 'none' }}>Exit Management</Link></h3>
+            <h3><Link to="/home5" className="side" style={{ textDecoration: 'none' }}>Holiday Calendar</Link></h3>
+            <h3><Link to="/home6" className="side" style={{ textDecoration: 'none' }}>Helpdesk</Link></h3>
+            <h3><Link to="/home7" className="side" style={{ textDecoration: 'none' }}>Leaves</Link></h3>
+            <h3><Link to="/home8" className="side" style={{ textDecoration: 'none' }}>Notifications</Link></h3>
+            <h3><Link to="/home9" className="side" style={{ textDecoration: 'none' }}>Pay slips</Link></h3>
+            <h3><Link to="/home10" className="side" style={{ textDecoration: 'none' }}>Performance</Link></h3>
+            <h3><Link to="/home11" className="side" style={{ textDecoration: 'none' }}>Training</Link></h3>
+            <h3><Link to="/home12" className="side" style={{ textDecoration: 'none' }}>Travel</Link></h3>
           </>
         ) : (
           <div className="collapsed-wrapper">
@@ -385,111 +387,83 @@ function NewClaim() {
 
       <div className="main-area">
 
-        <div className="dashboard-header">
-          <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2>Welcome, {employeeName} ({employeeId})</h2>
-
-            <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+        <div className="dashboard-header"   style={{
+    padding: '20px 20px 0px 40px ',
+    paddingLeft: '30px', 
+  }}>
+        <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>Welcome, {employeeName} ({employeeId})</h2>
+          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <img
+              src={require('../assets/Vector.png')}
+              alt="Notifications"
+              className="icon"
+              style={{ cursor: 'pointer' }}
+            />
+            <div className="profile-wrapper" style={{ position: 'relative' }}>
               <img
-                src={require('../assets/Vector.png')}
-                alt="Notifications"
-                className="icon"
-                style={{ cursor: 'pointer' }}
+                src={profilePic}
+                alt="Profile"
+                className="profile-pic"
+                onClick={toggleProfileMenu}
+                style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
               />
-
-              <div className="profile-wrapper" style={{ position: 'relative' }}>
-                <img
-                  src={profilePic}
-                  alt="Profile"
-                  className="profile-pic"
-                  onClick={toggleProfileMenu}
-                  style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                />
-                {isProfileMenuOpen && (
-                  <div
-                    ref={profileDropdownRef}
-                    className="profile-dropdown"
-                    style={{
-                      position: 'absolute',
-                      top: '50px',
-                      right: '0',
-                      backgroundColor: '#fff',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                      borderRadius: '4px',
-                      zIndex: 1000,
-                      width: '150px',
-                    }}
-                  >
-                    <button
-                      onClick={handleEditProfile}
-                      style={{
-                        display: 'block',
-                        width: '100%',
-                        padding: '10px',
-                        background: 'none',
-                        border: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        borderBottom: '1px solid #eee',
-                      }}
-                    >
-                      Edit Profile
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      style={{
-                        display: 'block',
-                        width: '100%',
-                        padding: '10px',
-                        background: 'none',
-                        border: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-
-                {successMessage && (
-                  <div style={{
+              {profileOpen && (
+                <div
+                  ref={profileDropdownRef}
+                  className="profile-dropdown"
+                  style={{
                     position: 'absolute',
-                    top: '100%',
+                    top: '50px',
                     right: '0',
-                    marginTop: '5px',
-                    backgroundColor: '#4BB543',
-                    color: 'white',
-                    padding: '8px 12px',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                     borderRadius: '4px',
-                    fontSize: '14px',
-                    whiteSpace: 'nowrap',
-                    zIndex: 1100,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                  }}>
-                    {successMessage}
-                  </div>
-                )}
-              </div>
-
+                    zIndex: 1000,
+                    width: '150px',
+                  }}
+                >
+                  <button onClick={handleEditProfile} style={{ padding: '10px', width: '100%', border: 'none', background: 'none', textAlign: 'left', borderBottom: '1px solid #eee' }}>Edit Profile</button>
+                  <button onClick={handleLogout} style={{ padding: '10px', width: '100%', border: 'none', background: 'none', textAlign: 'left' }}>Logout</button>
+                </div>
+              )}
+              {successMessage && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: '0',
+                  marginTop: '5px',
+                  backgroundColor: '#4BB543',
+                  color: 'white',
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                  zIndex: 1100,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}>
+                  {successMessage}
+                </div>
+              )}
               <input
                 type="file"
-                ref={profileInputRef}
+                ref={fileInputRef}
                 accept="image/*"
                 style={{ display: 'none' }}
                 onChange={handleImageChange}
               />
             </div>
           </div>
+        </div>
+<hr className="divider-line" style={{ marginTop: "10px" }} />
 
-          <hr className="divider-line" />
         </div>
 
         <div className="new-claim-wrapper">
