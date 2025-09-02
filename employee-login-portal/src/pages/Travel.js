@@ -1541,7 +1541,7 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
             <th style={{ ...thStyle, minWidth: '120px' }}>Accommodation Required</th>
             <th style={{ ...thStyle, minWidth: '120px' }}>Advance Required</th>
             <th style={{ ...thStyle, minWidth: '120px' }}>Purpose Of Travel</th>
-            <th style={{ ...thStyle, minWidth: '180px' }}>Upload Ticket (PDF)*</th>
+            <th style={{ ...thStyle, minWidth: '180px' }}>Upload Tickets*</th>
             <th style={{ ...thStyle, minWidth: '120px' }}>Action</th>
           </tr>
         </thead>
