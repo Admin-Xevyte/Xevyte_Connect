@@ -101,8 +101,9 @@ function LoginPage() {
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-              title="Must be at least 8 characters, include one uppercase letter, one number, and one special character"
+           pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$"
+title="Must be at least 8 characters, include uppercase and lowercase letters, one number, and one special character"
+
               required
               className="password-input"
             />
