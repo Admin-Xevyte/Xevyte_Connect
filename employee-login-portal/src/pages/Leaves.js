@@ -730,166 +730,209 @@ const handleSubmitLeave = async (e) => {
 
           {isModalOpen && (
             <div ref={modalRef} onClick={handleModalClick} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000 }}>
-              <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '10px', width: '90%', maxWidth: '500px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', position: 'relative' }}>
+             <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '10px', width: '90%', maxWidth: '500px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', position: 'relative' }}>
                 <h3 style={{ marginBottom: '20px' }}>Apply for Leave</h3>
                 <button onClick={() => setIsModalToOpen(false)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#aaa' }}>&times;</button>
-                <form onSubmit={handleSubmitLeave}>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                      Leave Type<span style={{ color: 'red' }}> *</span>
-                    </label>
-                    <select name="type" value={leaveRequest.type} onChange={handleInputChange} style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }}>
-                      <option value="Select" disabled>Select</option>
-                      <option value="Casual">Casual Leave</option>
-                      <option value="Sick">Sick Leave</option>
-                      <option value="Paternity">Paternity Leave</option>
-                      <option value="Maternity">Maternity Leave</option>
-                      <option value="LOP">LOP</option>
-                    </select>
-                  </div>
-
-
-<div style={{ marginBottom: '15px' }}>
-  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-    Start Date<span style={{ color: 'red' }}> *</span>
-  </label>
-  <DatePicker
-    selected={leaveRequest.startDate}
-    onChange={handleStartDateChange}
-    selectsStart
-    startDate={leaveRequest.startDate}
-    endDate={leaveRequest.endDate}
-    minDate={null}
-    maxDate={leaveRequest.type === 'Sick' ? new Date() : null}
-    dayClassName={highlightDates}
-    dateFormat="dd-MM-yyyy"
-    placeholderText="DD-MM-YYYY"
-    className="date-picker-input"
-    strictParsing
-  />
-</div>
-<div style={{ marginBottom: '15px' }}>
-  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-    End Date<span style={{ color: 'red' }}> *</span>
-  </label>
-  <DatePicker
-    selected={leaveRequest.endDate}
-    onChange={handleEndDateChange}
-    selectsEnd
-    startDate={leaveRequest.startDate}
-    endDate={leaveRequest.endDate}
-    minDate={leaveRequest.startDate}
-    dayClassName={highlightDates}
-    dateFormat="dd-MM-yyyy"
-    placeholderText="DD-MM-YYYY"
-    className="date-picker-input"
-    strictParsing
-  />
-  {formError && <p style={{ color: '#FF4136', fontSize: '12px', marginTop: '5px' }}>{formError}</p>}
-</div>
-
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                      Total Days<span style={{ color: 'red' }}> *</span>
-                    </label>
-                    <input type="text" name="totalDays" value={totalDays} readOnly style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd', backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} />
-                    {showLOPAlert && (
-                      <p style={{ color: '#FF4136', fontSize: '14px', marginTop: '10px', fontWeight: 'bold' }}>
-                        Note: You have already utilized your allocated leaves. Excess leaves will be marked as LOP.
-                      </p>
-                    )}
-                  </div>
-                 
-                    {/* File Upload */}
-<div style={{ marginBottom: "10px" }}>
-  <label style={{ display: "block", marginBottom: "5px" }}>
-    Upload Document (PDF, JPG, JPEG, PNG, max 5MB){" "}
-    {leaveRequest.type === "Sick" && totalDays > 2 && (
-      <span style={{ color: "red" }}>*</span>
-    )}
-  </label>
-
-  {/* Custom File Upload */}
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      overflow: "hidden",
-      width: "100%",
-    }}
-  >
-    {/* Hidden actual file input */}
-    <input
-      type="file"
-      id="fileInput"
-      name="document"
-      onChange={handleFileChange}
-      style={{ display: "none" }}
-    />
-
-    {/* Custom button to trigger input */}
-    <label
-      htmlFor="fileInput"
-      style={{
-        backgroundColor: "#f0f0f0",
-        padding: "5px 10px",
-        cursor: "pointer",
-        borderRight: "1px solid #ccc",
-      }}
-    >
-      Choose File
+               <form onSubmit={handleSubmitLeave}>
+  {/* Leave Type */}
+  <div style={{ marginBottom: '15px' }}>
+    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      Leave Type<span style={{ color: 'red' }}> *</span>
     </label>
-
-    {/* Filename (draft or uploaded) */}
-    <span
-      style={{
-        flex: "1",
-        padding: "5px 10px",
-        fontSize: "13px",
-        color: file || leaveRequest.fileName ? "#333" : "gray",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }}
+    <select
+      name="type"
+      value={leaveRequest.type}
+      onChange={handleInputChange}
+      style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }}
     >
-      {file
-        ? file.name
-        : leaveRequest.fileName
-        ? leaveRequest.fileName
-        : "No file chosen"}
-    </span>
+      <option value="Select" disabled>
+        Select
+      </option>
+      <option value="Casual">Casual Leave</option>
+      <option value="Sick">Sick Leave</option>
+      <option value="Paternity">Paternity Leave</option>
+      <option value="Maternity">Maternity Leave</option>
+      <option value="LOP">LOP</option>
+    </select>
   </div>
 
-  {/* Keep your existing messages */}
-  {file ? (
-    <p style={{ fontSize: "13px", color: "#333" }}>Attached: {file.name}</p>
-  ) : leaveRequest.existingFileName ? (
-  <p style={{ fontSize: "13px", color: "#333" }}>Attached: {leaveRequest.existingFileName}</p>
-) : fileError ? (
-    <p style={{ fontSize: "13px", color: "red" }}>{fileError}</p>
-  ) : (
-    <p style={{ fontSize: "13px", color: "gray" }}>No file uploaded</p>
-  )}
+  {/* Start Date */}
+{/* Date Range - Side by Side */}
+<div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+  {/* Start Date */}
+  <div style={{ flex: 1 }}>
+    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      Start Date<span style={{ color: 'red' }}> *</span>
+    </label>
+    <DatePicker
+      selected={leaveRequest.startDate}
+      onChange={handleStartDateChange}
+      selectsStart
+      startDate={leaveRequest.startDate}
+      endDate={leaveRequest.endDate}
+      minDate={null}
+      maxDate={leaveRequest.type === 'Sick' ? new Date() : null}
+      dayClassName={highlightDates}
+      dateFormat="yyyy-MM-dd"
+      placeholderText="YYYY-MM-DD"
+      className="date-picker-input"
+    />
+  </div>
+
+  {/* End Date */}
+  <div style={{ flex: 1 }}>
+    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      End Date<span style={{ color: 'red' }}> *</span>
+    </label>
+    <DatePicker
+      selected={leaveRequest.endDate}
+      onChange={handleEndDateChange}
+      selectsEnd
+      startDate={leaveRequest.startDate}
+      endDate={leaveRequest.endDate}
+      minDate={leaveRequest.startDate}
+      dayClassName={highlightDates}
+      dateFormat="yyyy-MM-dd"
+      placeholderText="YYYY-MM-DD"
+      className="date-picker-input"
+    />
+  </div>
 </div>
 
 
+  {/* Total Days */}
+  <div style={{ marginBottom: '15px' }}>
+    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      Total Days<span style={{ color: 'red' }}> *</span>
+    </label>
+    <input
+      type="text"
+      name="totalDays"
+      value={totalDays}
+      readOnly
+      style={{
+        width: '100%',
+        padding: '10px',
+        borderRadius: '5px',
+        border: '1px solid #ddd',
+        backgroundColor: '#f0f0f0',
+        cursor: 'not-allowed',
+      }}
+    />
+    {showLOPAlert && (
+      <p
+        style={{
+          color: '#FF4136',
+          fontSize: '14px',
+          marginTop: '10px',
+          fontWeight: 'bold',
+        }}
+      >
+        Note: You have already utilized your allocated leaves. Excess leaves will be marked as
+        LOP.
+      </p>
+    )}
+  </div>
 
+  {/* Upload Document */}
+  <div style={{ marginBottom: '15px' }}>
+    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      Upload Document
+      {(leaveRequest.type === 'Sick' && totalDays >= 3) && <span style={{ color: 'red' }}> *</span>}
+      <span style={{ fontSize: '12px', color: '#666', marginLeft: '10px' }}>
+        (PDF, JPG, JPEG, and PNG, max 5MB)
+      </span>
+    </label>
+    <input
+      type="file"
+      name="document"
+      onChange={handleFileChange}
+      style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }}
+    />
+  </div>
 
-                  <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                      Reason<span style={{ color: 'red' }}> *</span>
-                    </label>
-                    <textarea name="reason" value={leaveRequest.reason} onChange={handleInputChange} required style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd', minHeight: '100px', resize: 'vertical' }} />
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
-                    <button type="button" onClick={handleSaveDraft} style={{ flex: 1, padding: '12px', fontSize: '16px', backgroundColor: '#ffc107', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>Save Draft</button>
-                    <button type="submit" disabled={loading || fileError || leaveRequest.type === "Select" || formError} style={{ flex: 1, padding: '12px', fontSize: '16px', backgroundColor: (loading || fileError || leaveRequest.type === "Select" || formError) ? '#ccc' : '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: (loading || fileError || leaveRequest.type === "Select" || formError) ? 'not-allowed' : 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>{loading ? 'Submitting...' : 'Submit Leave'}</button>
-                  </div>
-                </form>
+  {/* Reason */}
+  <div style={{ marginBottom: '20px' }}>
+    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+      Reason<span style={{ color: 'red' }}> *</span>
+    </label>
+    <textarea
+      name="reason"
+      value={leaveRequest.reason}
+      onChange={handleInputChange}
+      required
+      style={{
+        width: '100%',
+        padding: '10px',
+        borderRadius: '5px',
+        border: '1px solid #ddd',
+        minHeight: '80px',
+        resize: 'vertical',
+      }}
+    />
+  </div>
+
+  {/* Centralized Error / Alert Block */}
+  {(formError || fileError) && (
+    <div
+      style={{
+        backgroundColor: '#ffe6e6',
+        border: '1px solid #ff4136',
+        borderRadius: '5px',
+        padding: '10px',
+        marginBottom: '20px',
+        color: '#ff4136',
+        fontWeight: 'bold',
+        fontSize: '14px',
+      }}
+    >
+      {formError && <p>{formError}</p>}
+      {fileError && <p>{fileError}</p>}
+    </div>
+  )}
+
+  {/* Buttons */}
+  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+    <button
+      type="button"
+      onClick={handleSaveDraft}
+      style={{
+        flex: 1,
+        padding: '12px',
+        fontSize: '16px',
+        backgroundColor: '#ffc107',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+      }}
+    >
+      Save Draft
+    </button>
+    <button
+      type="submit"
+      disabled={loading || fileError || leaveRequest.type === 'Select' || formError}
+      style={{
+        flex: 1,
+        padding: '12px',
+        fontSize: '16px',
+        backgroundColor:
+          loading || fileError || leaveRequest.type === 'Select' || formError ? '#ccc' : '#28a745',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px',
+        cursor:
+          loading || fileError || leaveRequest.type === 'Select' || formError ? 'not-allowed' : 'pointer',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+      }}
+    >
+      {loading ? 'Submitting...' : 'Submit Leave'}
+    </button>
+  </div>
+</form>
+
               </div>
-            </div>
           )}
         </div>
       </div>
