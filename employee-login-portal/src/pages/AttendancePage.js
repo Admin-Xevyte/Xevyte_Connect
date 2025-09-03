@@ -141,7 +141,7 @@ function TimesheetDashboard() {
 
   // Fetch holidays for the current month/year
   useEffect(() => {
-    const url = `http://13.234.30.186:8080/api/holidays/${year}/${month + 1}`;
+    const url = `http://3.7.139.212:8080/api/holidays/${year}/${month + 1}`;
     fetch(url)
       .then((r) => {
         if (!r.ok) throw new Error("Failed to fetch holidays");
@@ -178,7 +178,7 @@ function TimesheetDashboard() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
