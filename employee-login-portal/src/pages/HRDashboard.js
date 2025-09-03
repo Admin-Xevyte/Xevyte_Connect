@@ -58,7 +58,7 @@ function HRDashboard() {
    const fetchHRClaims = (hrId) => {
     // Use the `hrId` parameter directly to fetch data for the logged-in user.
     axios
-        .get(`http://13.234.30.186:8080/claims/hr/${hrId}`)
+        .get(`http://3.7.139.212:8080/claims/hr/${hrId}`)
         .then((response) => {
             const sortedClaims = response.data.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
             setOriginalClaims(sortedClaims);
@@ -71,7 +71,7 @@ function HRDashboard() {
         });
 };
     const fetchProfileInfo = (empId) => {
-        fetch(`http://13.234.30.186:8080/profile/${empId}`)
+        fetch(`http://3.7.139.212:8080/profile/${empId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.profilePic) {
@@ -119,7 +119,7 @@ function HRDashboard() {
         formData.append("profilePic", file);
  
         try {
-            const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+            const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
                 method: "PUT",
                 body: formData,
             });
@@ -153,7 +153,7 @@ function HRDashboard() {
  
     const updateStatus = (claimId, status) => {
         axios
-            .put(`http://13.234.30.186:8080/claims/hr/update-status/${claimId}?status=${status}`)
+            .put(`http://3.7.139.212:8080/claims/hr/update-status/${claimId}?status=${status}`)
             .then(() => fetchHRClaims(employeeId))
             .catch((error) => console.error(`Error updating status:`, error));
     };
