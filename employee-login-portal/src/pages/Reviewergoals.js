@@ -167,7 +167,7 @@ function ReviewerApprovedGoalsWithLayout() {
       if (rawToken.startsWith('"') && rawToken.endsWith('"')) rawToken = rawToken.slice(1, -1);
       const token = `Bearer ${rawToken}`;
       for (const [goalId, reviewerComments] of Object.entries(reviewerCommentsMap)) {
-        const response = await fetch(`http://13.234.30.186:8080/api/goals/${goalId}/reviewer-comments`, {
+        const response = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/reviewer-comments`, {
           method: 'PUT',
           headers: { Authorization: token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ reviewerComments }),
