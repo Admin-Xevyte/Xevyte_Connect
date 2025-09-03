@@ -17,7 +17,7 @@ function Rejectedgoals() {
 
   useEffect(() => {
     if (employeeIdLocal) {
-      fetch(`http://13.234.30.186:8080/profile/${employeeIdLocal}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeIdLocal}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -63,7 +63,7 @@ function Rejectedgoals() {
     formData.append("name", employeeName);
     formData.append("profilePic", file);
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeIdLocal}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeIdLocal}`, {
         method: "PUT",
         body: formData,
       });
@@ -132,7 +132,7 @@ function Rejectedgoals() {
           rawToken = rawToken.slice(1, -1);
         }
         const token = `Bearer ${rawToken}`;
-        const response = await fetch(`http://13.234.30.186:8080/api/goals/employee/${employeeId}`, {
+        const response = await fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`, {
           method: 'GET',
           headers: { Authorization: token, 'Content-Type': 'application/json' },
         });
@@ -200,7 +200,7 @@ function Rejectedgoals() {
     }
 
     try {
-      const response = await fetch(`http://13.234.30.186:8080/api/goals/delete/${goalId}`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/delete/${goalId}`, {
         method: 'DELETE',
       });
 
