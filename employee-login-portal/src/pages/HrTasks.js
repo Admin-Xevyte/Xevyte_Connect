@@ -32,7 +32,7 @@ function HRDashboard() {
   setLoading(true);
   setApiError("");
   try {
-    const res = await fetch(`http://13.234.30.186:8080/leaves/hr/${hrId}`, {
+    const res = await fetch(`http://3.7.139.212:8080/leaves/hr/${hrId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
@@ -61,7 +61,7 @@ function HRDashboard() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://13.234.30.186:8080/profile/${hrId}`, {
+        const res = await fetch(`http://3.7.139.212:8080/profile/${hrId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to fetch profile info");
@@ -111,7 +111,7 @@ function HRDashboard() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${hrId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${hrId}`, {
         method: "PUT",
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
