@@ -2,6 +2,7 @@ package com.register.example.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -19,6 +20,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
+                // Permit all OPTIONS requests (CORS preflight)
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Permit all other requests (adjust roles as needed)
                 .anyRequest().permitAll()
             );
         return http.build();
@@ -28,24 +32,24 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allow multiple origins (React dev + deployed IP with/without port)
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "http://3.7.139.212",
-                "http://3.7.139.212:80",
-                "http://3.7.139.212:8080"
-        ));
+        // Allow all origins (you can restrict this later if needed)
+        configuration.addAllowedOriginPattern("*");
 
-        // Or: allow all (safe for testing)
-        // configuration.addAllowedOriginPattern("*");
-
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        // Allow credentials (cookies, auth headers)
         configuration.setAllowCredentials(true);
 
+        // Allow all headers
+        configuration.addAllowedHeader("*");
+
+        // Allow common HTTP methods
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+        ));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Apply this configuration to all paths
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 }
