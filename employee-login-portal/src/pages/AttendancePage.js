@@ -49,7 +49,7 @@ function TimesheetDashboard() {
 
     const fetchFrozenDates = async () => {
       try {
-        const response = await fetch(`http://13.234.30.186:8080/daily-entry/frozen-dates/${employeeId}`);
+        const response = await fetch(`http://3.7.139.212:8080/daily-entry/frozen-dates/${employeeId}`);
         if (!response.ok) throw new Error("Failed to fetch frozen dates");
         const data = await response.json();
         setFrozenDates(data); // backend returns list of LocalDate like ["2025-08-01", "2025-08-15"]
