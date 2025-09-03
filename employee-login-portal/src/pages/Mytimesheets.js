@@ -52,7 +52,7 @@ const EmployeeTimesheets = ({ employeeId, searchTerm }) => {
                 setError(null);
 
                 const response = await axios.get(
-                    `http://13.234.30.186:8080/daily-entry/employee/${employeeId}`
+                    `http://3.7.139.212:8080/daily-entry/employee/${employeeId}`
                 );
 
                 setAllEntries(response.data); // Store all entries
