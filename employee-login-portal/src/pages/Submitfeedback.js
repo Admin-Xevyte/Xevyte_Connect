@@ -225,7 +225,7 @@ const EmployeeGoals = () => {
         }
       }
 
-      const feedbackResponse = await fetch('http://13.234.30.186:8080/api/goals/manager-feedback', {
+      const feedbackResponse = await fetch('http://3.7.139.212:8080/api/goals/manager-feedback', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(feedbackArray),
@@ -233,7 +233,7 @@ const EmployeeGoals = () => {
       if (!feedbackResponse.ok) throw new Error(await feedbackResponse.text());
 
       const reviewedGoalIds = feedbackArray.map(goal => goal.goalId);
-      const reviewResponse = await fetch('http://13.234.30.186:8080/api/goals/review', {
+      const reviewResponse = await fetch('http://3.7.139.212:8080/api/goals/review', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ goalIds: reviewedGoalIds, status: 'reviewed' }),
