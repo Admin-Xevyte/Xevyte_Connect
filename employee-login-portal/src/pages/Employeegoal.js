@@ -216,7 +216,7 @@ const EmployeeGoals = () => {
   const handleReview = async () => {
     try {
       const goalIds = goals.map(goal => goal.goalId);
-      const response = await fetch('http://13.234.30.186:8080/api/goals/review', {
+      const response = await fetch('http://3.7.139.212:8080/api/goals/review', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ goalIds, status: 'reviewed' }),
