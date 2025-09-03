@@ -9,58 +9,53 @@ function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
  
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
- 
-    try {
-      const res = await axios.post("http://3.7.139.212:8080/api/auth/login", {
-        employeeId,
-        password,
-      });
- 
-      // Assuming the API returns token and other info
-      if (res.data.message === "SUCCESS") {
-        // ✅ Store all required values in localStorage
-        localStorage.setItem("employeeId", res.data.employeeId);
-        localStorage.setItem("employeeName", res.data.name);
-        localStorage.setItem("role", res.data.role);
-        localStorage.setItem("managerId", res.data.managerId);
-        localStorage.setItem('token', res.data.token);  // ✅ Store token
- 
- 
-        // ✅ Store the token (important!)
-        if (res.data.token) {
-          localStorage.setItem("token", res.data.token);
-        } else {
-          console.warn("No token found in login response.");
-        }
- 
-        // ✅ Navigate to dashboard
-        navigate("/dashboard");
-      } else {
-        setError("❌ Invalid credentials. Please reset your password.");
-      }
-    } catch (err) {
-      // 🛑 Handle error responses properly
-      if (err.response && err.response.data && err.response.data.message) {
-        const status = err.response.status;
-        const msg = err.response.data.message;
- 
-        if (status === 401) {
-          setError("❌ " + msg);
-        } else if (status === 423) {
-          setError("🔒 " + msg);
-        } else if (status === 404) {
-          setError("❌ " + msg);
-        } else {
-          setError("❗ " + msg);
-        }
-      } else {
-        setError("🔌 Network error. Please check your connection.");
-      }
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
+
+  try {
+    const res = await axios.post("http:///api/auth/login", {
+      employeeId,
+      password,
+    });
+
+    if (res.data.message === "SUCCESS") {
+      // Store info and token
+      localStorage.setItem("employeeId", res.data.employeeId);
+      localStorage.setItem("employeeName", res.data.name);
+      localStorage.setItem("role", res.data.role);
+      localStorage.setItem("managerId", res.data.managerId);
+      localStorage.setItem("token", res.data.token);
+
+     if (res.data.mustChangePassword) {
+  navigate("/change-password");
+} else {
+  navigate("/dashboard");
+}
+
+    } else {
+      setError("❌ Invalid credentials. Please reset your password.");
     }
-  };
+  } catch (err) {
+    if (err.response && err.response.data && err.response.data.message) {
+      const status = err.response.status;
+      const msg = err.response.data.message;
+
+      if (status === 401) {
+        setError("❌ " + msg);
+      } else if (status === 423) {
+        setError("🔒 " + msg);
+      } else if (status === 404) {
+        setError("❌ " + msg);
+      } else {
+        setError("❗ " + msg);
+      }
+    } else {
+      setError("🔌 Network error. Please check your connection.");
+    }
+  }
+};
+
  
   return (
     <div className="login-page">
@@ -101,7 +96,7 @@ function LoginPage() {
               placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-           pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$"
+             pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$"
 title="Must be at least 8 characters, include uppercase and lowercase letters, one number, and one special character"
 
               required
@@ -127,5 +122,3 @@ title="Must be at least 8 characters, include uppercase and lowercase letters, o
 }
  
 export default LoginPage;
- 
- 
