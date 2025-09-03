@@ -35,7 +35,7 @@ function LeaveHistory() {
     // Fetch updated profile info on mount (optional but recommended)
     useEffect(() => {
         if (employeeId) {
-            fetch(`http://13.234.30.186:8080/profile/${employeeId}`)
+            fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.profilePic) {
@@ -63,7 +63,7 @@ function LeaveHistory() {
             setLoading(true);
             setApiError("");
             try {
-                const res = await fetch(`http://13.234.30.186:8080/leaves/employee/${employeeId}`);
+                const res = await fetch(`http://3.7.139.212:8080/leaves/employee/${employeeId}`);
                 if (!res.ok) {
                     throw new Error(`HTTP error! status: ${res.status}`);
                 }
@@ -120,7 +120,7 @@ function LeaveHistory() {
         formData.append("profilePic", file);
 
         try {
-            const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+            const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
                 method: "PUT",
                 body: formData,
             });
@@ -167,7 +167,7 @@ function LeaveHistory() {
     const handleCancelLeave = async (leaveId) => {
         if (window.confirm("Are you sure you want to cancel this leave request?")) {
             try {
-                const res = await fetch(`http://13.234.30.186:8080/leaves/cancel/${leaveId}`, {
+                const res = await fetch(`http://3.7.139.212:8080/leaves/cancel/${leaveId}`, {
                     method: 'PUT',
                 });
                 
