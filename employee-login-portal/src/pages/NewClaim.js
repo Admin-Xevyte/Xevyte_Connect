@@ -52,7 +52,7 @@ function NewClaim() {
     setFormData((prev) => ({ ...prev, employeeId: id, name }));
 
     if (id) {
-      fetch(`http://13.234.30.186:8080/profile/${id}`)
+      fetch(`http://3.7.139.212:8080/profile/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -70,7 +70,7 @@ function NewClaim() {
       const draftId = location.state.draftId;
       setOriginalDraftId(draftId);
 
-      axios.get(`http://13.234.30.186:8080/claims/draft/${draftId}`)
+      axios.get(`http://3.7.139.212:8080/claims/draft/${draftId}`)
         .then(draftRes => {
           const draft = draftRes.data;
           setFormData({
@@ -86,7 +86,7 @@ function NewClaim() {
           setDraftLoaded(true);
 
           if (draft.receiptName) {
-            axios.get(`http://13.234.30.186:8080/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
+            axios.get(`http://3.7.139.212:8080/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
               .then(receiptRes => {
                 const fileBlob = receiptRes.data;
                 const fileName = draft.receiptName;
@@ -141,7 +141,7 @@ function NewClaim() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -233,7 +233,7 @@ function NewClaim() {
 
     if (originalDraftId) {
       try {
-        const res = await axios.post(`http://13.234.30.186:8080/claims/submit-draft/${originalDraftId}`);
+        const res = await axios.post(`http://3.7.139.212:8080/claims/submit-draft/${originalDraftId}`);
         setMessage("Expense claim submitted successfully from draft!");
         setOriginalDraftId(null);
         setDraftLoaded(false);
@@ -261,7 +261,7 @@ function NewClaim() {
         data.append("receiptFile", receiptFile);
       }
       try {
-        const res = await axios.post("http://13.234.30.186:8080/claims/submit", data);
+        const res = await axios.post("http://3.7.139.212:8080/claims/submit", data);
         setMessage("Expense claim submitted successfully!");
         setError("");
         setFormData((prev) => ({
@@ -310,13 +310,13 @@ function NewClaim() {
       let res;
       if (originalDraftId) {
         res = await axios.put(
-          `http://13.234.30.186:8080/claims/draft/${originalDraftId}`,
+          `http://3.7.139.212:8080/claims/draft/${originalDraftId}`,
           data,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
       } else {
         res = await axios.post(
-          "http://13.234.30.186:8080/claims/draft",
+          "http://3.7.139.212:8080/claims/draft",
           data,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
