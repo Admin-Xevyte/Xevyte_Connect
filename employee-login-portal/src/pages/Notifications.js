@@ -17,7 +17,7 @@ function Performance() {
   // Fetch updated profile info on mount (optional but recommended)
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://localhost:8082/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
