@@ -67,7 +67,7 @@ function ManagerDashBoard() {
     }
 
     if (storedId) {
-      fetch(`http://13.234.30.186:8080/profile/${storedId}`)
+      fetch(`http://3.7.139.212:8080/profile/${storedId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -137,7 +137,7 @@ useEffect(() => {
 
   const fetchClaims = (managerId) => {
     axios
-      .get(`http://13.234.30.186:8080/claims/manager/${managerId}`)
+      .get(`http://3.7.139.212:8080/claims/manager/${managerId}`)
       .then((res) => {
         const sortedClaims = res.data.sort((a, b) => {
           const dateA = new Date(a.submittedDate);
@@ -153,7 +153,7 @@ useEffect(() => {
 
   const handleApprove = (id) => {
     axios
-      .post(`http://13.234.30.186:8080/claims/approve/${id}?role=Manager`)
+      .post(`http://3.7.139.212:8080/claims/approve/${id}?role=Manager`)
       .then(() => fetchClaims(employeeId));
   };
 
@@ -170,7 +170,7 @@ useEffect(() => {
 
     axios
       .post(
-        `http://13.234.30.186:8080/claims/reject/${selectedClaimId}?role=Manager&reason=${encodeURIComponent(
+        `http://3.7.139.212:8080/claims/reject/${selectedClaimId}?role=Manager&reason=${encodeURIComponent(
           rejectionReason
         )}`
       )
@@ -188,7 +188,7 @@ useEffect(() => {
 
   const handleViewReceipt = (id, receiptName) => {
     axios
-      .get(`http://13.234.30.186:8080/claims/receipt/${id}`, { responseType: "blob" })
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
       .then((res) => {
         const fileExtension = receiptName.split('.').pop().toLowerCase();
         const fileUrl = URL.createObjectURL(res.data);
@@ -205,7 +205,7 @@ useEffect(() => {
 
   const handleDownloadReceipt = (id, receiptName) => {
     axios
-      .get(`http://13.234.30.186:8080/claims/receipt/${id}`, {
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, {
         responseType: "blob",
       })
       .then((res) => {
@@ -265,7 +265,7 @@ useEffect(() => {
 
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
