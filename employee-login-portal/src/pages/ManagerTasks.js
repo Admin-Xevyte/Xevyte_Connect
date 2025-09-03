@@ -243,7 +243,7 @@ const renderTable = (leaves, showActions = false) => (
              <td style={{ padding: '12px', border: '1px solid #ddd' }}>
   {leave.fileName ? (
     <a
-      href={`http://13.234.30.186:8080/leaves/download/${leave.id}`}
+      href={`http://3.7.139.212:8080/leaves/download/${leave.id}`}
       target="_blank"
       rel="noopener noreferrer"
       download
