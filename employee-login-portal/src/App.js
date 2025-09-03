@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './components/LoginPage';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
+import ChangePasswordPage from "./components/ChangePasswordPage";
 import Dashboard from './pages/Dashboard';
 import ResetLinkSent from './components/ResetLinkSent';
 import PasswordReset from './components/PasswordReset';
@@ -67,6 +68,7 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="reset-link-sent" element={<ResetLinkSent/>}/>
         <Route path="/login" element={<LoginPage />} />
+            <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/home" element={<Home1/>}/>
         <Route path="/hom" element={<Favourites/>}/>
