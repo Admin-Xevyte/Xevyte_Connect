@@ -58,7 +58,7 @@ const handleDateChange = (e) => {
 
   const fetchHolidays = async () => {
     try {
-      const res = await fetch(`http://13.234.30.186:8080/leaves/holidays`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/holidays`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -73,7 +73,7 @@ const handleDateChange = (e) => {
   const fetchLeaveBalance = async () => {
     if (!employeeId) return;
     try {
-      const res = await fetch(`http://13.234.30.186:8080/leaves/balance/${employeeId}`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/balance/${employeeId}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -95,7 +95,7 @@ const handleDateChange = (e) => {
     if (!employeeId) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://13.234.30.186:8080/leaves/employee/${employeeId}`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/employee/${employeeId}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -125,7 +125,7 @@ const handleDateChange = (e) => {
     // ✅ If the draft has a fileName, fetch the actual file
   if (draft.fileName && draft.id) {
   try {
-    const res = await fetch(`http://13.234.30.186:8080/leaves/drafts/download/${draft.id}`);
+    const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/download/${draft.id}`);
     if (res.ok) {
       const blob = await res.blob();
       const file = new File([blob], draft.fileName, { type: blob.type });
@@ -144,7 +144,7 @@ const handleDateChange = (e) => {
 
     loadDraft();
     if (employeeId) {
-      fetch(`http://13.234.30.186:8080/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -239,7 +239,7 @@ const handleDateChange = (e) => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -284,7 +284,7 @@ const handleDateChange = (e) => {
   };
 
   const applyLeaveWithExistingFile = async (leaveData) => {
-  const response = await fetch("http://13.234.30.186:8080/leaves/apply-with-existing-file", {
+  const response = await fetch("http://3.7.139.212:8080/leaves/apply-with-existing-file", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -353,7 +353,7 @@ const handleFileChange = (e) => {
   // ✅ Fetch draft by ID for editing
 const fetchDraftById = async (draftId) => {
   try {
-    const res = await fetch(`http://13.234.30.186:8080/leaves/drafts/single/${draftId}`);
+    const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/single/${draftId}`);
     if (!res.ok) throw new Error("Failed to fetch draft");
 
     const draft = await res.json();
@@ -416,8 +416,8 @@ const handleSaveDraft = async () => {
 
     try {
         const url = leaveRequest.id ?
-            `http://13.234.30.186:8080/leaves/drafts/${leaveRequest.id}` : // update
-            "http://13.234.30.186:8080/leaves/drafts"; // create
+            `http://3.7.139.212:8080/leaves/drafts/${leaveRequest.id}` : // update
+            "http://3.7.139.212:8080/leaves/drafts"; // create
 
         const method = leaveRequest.id ? "PUT" : "POST";
 
@@ -499,7 +499,7 @@ const handleSubmitLeave = async (e) => {
                 status: "Pending",
             };
 
-            const res = await fetch(`http://13.234.30.186:8080/leaves/submit-draft/${leaveRequest.id}`, {
+            const res = await fetch(`http://3.7.139.212:8080/leaves/submit-draft/${leaveRequest.id}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -534,7 +534,7 @@ const handleSubmitLeave = async (e) => {
             if (file) {
                 formData.append("document", file);
             } else if (leaveRequest.fileName) {
-                const fileBlobRes = await fetch(`http://13.234.30.186:8080/leaves/drafts/download/${leaveRequest.id}`);
+                const fileBlobRes = await fetch(`http://3.7.139.212:8080/leaves/drafts/download/${leaveRequest.id}`);
                 if (!fileBlobRes.ok) {
                     throw new Error("Failed to retrieve draft file for submission.");
                 }
@@ -543,7 +543,7 @@ const handleSubmitLeave = async (e) => {
                 formData.append("document", draftFile);
             }
 
-            const res = await fetch("http://13.234.30.186:8080/leaves/apply", {
+            const res = await fetch("http://3.7.139.212:8080/leaves/apply", {
                 method: "POST",
                 body: formData,
             });
