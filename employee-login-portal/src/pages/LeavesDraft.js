@@ -24,7 +24,7 @@ function LeavesDrafts() {
   // Fetch updated profile info on component mount
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://13.234.30.186:8080/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -52,7 +52,7 @@ function LeavesDrafts() {
       setLoadingDrafts(true);
       setDraftsError("");
       try {
-        const res = await fetch(`http://13.234.30.186:8080/leaves/drafts/${employeeId}`);
+        const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/${employeeId}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
 
@@ -107,7 +107,7 @@ function LeavesDrafts() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -143,7 +143,7 @@ function LeavesDrafts() {
   // ✅ Delete draft from backend and update list with message
   const handleDeleteDraft = async (draftId) => {
     try {
-      const res = await fetch(`http://13.234.30.186:8080/leaves/drafts/${draftId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/${draftId}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -163,7 +163,7 @@ function LeavesDrafts() {
   // ✅ Improved download (forces browser to download)
   const handleDownloadDraft = async (draft) => {
     try {
-      const res = await fetch(`http://13.234.30.186:8080/leaves/drafts/download/${draft.id}`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/download/${draft.id}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
