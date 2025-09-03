@@ -63,7 +63,7 @@ const splitIntoRows = (text, rowLength) => {
 useEffect(() => {
     const fetchActiveRequests = async () => {
         try {
-            const response = await fetch(`http://13.234.30.186:8080/api/travel/employee/active/${employeeId}`);
+            const response = await fetch(`http://3.7.139.212:8080/api/travel/employee/active/${employeeId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch active requests');
             }
@@ -82,7 +82,7 @@ useEffect(() => {
 useEffect(() => {
     const fetchHistoryRequests = async () => {
         try {
-            const response = await fetch(`http://13.234.30.186:8080/api/travel/employee/all/${employeeId}`);
+            const response = await fetch(`http://3.7.139.212:8080/api/travel/employee/all/${employeeId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch history');
             }
@@ -141,7 +141,7 @@ const handleUpload = async (requestId) => {
 
   try {
     const res = await fetch(
-      `http://13.234.30.186:8080/api/travel/admin/upload-pdfs/${requestId}`,
+      `http://3.7.139.212:8080/api/travel/admin/upload-pdfs/${requestId}`,
       {
         method: "POST",
         body: formData,
@@ -171,7 +171,7 @@ const handleUpload = async (requestId) => {
 
 useEffect(() => {
   if (employeeId) {
-    fetch(`http://13.234.30.186:8080/api/travel/drafts/employee/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/api/travel/drafts/employee/${employeeId}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch drafts');
         return res.json();
@@ -189,7 +189,7 @@ useEffect(() => {
   // Fetch employee profile data
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://13.234.30.186:8080/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => {
           if (!res.ok) {
             throw new Error('Failed to fetch profile data');
@@ -225,7 +225,7 @@ useEffect(() => {
 
   // Fetches tickets based on the endpoint and sets state
   const fetchTickets = (endpoint, setState) => {
-    fetch(`http://13.234.30.186:8080/api/travel/${endpoint}/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/api/travel/${endpoint}/${employeeId}`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to fetch ${endpoint}`);
@@ -240,7 +240,7 @@ useEffect(() => {
   const fetchPendingRequests = () => {
     if (role === "Manager") {
       // Corrected endpoint for manager pending requests
-      fetch(`http://13.234.30.186:8080/api/travel/manager/pending/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/api/travel/manager/pending/${employeeId}`)
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch pending requests');
           return res.json();
@@ -249,7 +249,7 @@ useEffect(() => {
         .catch(err => console.error("Error fetching pending requests:", err));
     } else if (role === "admin") {
       // Corrected endpoint for admin pending requests
-      fetch(`http://13.234.30.186:8080/api/travel/admin/assigned-requests/${adminId}`)
+      fetch(`http://3.7.139.212:8080/api/travel/admin/assigned-requests/${adminId}`)
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch pending requests for admin');
           return res.json();
@@ -279,7 +279,7 @@ useEffect(() => {
   const handleApprove = async (id) => {
     try {
       const params = new URLSearchParams({ managerId: employeeId });
-      const res = await fetch(`http://13.234.30.186:8080/api/travel/approve/${id}?${params.toString()}`, {
+      const res = await fetch(`http://3.7.139.212:8080/api/travel/approve/${id}?${params.toString()}`, {
         method: "PUT"
       });
       if (res.ok) {
@@ -310,7 +310,7 @@ const handleReject = async (id) => {
       rejectedReason: remarks // match backend param name
     });
 
-    const res = await fetch(`http://13.234.30.186:8080/api/travel/reject/${id}?${params.toString()}`, {
+    const res = await fetch(`http://3.7.139.212:8080/api/travel/reject/${id}?${params.toString()}`, {
       method: "PUT"
     });
 
@@ -349,7 +349,7 @@ const handleReject = async (id) => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -489,7 +489,7 @@ const handleSubmit = async (e) => {
       // ✅ If this was created from a draft, delete that draft permanently
       if (id) {
         try {
-          await fetch(`http://13.234.30.186:8080/api/travel/drafts/${id}?employeeId=${employeeId}`, {
+          await fetch(`http://3.7.139.212:8080/api/travel/drafts/${id}?employeeId=${employeeId}`, {
             method: "DELETE",
           });
 
@@ -533,7 +533,7 @@ const handleSaveDraft = async (e) => {
   const draftToSave = { ...newRequest };
 
   try {
-    const res = await fetch("http://13.234.30.186:8080/api/travel/drafts", {
+    const res = await fetch("http://3.7.139.212:8080/api/travel/drafts", {
       method: "POST", // backend will upsert based on `id`
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(draftToSave),
@@ -585,7 +585,7 @@ const handleSaveDraft = async (e) => {
 useEffect(() => {
   const fetchDrafts = async () => {
     try {
-      const res = await fetch(`http://13.234.30.186:8080/api/travel/drafts?employeeId=${employeeId}`);
+      const res = await fetch(`http://3.7.139.212:8080/api/travel/drafts?employeeId=${employeeId}`);
       if (!res.ok) {
         console.error("Failed to fetch drafts");
         return;
@@ -624,7 +624,7 @@ const handleEditDraft = (draft) => {
 // Delete Draft
 const handleDeleteDraft = async (id, showAlert = true) => {
   try {
-    const res = await fetch(`http://13.234.30.186:8080/api/travel/drafts/${id}?employeeId=${employeeId}`, {
+    const res = await fetch(`http://3.7.139.212:8080/api/travel/drafts/${id}?employeeId=${employeeId}`, {
       method: 'DELETE',
     });
 
