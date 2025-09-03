@@ -38,7 +38,7 @@ function FinalHrGoalsWithLayout() {
   // Fetch updated profile info
   useEffect(() => {
     if (employeeIdFromStorage) {
-      fetch(`http://13.234.30.186:8080/profile/${employeeIdFromStorage}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeIdFromStorage}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -89,7 +89,7 @@ function FinalHrGoalsWithLayout() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeIdFromStorage}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeIdFromStorage}`, {
         method: "PUT",
         body: formData,
       });
@@ -147,7 +147,7 @@ function FinalHrGoalsWithLayout() {
       }
       const token = `Bearer ${rawToken}`;
 
-      const response = await fetch(`http://13.234.30.186:8080/api/goals/employee/${employeeId}`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`, {
         method: 'GET',
         headers: { Authorization: token, 'Content-Type': 'application/json' },
       });
@@ -175,7 +175,7 @@ function FinalHrGoalsWithLayout() {
         rawToken = rawToken.slice(1, -1);
       }
       const token = `Bearer ${rawToken}`;
-      const response = await fetch(`http://13.234.30.186:8080/api/goals/${goalId}/comments`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/comments`, {
         headers: { Authorization: token, 'Content-Type': 'application/json' }
       });
       if (!response.ok) {
