@@ -30,7 +30,7 @@ const NewGoals = () => {
   // ✅ Fetch logged-in employee profile
   useEffect(() => {
     if (loggedInEmployeeId) {
-      fetch(`http://13.234.30.186:8080/profile/${loggedInEmployeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${loggedInEmployeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -81,7 +81,7 @@ const NewGoals = () => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${loggedInEmployeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${loggedInEmployeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -201,7 +201,7 @@ const NewGoals = () => {
 
       // Delete previous goal if reassign
       if (previousGoalId) {
-        await fetch(`http://13.234.30.186:8080/api/goals/delete/${previousGoalId}`, { method: 'DELETE' });
+        await fetch(`http://3.7.139.212:8080/api/goals/delete/${previousGoalId}`, { method: 'DELETE' });
       }
 
       alert('Goals submitted successfully!');
