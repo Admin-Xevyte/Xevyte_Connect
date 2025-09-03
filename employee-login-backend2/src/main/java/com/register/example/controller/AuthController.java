@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+    @CrossOrigin(origins = "http://3.7.139.212")
 @RequestMapping("/api/auth")
 public class AuthController {
 
