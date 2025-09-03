@@ -31,12 +31,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow your frontend origin including with any port for flexibility
-        config.setAllowedOriginPatterns(Arrays.asList("http://3.7.139.212", "http://3.7.139.212:*"));
+        // Allow all origins (use "*" to allow any origin)
+        config.addAllowedOriginPattern("*"); // Use this if using Spring Boot 2.4+
+        // or use config.setAllowedOrigins(Arrays.asList("*")); for older versions (note: might not support credentials)
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(true); 
+        config.setAllowCredentials(true);  // Be careful: with allowCredentials=true, allowedOrigins cannot be "*"
+                                        // So you need to either disable credentials or whitelist specific origins.
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
