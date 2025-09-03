@@ -54,7 +54,7 @@ const truncateFileName = (fileName, length = 10) => {
 
 
   useEffect(() => {
-    fetch(`http://13.234.30.186:8080/claims/history/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/claims/history/${employeeId}`)
       .then((res) => res.json())
       .then((data) => {
         // Sort claims by submittedDate in descending order (newest first)
@@ -66,7 +66,7 @@ const truncateFileName = (fileName, length = 10) => {
   
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://13.234.30.186:8080/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -94,7 +94,7 @@ const truncateFileName = (fileName, length = 10) => {
 
   const handleViewReceipt = (id, receiptName) => {
     axios
-      .get(`http://13.234.30.186:8080/claims/receipt/${id}`, { responseType: "blob" })
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
       .then((res) => {
         const fileExtension = receiptName.split('.').pop().toLowerCase();
         const fileUrl = URL.createObjectURL(res.data);
@@ -146,7 +146,7 @@ const truncateFileName = (fileName, length = 10) => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
