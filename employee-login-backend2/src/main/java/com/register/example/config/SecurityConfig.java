@@ -30,7 +30,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Allow requests from your React application's origin
-  configuration.setAllowedOrigins(Collections.singletonList("http://13.234.30.186"));
+  configuration.setAllowedOrigins(Collections.singletonList("http://3.7.139.212"));
 
 
         // Specify the allowed HTTP methods
