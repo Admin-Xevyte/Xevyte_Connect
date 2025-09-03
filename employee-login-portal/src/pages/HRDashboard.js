@@ -161,7 +161,7 @@ function HRDashboard() {
     // Modified handleViewReceipt to support both images and PDFs
     const handleViewReceipt = (id, receiptName) => {
         axios
-            .get(`http://13.234.30.186:8080/claims/receipt/${id}`, { responseType: "blob" })
+            .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
             .then((res) => {
                 const fileExtension = receiptName.split('.').pop().toLowerCase();
                 const fileUrl = URL.createObjectURL(res.data);
