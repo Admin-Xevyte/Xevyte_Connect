@@ -26,7 +26,7 @@ function ReviewerGoals() {
   // Fetch updated profile info (Performance logic)
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://13.234.30.186:8080/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -78,7 +78,7 @@ function ReviewerGoals() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -130,7 +130,7 @@ function ReviewerGoals() {
     setUserRole(roleLower);
     setIsAuthorized(true);
 
-    const url = `http://13.234.30.186:8080/api/goals/reviewer/${employeeId}/employees`;
+    const url = `http://3.7.139.212:8080/api/goals/reviewer/${employeeId}/employees`;
 
     fetch(url)
       .then((response) => {
