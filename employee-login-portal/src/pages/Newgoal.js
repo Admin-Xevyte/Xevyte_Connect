@@ -187,7 +187,7 @@ const NewGoals = () => {
       // Submit all new goals
       for (const goal of goals) {
         goal.employeeId = selectedEmployeeId;
-        const response = await fetch('http://13.234.30.186:8080/api/goals/assign', {
+        const response = await fetch('http://3.7.139.212:8080/api/goals/assign', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(goal),
