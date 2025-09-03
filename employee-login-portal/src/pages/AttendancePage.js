@@ -65,7 +65,7 @@ function TimesheetDashboard() {
   // Fetch employee profile info
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://13.234.30.186:8080/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -87,7 +87,7 @@ function TimesheetDashboard() {
 
     const fetchApprovedLeaves = async () => {
       try {
-        const response = await fetch(`http://13.234.30.186:8080/leaves/approved-dates/${employeeId}`);
+        const response = await fetch(`http://3.7.139.212:8080/leaves/approved-dates/${employeeId}`);
         if (!response.ok) throw new Error("Failed to fetch approved leaves");
         const data = await response.json();
         setApprovedLeaveDates(data);
@@ -104,7 +104,7 @@ function TimesheetDashboard() {
   const fetchSubmittedEntries = async () => {
     if (!employeeId) return;
     try {
-      const response = await fetch(`http://13.234.30.186:8080/daily-entry/employee/${employeeId}`);
+      const response = await fetch(`http://3.7.139.212:8080/daily-entry/employee/${employeeId}`);
       if (!response.ok) {
         console.error("Backend response not ok:", response.status);
         throw new Error("Failed to fetch submitted entries");
