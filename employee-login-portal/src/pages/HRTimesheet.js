@@ -61,7 +61,7 @@ const HRTimesheetsTable = ({ hrId, passedEmployeeId, searchTerm }) => {
             setError(null);
             try {
                 // Fetch all entries for the HR
-                const response = await axios.get(`http://13.234.30.186:8080/daily-entry/hr/${hrId}`);
+                const response = await axios.get(`http://3.7.139.212:8080/daily-entry/hr/${hrId}`);
                 setAllTimesheets(response.data);
             } catch (err) {
                 console.error("Error fetching HR timesheets:", err);
@@ -481,7 +481,7 @@ function Performance() {
  
     useEffect(() => {
         if (employeeId) {
-            fetch(`http://13.234.30.186:8080/profile/${employeeId}`)
+            fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.profilePic) {
@@ -532,7 +532,7 @@ function Performance() {
         formData.append("profilePic", file);
  
         try {
-            const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+            const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
                 method: "PUT",
                 body: formData,
             });
