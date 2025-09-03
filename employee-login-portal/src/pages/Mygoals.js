@@ -260,7 +260,7 @@ function Performance() {
 
       console.log("Sending update:", goalId, payload);
 
-      const response = await fetch(`http://13.234.30.186:8080/api/goals/${goalId}/status`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/status`, {
         method: "PUT",
         headers,
         body: JSON.stringify(payload),
