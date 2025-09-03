@@ -477,7 +477,7 @@ const handleSubmit = async (e) => {
   console.log("Submitting request:", requestData);
 
   try {
-    const res = await fetch("http://13.234.30.186:8080/api/travel/create", {
+    const res = await fetch("http://3.7.139.212:8080/api/travel/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestData),
@@ -1179,7 +1179,7 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
     onClick={async () => {
       try {
         // Step 1: Fetch the list of documents for this request
-        const res = await fetch(`http://13.234.30.186:8080/api/travel/documents/${ticket.id}`);
+        const res = await fetch(`http://3.7.139.212:8080/api/travel/documents/${ticket.id}`);
         if (!res.ok) throw new Error("Failed to fetch documents");
         const docs = await res.json();
 
@@ -1190,7 +1190,7 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
 
         // Step 2: Download each document
         for (const doc of docs) {
-          const downloadRes = await fetch(`http://13.234.30.186:8080/api/travel/download-document/${doc.id}`);
+          const downloadRes = await fetch(`http://3.7.139.212:8080/api/travel/download-document/${doc.id}`);
           if (!downloadRes.ok) throw new Error("Download failed for file: " + doc.fileName);
 
           const blob = await downloadRes.blob();
@@ -1207,7 +1207,7 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
         }
 
         // ✅ Step 3: Mark request as downloaded
-        await fetch(`http://13.234.30.186:8080/api/travel/mark-downloaded/${ticket.id}`, {
+        await fetch(`http://3.7.139.212:8080/api/travel/mark-downloaded/${ticket.id}`, {
           method: "PUT"
         });
 
@@ -1343,7 +1343,7 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
     onClick={async () => {
       try {
         // Step 1: Fetch the list of documents for this request
-        const res = await fetch(`http://13.234.30.186:8080/api/travel/documents/${ticket.id}`);
+        const res = await fetch(`http://3.7.139.212:8080/api/travel/documents/${ticket.id}`);
         if (!res.ok) throw new Error("Failed to fetch documents");
         const docs = await res.json();
 
@@ -1354,7 +1354,7 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
 
         // Step 2: Use a for...of loop to download each file sequentially
         for (const doc of docs) {
-          const downloadRes = await fetch(`http://13.234.30.186:8080/api/travel/download-document/${doc.id}`);
+          const downloadRes = await fetch(`http://3.7.139.212:8080/api/travel/download-document/${doc.id}`);
           if (!downloadRes.ok) throw new Error("Download failed for file: " + doc.fileName);
 
           const blob = await downloadRes.blob();
