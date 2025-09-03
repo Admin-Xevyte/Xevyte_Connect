@@ -29,7 +29,7 @@ function Saveddrafts() {
   const fetchDrafts = () => {
     const empId = localStorage.getItem("employeeId");
     if (empId) {
-      axios.get(`http://13.234.30.186:8080/claims/drafts/${empId}`)
+      axios.get(`http://3.7.139.212:8080/claims/drafts/${empId}`)
         .then(res => {
           const sortedDrafts = res.data.sort((a, b) => b.expenseId - a.expenseId);
           setDrafts(sortedDrafts);
@@ -60,7 +60,7 @@ function Saveddrafts() {
 
     fetchDrafts();
 
-    fetch(`http://13.234.30.186:8080/profile/${empId}`)
+    fetch(`http://3.7.139.212:8080/profile/${empId}`)
       .then(res => res.json())
       .then(data => {
         setProfilePic(data.profilePic);
@@ -72,7 +72,7 @@ function Saveddrafts() {
   const handleDelete = (draftId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this draft?");
     if (confirmDelete) {
-        axios.delete(`http://13.234.30.186:8080/claims/draft/delete/${draftId}`)
+        axios.delete(`http://3.7.139.212:8080/claims/draft/delete/${draftId}`)
             .then(res => {
                 // Remove the draft from the frontend state
                 const updatedDrafts = drafts.filter((draft) => draft.expenseId !== draftId);
@@ -115,7 +115,7 @@ function Saveddrafts() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -294,7 +294,7 @@ function Saveddrafts() {
               <td className="receipt-cell">
                 {draft.receiptName ? (
                   <a
-                    href={`http://13.234.30.186:8080/claims/draft/receipt/${draft.expenseId}`}
+                    href={`http://3.7.139.212:8080/claims/draft/receipt/${draft.expenseId}`}
                     download={draft.receiptName}
                     target="_blank"
                     rel="noopener noreferrer"
