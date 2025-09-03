@@ -51,7 +51,7 @@ function ChangePasswordPage() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8082/api/auth/change-password",
+        "http://3.7.139.212:8080/api/auth/change-password",
         { employeeId, newPassword }
       );
 
