@@ -1,7 +1,7 @@
 package com.register.example.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate; // ✅ You forgot this import
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "employee_portal")
@@ -27,11 +27,13 @@ public class Employee {
     private String email;
 
     @Column(name = "joining_date")
-    private LocalDate joiningDate; // ✅ Now works fine
+    private LocalDate joiningDate;
 
     private Integer failedAttempts = 0;
 
     private Boolean accountLocked = false;
+
+    private Boolean mustChangePassword = true;  // <--- NEW FIELD
 
     private String role;
 
@@ -54,6 +56,7 @@ public class Employee {
     }
 
     // === Getters & Setters ===
+
     public Long getId() {
         return id;
     }
@@ -122,6 +125,14 @@ public class Employee {
 
     public void setAccountLocked(Boolean accountLocked) {
         this.accountLocked = accountLocked;
+    }
+
+    public Boolean getMustChangePassword() {
+        return mustChangePassword != null ? mustChangePassword : true;
+    }
+
+    public void setMustChangePassword(Boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
     }
 
     public String getEmail() {
