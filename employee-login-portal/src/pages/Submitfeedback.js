@@ -42,7 +42,7 @@ const EmployeeGoals = () => {
   // ====== PERFORMANCE HEADER DATA FETCH ======
   useEffect(() => {
     if (loggedInEmployeeId) {
-      fetch(`http://13.234.30.186:8080/profile/${loggedInEmployeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${loggedInEmployeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -93,7 +93,7 @@ const EmployeeGoals = () => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${loggedInEmployeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${loggedInEmployeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -128,7 +128,7 @@ const EmployeeGoals = () => {
   const fetchGoals = () => {
     setLoading(true);
     setError(null);
-    fetch(`http://13.234.30.186:8080/api/goals/employee/${selectedEmployeeId}`)
+    fetch(`http://3.7.139.212:8080/api/goals/employee/${selectedEmployeeId}`)
       .then(async (res) => {
         const ct = res.headers.get('content-type') || '';
         if (!res.ok) {
