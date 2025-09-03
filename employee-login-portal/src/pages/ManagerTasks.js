@@ -31,7 +31,7 @@ function ManagerTasks() {
       setLoading(true);
       setApiError("");
       try {
-        const res = await fetch(`http://13.234.30.186:8080/leaves/manager/${managerId}`, {
+        const res = await fetch(`http://3.7.139.212:8080/leaves/manager/${managerId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) {
@@ -50,7 +50,7 @@ function ManagerTasks() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://13.234.30.186:8080/profile/${managerId}`, {
+        const res = await fetch(`http://3.7.139.212:8080/profile/${managerId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to fetch profile info");
@@ -109,7 +109,7 @@ function ManagerTasks() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://13.234.30.186:8080/profile/update/${managerId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${managerId}`, {
         method: "PUT",
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
@@ -151,7 +151,7 @@ function ManagerTasks() {
     setLoading(true);
     setApiError("");
     try {
-      const res = await fetch("http://13.234.30.186:8080/leaves/action", {
+      const res = await fetch("http://3.7.139.212:8080/leaves/action", {
         method: "POST",
         headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(actionDTO),
