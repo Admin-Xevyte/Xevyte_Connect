@@ -1,7 +1,7 @@
 {
   "name": "employee-login-portal",
   "version": "0.1.0",
-  "proxy": "http://localhost:8082",
+  "proxy": "http://3.7.139.212:8080",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
