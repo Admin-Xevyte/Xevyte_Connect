@@ -189,16 +189,43 @@ const [formData, setFormData] = useState({
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setReceiptFile(file);
-      const url = URL.createObjectURL(file);
-      setReceiptPreviewUrl(url);
-    } else {
+  const file = e.target.files[0];
+
+  if (file) {
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+
+    if (file.size > maxSize) {
+      // Set the error message for oversized file
+      setFieldErrors((prev) => ({
+        ...prev,
+        receiptFile: "Receipt file size must be less than 5MB",
+      }));
+
+      // Clear file-related state
       setReceiptFile(null);
       setReceiptPreviewUrl(null);
+      return;
     }
-  };
+
+    // File is valid
+    setFieldErrors((prev) => ({
+      ...prev,
+      receiptFile: null, // clear previous error
+    }));
+
+    setReceiptFile(file);
+    const url = URL.createObjectURL(file);
+    setReceiptPreviewUrl(url);
+  } else {
+    setReceiptFile(null);
+    setReceiptPreviewUrl(null);
+    setFieldErrors((prev) => ({
+      ...prev,
+      receiptFile: "No file selected",
+    }));
+  }
+};
+
 
 const validateRequired = () => {
   const missingFields = [];
@@ -503,16 +530,18 @@ const handleSubmit = async () => {
                 <div className="form-group">
                   <label>Amount *</label>
                   <input
-                    type="text"
-                    name="amount"
-                    value={formData.amount}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*$/.test(value)) {
-                        handleChange(e);
-                      }
-                    }}
-                  />
+  type="text"
+  name="amount"
+  value={formData.amount}
+  onChange={(e) => {
+    const value = e.target.value;
+    // Check if value contains only digits and length <= 10
+    if (/^\d*$/.test(value) && value.length <= 10) {
+      handleChange(e);
+    }
+  }}
+/>
+
                   {fieldErrors.amount && <p className="error-text">{fieldErrors.amount}</p>}
                 </div>
               </div>
@@ -568,7 +597,8 @@ const handleSubmit = async () => {
                 </div>
                 <p className="receipt-hint">Supported: JPG, PNG, PDF (Max 5MB)</p>
                 {fieldErrors.receiptFile && (
-                  <p className="error-text">{fieldErrors.receiptFile}</p>
+                  
+  <p style={{ color: 'red', marginTop: '4px', fontSize: '0.9rem' }}>{fieldErrors.receiptFile}</p>
                 )}
               </div>
             </div>
@@ -578,7 +608,15 @@ const handleSubmit = async () => {
                 <h3>Expense Summary</h3>
                 <div className="summary-item"><span>Amount:</span> <strong>₹{formData.amount || '0.00'}</strong></div>
                 <div className="summary-item"><span>Category:</span> <strong>{formData.category || 'Not selected'}</strong></div>
-                <div className="summary-item"><span>Date:</span> <strong>{formData.expenseDate || 'Not selected'}</strong></div>
+                <div className="summary-item">
+  <span>Expense Date:</span>
+  <strong>
+    {formData.expenseDate
+      ? formData.expenseDate.split('-').reverse().join('-')
+      : 'Not selected'}
+  </strong>
+</div>
+
                 <div className="summary-item"><span>Receipts:</span> <strong>{receiptFile ? '1 file' : '0 file'}</strong></div>
               </div>
               <div className="actions-box">
