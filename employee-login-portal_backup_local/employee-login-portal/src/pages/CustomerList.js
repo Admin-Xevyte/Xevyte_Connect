@@ -294,26 +294,31 @@ const handleDownload = async (customerId, filename) => {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to download file');
+      alert('Failed to download file.');
+      return;
     }
 
+    // Get the file data as a blob
     const blob = await response.blob();
+
+    // Create a URL for the blob object
     const url = window.URL.createObjectURL(blob);
 
+    // Create a temporary link element
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename || 'msa-document'; // fallback filename
+    a.download = filename;  // Set the filename for the download
     document.body.appendChild(a);
     a.click();
 
+    // Clean up
     a.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error("Download error:", error);
-    alert("Failed to download the file.");
+    console.error('Error downloading the file:', error);
+    alert('An error occurred while downloading the file.');
   }
 };
-
 
 function CustomerList() {
     const [customers, setCustomers] = useState([]);
