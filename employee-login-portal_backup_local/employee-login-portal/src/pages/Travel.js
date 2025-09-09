@@ -1,0 +1,1800 @@
+
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './Dashboard.css';
+import './Travel.css';
+
+function Travel() {
+  const employeeId = localStorage.getItem("employeeId");
+  const role = localStorage.getItem("role");
+  const adminId = (role === "admin") ? employeeId : null;
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName") || '');
+  const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const fileInputRef = useRef(null);
+  const profileDropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [activeTab, setActiveTab] = useState('New Ticket');
+  
+  const [newRequest, setNewRequest] = useState({
+    name: '',
+    fromLocation: '',
+    toLocation: '',
+    modeOfTravel: 'Select',
+    category: 'Select',
+    departureDate: '',
+    returnDate: '',
+    accommodationRequired: 'No',
+    advanceRequired: 'No',
+    remarks: '',
+    employeeId: employeeId,
+  });
+  const [activeTickets, setActiveTickets] = useState([]);
+  const [historyTickets, setHistoryTickets] = useState([]);
+
+  
+
+const handleFileChange = (requestId, e) => {
+  const newFiles = Array.from(e.target.files); // Convert FileList to array
+
+  setSelectedFiles(prev => ({
+    ...prev,
+    [requestId]: prev[requestId]
+      ? [...prev[requestId], ...newFiles] // Append to existing
+      : newFiles, // First time selection
+  }));
+};
+
+             // helper function to split text into equal rows
+const splitIntoRows = (text, rowLength) => {
+  const rows = [];
+  for (let i = 0; i < text.length; i += rowLength) {
+    rows.push(text.slice(i, i + rowLength));
+  }
+  return rows;
+};
+useEffect(() => {
+    const fetchActiveRequests = async () => {
+        try {
+            const response = await fetch(`/api/travel/employee/active/${employeeId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch active requests');
+            }
+            const data = await response.json();
+            setActiveTickets(data);
+        } catch (error) {
+            console.error("Error fetching active requests:", error);
+            // Handle the error, maybe set an error state
+        }
+    };
+
+    if (activeTab === 'Awaiting Approval') {
+        fetchActiveRequests();
+    }
+}, [activeTab, employeeId]);
+useEffect(() => {
+    const fetchHistoryRequests = async () => {
+        try {
+            const response = await fetch(`/api/travel/employee/all/${employeeId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch history');
+            }
+            const data = await response.json();
+            setHistoryTickets(data); // <-- Corrected line
+        } catch (error) {
+            console.error("Error fetching history:", error);
+        }
+    };
+
+    if (activeTab === 'History') {
+        fetchHistoryRequests();
+    }
+}, [activeTab, employeeId]);
+
+const handleUpload = async (requestId) => {
+  const files = selectedFiles[requestId];
+  const MAX_SIZE = 5 * 1024 * 1024; // 5 MB in bytes
+  let totalSize = 0;
+
+  if (!files || files.length === 0) {
+    alert("Kindly attach the booking details to complete your submission.");
+    return;
+  }
+
+  const allowedTypes = [
+    "application/pdf",
+    "image/jpeg",
+    "image/png"
+  ];
+
+  const invalidFiles = [];
+  for (const file of files) {
+    if (!allowedTypes.includes(file.type)) {
+      invalidFiles.push(file.name);
+    }
+    totalSize += file.size;
+  }
+
+  if (invalidFiles.length > 0) {
+    alert(
+      `The following files are not allowed:\n${invalidFiles.join("\n")}\n\nOnly PDF, JPG, and PNG files are supported.`
+    );
+    return;
+  }
+
+  if (totalSize > MAX_SIZE) {
+    alert("Total file size exceeds the 5 MB limit. Please select smaller files.");
+    return;
+  }
+
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  try {
+    const res = await fetch(
+      `/api/travel/admin/upload-pdfs/${requestId}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (res.ok) {
+      alert("Booking details have been sent successfully.");
+
+      setPendingRequests((prev) => prev.filter((req) => req.id !== requestId));
+
+      setSelectedFiles((prev) => {
+        const copy = { ...prev };
+        delete copy[requestId];
+        return copy;
+      });
+    } else {
+      const error = await res.text();
+      alert("Upload failed: " + error);
+    }
+  } catch (err) {
+    alert("Error uploading files: " + err.message);
+  }
+};
+
+  const [drafts, setDrafts] = useState([]);
+
+useEffect(() => {
+  if (employeeId) {
+    fetch(`/api/travel/drafts/employee/${employeeId}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch drafts');
+        return res.json();
+      })
+      .then(data => setDrafts(data))
+      .catch(err => console.error('Error fetching drafts:', err));
+  }
+}, [employeeId]);
+
+  // **FIX:** Use useEffect to save drafts to localStorage whenever the 'drafts' state changes
+  useEffect(() => {
+    localStorage.setItem(`travelDrafts_${employeeId}`, JSON.stringify(drafts));
+  }, [drafts, employeeId]);
+
+  // Fetch employee profile data
+  useEffect(() => {
+    if (employeeId) {
+      fetch(`/profile/${employeeId}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch profile data');
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data.profilePic) {
+            setProfilePic(data.profilePic);
+            localStorage.setItem("employeeProfilePic", data.profilePic);
+          }
+          if (data.name) {
+            setEmployeeName(data.name);
+            localStorage.setItem("employeeName", data.name);
+          }
+        })
+        .catch(err => console.error("Failed to fetch profile info:", err));
+    }
+  }, [employeeId]);
+
+  // Handle clicks outside the profile dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
+
+  // Fetches tickets based on the endpoint and sets state
+  const fetchTickets = (endpoint, setState) => {
+    fetch(`/api/travel/${endpoint}/${employeeId}`)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch ${endpoint}`);
+        }
+        return res.json();
+      })
+      .then(data => setState(data))
+      .catch(err => console.error(`Error fetching ${endpoint}:`, err));
+  };
+
+  // Corrected function to fetch pending requests based on role
+  const fetchPendingRequests = () => {
+    if (role === "Manager") {
+      // Corrected endpoint for manager pending requests
+      fetch(`/api/travel/manager/pending/${employeeId}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch pending requests');
+          return res.json();
+        })
+        .then(data => setPendingRequests(data))
+        .catch(err => console.error("Error fetching pending requests:", err));
+    } else if (role === "admin") {
+      // Corrected endpoint for admin pending requests
+      fetch(`/api/travel/admin/assigned-requests/${adminId}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch pending requests for admin');
+          return res.json();
+        })
+        .then(data => setPendingRequests(data))
+        .catch(err => console.error("Error fetching admin pending requests:", err));
+    }
+  };
+
+  // Effect to fetch data for active and history tabs
+  useEffect(() => {
+    if (activeTab === 'History') {
+      fetchTickets('history', setHistoryTickets);
+    } else if (activeTab === 'Awaiting Approval') {
+      fetchTickets('active', setActiveTickets);
+    }
+  }, [activeTab, employeeId]);
+
+useEffect(() => {
+  if (activeTab === "Pending Requests") {
+    navigate('/myteam3');
+  }
+}, [activeTab]);
+
+  // useEffect(() => {
+  //   if (activeTab === "Pending Requests" && (role === "Manager" || role === "admin")) {
+  //     fetchPendingRequests();
+  //   }
+  // }, [activeTab, employeeId, role]);
+
+  // Approve a travel request (Manager/Admin function)
+  const handleApprove = async (id) => {
+    try {
+      const params = new URLSearchParams({ managerId: employeeId });
+      const res = await fetch(`/api/travel/approve/${id}?${params.toString()}`, {
+        method: "PUT"
+      });
+      if (res.ok) {
+        alert("Request approved!");
+        fetchPendingRequests();
+      } else {
+        alert("Failed to approve request. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error approving request.");
+    }
+  };
+
+  // Reject a travel request (Manager/Admin function)
+const handleReject = async (id) => {
+  let remarks = prompt("Enter rejection reason (minimum 10 characters):");
+  if (remarks === null) return; // user cancelled
+  remarks = remarks.trim();
+  if (remarks.length < 10) {
+    alert("Rejected reason must be at least 10 characters.");
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams({
+      managerId: employeeId,
+      rejectedReason: remarks // match backend param name
+    });
+
+    const res = await fetch(`/api/travel/reject/${id}?${params.toString()}`, {
+      method: "PUT"
+    });
+
+    if (res.ok) {
+      alert("Request rejected!");
+      fetchPendingRequests();
+    } else {
+      alert("Failed to reject request. Please try again.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error rejecting request.");
+  }
+};
+
+  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const toggleProfileMenu = () => setProfileOpen(!profileOpen);
+
+  const handleLogout = () => {
+    
+    sessionStorage.clear();
+    navigate("/login");
+  };
+
+  const handleEditProfile = () => {
+    setProfileOpen(false);
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("name", employeeName);
+    formData.append("profilePic", file);
+
+    try {
+      const res = await fetch(`/profile/update/${employeeId}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data.profilePic) {
+        setProfilePic(data.profilePic);
+        localStorage.setItem("employeeProfilePic", data.profilePic);
+        setSuccessMessage("Profile picture updated successfully! 🎉");
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } else {
+        alert("Failed to update profile picture: no profilePic returned.");
+      }
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+      alert("Error uploading profile picture. See console for details.");
+    } finally {
+      setProfileOpen(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewRequest(prev => ({ ...prev, [name]: value }));
+  };
+  
+  // Handler for clearing the form fields
+  const handleCancel = (e) => {
+    e.preventDefault();
+    setNewRequest({
+      name: '',
+      fromLocation: '',
+      toLocation: '',
+      modeOfTravel: 'Select',
+      category: 'Select',
+      departureDate: '',
+      returnDate: '',
+      accommodationRequired: 'No',
+      advanceRequired: 'No',
+      remarks: '',
+      employeeId: employeeId,
+    });
+  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // 1. Required fields (must match state keys exactly!)
+  const requiredFields = [
+    "category",
+    "modeOfTravel",
+    "fromLocation",
+    "toLocation",
+    "departureDate",
+    "accommodationRequired",
+    "advanceRequired",
+    "remarks", // ✅ lowercase - matches newRequest.remarks
+  ];
+
+  // Human-readable labels for alerts
+  const fieldLabels = {
+    category: "Category",
+    modeOfTravel: "Mode of Travel",
+    fromLocation: "From Location",
+    toLocation: "To Location",
+    departureDate: "Departure Date",
+    accommodationRequired: "Accommodation Required",
+    advanceRequired: "Advance Required",
+    remarks: "Purpose of Travel", // ✅ custom label
+  };
+
+  for (const field of requiredFields) {
+    const value = newRequest[field];
+    if (!value || (typeof value === "string" && value.trim() === "") || value === "Select") {
+      alert(`Please fill in the required field: ${fieldLabels[field]}`);
+      return;
+    }
+  }
+  // 2. Date validations
+  const { category, departureDate, returnDate, id } = newRequest; // ✅ include id
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const depart = new Date(departureDate);
+  depart.setHours(0, 0, 0, 0);
+  const returnD = returnDate ? new Date(returnDate) : null;
+  if (returnD) returnD.setHours(0, 0, 0, 0);
+
+  if (depart < today) {
+    alert("Departure date cannot be in the past.");
+    return;
+  }
+
+  if (returnD && returnD < depart) {
+    alert("Return date cannot be before the departure date.");
+    return;
+  }
+
+  if (category === 'Domestic') {
+    const minDomesticDate = new Date(today);
+    minDomesticDate.setDate(today.getDate() + 7);
+    if (depart < minDomesticDate) {
+      alert("For domestic travel, the ticket must be booked at least one week in advance.");
+      return;
+    }
+  } else if (category === 'International') {
+    const minInternationalDate = new Date(today);
+    minInternationalDate.setDate(today.getDate() + 30);
+    if (depart < minInternationalDate) {
+      alert("For international travel, the ticket must be booked at least one month in advance.");
+      return;
+    }
+  }
+
+  // 3. Submit request
+  const requestData = {
+    ...newRequest,
+    employeeId: employeeId,
+    name: employeeName
+  };
+
+  console.log("Submitting request:", requestData);
+
+  try {
+    const res = await fetch("/api/travel/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+    });
+
+    if (res.ok) {
+      alert("Travel request submitted successfully!");
+
+      // ✅ If this was created from a draft, delete that draft permanently
+      if (id) {
+        try {
+          await fetch(`/api/travel/drafts/${id}?employeeId=${employeeId}`, {
+            method: "DELETE",
+          });
+
+          // remove from local state too
+          setDrafts(prevDrafts => prevDrafts.filter(draft => draft.id !== id));
+        } catch (deleteError) {
+          console.error("Failed to delete draft after submission:", deleteError);
+        }
+      }
+
+      // ✅ Reset form
+      setNewRequest({
+        id: "",
+        name: '',
+        fromLocation: '',
+        toLocation: '',
+        modeOfTravel: 'Select',
+        category: 'Select',
+        departureDate: '',
+        returnDate: '',
+        accommodationRequired: 'No',
+        advanceRequired: 'No',
+        remarks: '',
+        employeeId: employeeId
+      });
+
+    } else {
+      const errorText = await res.text();
+      alert(`Failed to submit travel request: ${errorText}`);
+    }
+  } catch (error) {
+    console.error("Error submitting travel request:", error);
+    alert("Error submitting travel request. Please check the console for details.");
+  }
+};
+
+const handleSaveDraft = async (e) => {
+  e.preventDefault();
+
+  // ✅ Include the ID if editing
+  const draftToSave = { ...newRequest };
+
+  try {
+    const res = await fetch("/api/travel/drafts", {
+      method: "POST", // backend will upsert based on `id`
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(draftToSave),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      alert(`Failed to save draft: ${errorText}`);
+      return;
+    }
+
+    const savedDraft = await res.json();
+
+    setDrafts((prevDrafts) => {
+      const exists = prevDrafts.some((d) => d.id === savedDraft.id);
+      if (exists) {
+        // ✅ Update the draft in state
+        return prevDrafts.map((d) => (d.id === savedDraft.id ? savedDraft : d));
+      } else {
+        // ✅ Add as new draft
+        return [...prevDrafts, savedDraft];
+      }
+    });
+
+    // ✅ Reset form but keep `id` cleared (so next new save won’t overwrite the last draft)
+    setNewRequest({
+      id: "", // clear id so next is a new draft
+      name: "",
+      fromLocation: "",
+      toLocation: "",
+      modeOfTravel: "Select",
+      category: "Select",
+      departureDate: "",
+      returnDate: "",
+      accommodationRequired: "No",
+      advanceRequired: "No",
+      remarks: "",
+      employeeId: employeeId,
+    });
+
+    alert(draftToSave.id ? "Draft updated successfully!" : "Draft saved successfully!");
+  } catch (error) {
+    console.error("Error saving draft:", error);
+    alert("Error saving draft. See console for details.");
+  }
+};
+
+// Fetch drafts for employee
+useEffect(() => {
+  const fetchDrafts = async () => {
+    try {
+      const res = await fetch(`/api/travel/drafts?employeeId=${employeeId}`);
+      if (!res.ok) {
+        console.error("Failed to fetch drafts");
+        return;
+      }
+      const data = await res.json();
+      setDrafts(data);
+    } catch (error) {
+      console.error("Error fetching drafts:", error);
+    }
+  };
+
+  fetchDrafts();
+}, [employeeId]);
+
+// Edit draft
+const handleEditDraft = (draft) => {
+  const formatDateForInput = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const draftForForm = {
+    ...draft,
+    departureDate: formatDateForInput(draft.departureDate),
+    returnDate: formatDateForInput(draft.returnDate),
+  };
+
+  setNewRequest(draftForForm); // ✅ load with ID
+  setActiveTab("New Ticket");
+};
+
+// Delete Draft
+const handleDeleteDraft = async (id, showAlert = true) => {
+  try {
+    const res = await fetch(`/api/travel/drafts/${id}?employeeId=${employeeId}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) {
+      alert('Failed to delete draft.');
+      return;
+    }
+
+    setDrafts(prevDrafts => prevDrafts.filter(draft => draft.id !== id));
+
+    if (showAlert) {
+      alert("Draft deleted successfully!");
+    }
+  } catch (error) {
+    console.error('Error deleting draft:', error);
+    alert('Error deleting draft. See console for details.');
+  }
+};
+
+  // ------------------------------------------------------
+// This is the line that needs to be updated.
+const filteredHistory = historyTickets.filter(ticket => {
+  const searchTermLower = searchTerm.toLowerCase();
+
+  // Create a searchable string for the departure date in dd-mm-yyyy format
+  const departDate = new Date(ticket.departureDate);
+  const departDay = String(departDate.getDate()).padStart(2, '0');
+  const departMonth = String(departDate.getMonth() + 1).padStart(2, '0');
+  const departYear = departDate.getFullYear();
+  const departDateForSearch = `${departDay}-${departMonth}-${departYear}`;
+
+  // Create a searchable string for the return date in dd-mm-yyyy format
+  const returnDateForSearch = ticket.returnDate
+    ? new Date(ticket.returnDate).toLocaleDateString('en-GB').replace(/\//g, '-')
+    : '';
+
+  // Combine all searchable values into an array
+  const allSearchableValues = [
+    ticket.category,
+    ticket.modeOfTravel,
+    departDateForSearch,
+    returnDateForSearch,
+    ticket.fromLocation,
+    ticket.toLocation,
+    ticket.accommodationRequired,
+    ticket.advanceRequired,
+    ticket.remarks,
+    ticket.status,
+    ticket.rejectedReason,
+  ].map(value => value?.toString().toLowerCase());
+
+  // Check if any of the values contain the search term
+  return allSearchableValues.some(value => value && value.includes(searchTermLower));
+});
+const filteredDrafts = drafts.filter(draft =>
+  Object.values(draft).some(value =>
+    value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  )
+);
+
+const filteredActiveTickets = activeTickets.filter(ticket =>
+  Object.values(ticket).some(value =>
+    value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  )
+);
+
+const filteredPendingRequests = pendingRequests.filter(req =>
+  Object.values(req).some(value =>
+    value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  )
+);
+  const thStyle = { backgroundColor: '#131212ff' };
+
+  // Add this function to your component
+const handleRemoveFile = (requestId, fileIndexToRemove) => {
+  setSelectedFiles(prevFiles => {
+    const newFiles = { ...prevFiles };
+    // Filter out the file at the specified index
+    newFiles[requestId] = newFiles[requestId].filter(
+      (_, index) => index !== fileIndexToRemove
+    );
+    // If no files are left, you might want to clean up the state
+    if (newFiles[requestId].length === 0) {
+      delete newFiles[requestId];
+    }
+    return newFiles;
+  });
+};
+
+  return (
+    <div className="dashboard-container">
+      {/* Sidebar */}
+      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        {!isCollapsed ? (
+          <>
+            <img
+              src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")}
+              alt="office"
+              className="office-vng"
+            />
+            <img
+              src={require("../assets/gg_move-left.png")}
+              alt="collapse"
+              className="toggle-btn"
+              onClick={toggleSidebar}
+              style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
+            />
+    <h3>
+                           <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
+                             <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
+                               Home
+                              
+                             </span>
+                           </Link>
+                         </h3>
+                         <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
+                         <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
+                         <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
+                         <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
+                         <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
+                         <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
+                         <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
+                         <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
+                       
+                         <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
+                         <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Performance</Link></h3>
+                         <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
+                         <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'white' }}>Travel</Link></h3>
+          </>
+        ) : (
+          <div className="collapsed-wrapper">
+            <img
+              src={require("../assets/Group.png")}
+              alt="expand"
+              className="collapsed-toggle"
+              onClick={toggleSidebar}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="main-content">
+        <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 >Welcome, {employeeName} ({employeeId})</h2>
+          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <img
+              src={require('../assets/Vector.png')}
+              alt="Notifications"
+              className="icon"
+              style={{ cursor: 'pointer' }}
+            />
+            <div className="profile-wrapper" style={{ position: 'relative' }}>
+              <img
+                src={profilePic}
+                alt="Profile"
+                className="profile-pic"
+                onClick={toggleProfileMenu}
+                style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+              />
+              {profileOpen && (
+                <div
+                  ref={profileDropdownRef}
+                  className="profile-dropdown"
+                  style={{
+                    position: 'absolute',
+                    top: '50px',
+                    right: '0',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    borderRadius: '4px',
+                    zIndex: 1000,
+                    width: '150px',
+                  }}
+                >
+                  <button
+                    onClick={handleEditProfile}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '10px',
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid #eee',
+                    }}
+                  >
+                    Edit Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '10px',
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+              {successMessage && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: '0',
+                  marginTop: '5px',
+                  backgroundColor: '#4BB543',
+                  color: 'white',
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                  zIndex: 1100,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}>
+                  {successMessage}
+                </div>
+              )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleImageChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr className="divider-line" />
+
+        <div className="travel-management">
+          <div className="tabs">
+            {['New Ticket', 'Awaiting Approval', 'History', 'Drafts', ...(role === "Manager" || role === "admin" ? ['Pending Requests'] : [])].map((tab) => (
+              <button
+                key={tab}
+                className={activeTab === tab ? 'tab active' : 'tab'}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          <div className="travel-content">
+{activeTab === 'New Ticket' && (
+  <>
+    <p className="warning-text">
+      {newRequest.category === 'Domestic'
+        ? 'Kindly book the ticket at least one week before the travel date.'
+        : newRequest.category === 'International'
+        ? 'Kindly book the ticket at least one month before the travel date.'
+        : 'Welcome! Please fill out the form to create a new travel ticket.' // New default message
+      }
+    </p>
+<form>
+  <div
+    className="travelform-container"
+    style={{
+      display: 'flex',
+      gap: '40px',         // space between columns
+      justifyContent: 'space-between',
+      flexWrap: 'wrap',    // wrap on small screens
+    }}
+  >
+    <div
+      className="travelform-column"
+
+    >
+      <label style={{ display: 'block', marginBottom: '7px' }}>
+        <span style={{ display: 'block', fontWeight: '600', marginBottom: '6px' }}>
+          Category <span style={{ color: 'red' }}>*</span>
+        </span>
+        <select
+          name="category"
+          value={newRequest.category}
+          onChange={(e) => {
+            handleInputChange(e);
+            if (e.target.value === 'International') {
+              handleInputChange({
+                target: { name: 'modeOfTravel', value: 'Flight' },
+              });
+            }
+          }}
+          required
+          style={{ width: '100%', padding: '8px', fontSize: '1rem' }}
+        >
+          <option value="">Select</option>
+          <option value="Domestic">Domestic</option>
+          <option value="International">International</option>
+        </select>
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '7px' }}>
+        <span style={{ display: 'block', fontWeight: '600', marginBottom: '6px' }}>
+          Mode of Travel <span style={{ color: 'red' }}>*</span>
+        </span>
+        <select
+          name="modeOfTravel"
+          value={newRequest.modeOfTravel}
+          onChange={handleInputChange}
+          required
+          disabled={newRequest.category === 'International'}
+          style={{ width: '100%', padding: '8px', fontSize: '1rem' }}
+        >
+          {newRequest.category === 'International' ? (
+            <option value="Flight">Flight</option>
+          ) : (
+            <>
+              <option value="">Select</option>
+              <option value="Flight">Flight</option>
+              <option value="Bus">Bus</option>
+              <option value="Train">Train</option>
+            </>
+          )}
+        </select>
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '0px' }}>
+        <span style={{ display: 'block', fontWeight: '600', marginBottom: '6px' }}>
+          From <span style={{ color: 'red' }}>*</span>
+        </span>
+        <input
+          name="fromLocation"
+          value={newRequest.fromLocation}
+          onChange={handleInputChange}
+          required
+          style={{ width: '100%', padding: '8px', fontSize: '1rem' }}
+        />
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '0' }}>
+        <span style={{ display: 'block', fontWeight: '600', marginBottom: '6px' }}>
+          To <span style={{ color: 'red' }}>*</span>
+        </span>
+        <input
+          name="toLocation"
+          value={newRequest.toLocation}
+          onChange={handleInputChange}
+          required
+          style={{ width: '100%', padding: '8px', fontSize: '1rem' }}
+        />
+      </label>
+    </div>
+
+    <div
+      className="travelform-column"
+  
+    >
+      <label style={{ display: 'block', marginBottom: '-7px' }}>
+        <span style={{ display: 'block', fontWeight: '600', marginBottom: '6px' }}>
+          Depart Date <span style={{ color: 'red' }}>*</span>
+        </span>
+        <input
+          type="date"
+          name="departureDate"
+          value={newRequest.departureDate}
+          onChange={handleInputChange}
+          required
+          style={{ width: '100%', padding: '8px', fontSize: '1rem' }}
+        />
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '-9px' }}>
+        <span style={{ display: 'block', fontWeight: '600', marginBottom: '6px' }}>
+          Return Date
+        </span>
+        <input
+          type="date"
+          name="returnDate"
+          value={newRequest.returnDate}
+          onChange={handleInputChange}
+          style={{ width: '100%', padding: '8px', fontSize: '1rem' }}
+        />
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '15px' }}>
+        <span style={{ display: 'block', fontWeight: '600', marginBottom: '6px' }}>
+          Accommodation Required <span style={{ color: 'red' }}>*</span>
+        </span>
+        <select
+          name="accommodationRequired"
+          value={newRequest.accommodationRequired}
+          onChange={handleInputChange}
+          required
+          style={{ width: '100%', padding: '8px', fontSize: '1rem' }}
+        >
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </label>
+
+      <label style={{ display: 'block', marginBottom: '15px' }}>
+        <span style={{ display: 'block', fontWeight: '600', marginBottom: '6px' }}>
+          Advance Required <span style={{ color: 'red' }}>*</span>
+        </span>
+        <select
+          name="advanceRequired"
+          value={newRequest.advanceRequired}
+          onChange={handleInputChange}
+          required
+          style={{ width: '100%', padding: '8px', fontSize: '1rem' }}
+        >
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+<label style={{ display: 'block', marginTop: '0', fontWeight: '600' }}>
+  Purpose Of Travel<span style={{ color: 'red' }}>*</span>
+  <textarea
+    name="remarks"
+    value={newRequest.remarks}
+    onChange={handleInputChange}
+    placeholder="Please Enter The Purpose Of Your Travel"
+    maxLength={255}
+    required
+    rows={2}   // ✅ controls visible height
+    style={{
+      width: '100%',
+      marginTop: '8px',
+      padding: '8px',
+      fontSize: '1rem',
+      resize: 'vertical', // ✅ allows manual resize (you can use "none" to disable)
+    }}
+  />
+  <small style={{ fontSize: '0.8rem', color: '#555' }}>
+    Maximum 255 characters allowed
+  </small>
+</label>
+
+  <div
+    className="submit-button-container"
+  >
+    <button className="submit-button" onClick={handleSaveDraft} type="button">
+      Save Draft
+    </button>
+    <button className="submit-button" type="submit" onClick={handleSubmit}>
+      Submit Request
+    </button>
+    <button className="submit-button" type="button" onClick={handleCancel}>
+      Cancel
+    </button>
+  </div>
+</form>
+
+  </>
+)}
+
+{activeTab === 'Awaiting Approval' && (
+  <div
+    style={{
+      height: 'calc(100vh - 200px)',
+      overflowY: 'auto',
+      border: '1px solid #ccc',
+      padding: '0px',
+    }}
+  >
+    <h3>Active Travel Requests</h3>
+    {/* Use filteredActiveTickets here */}
+    {filteredActiveTickets.length === 0 ? (
+      <p>No active requests found.</p>
+    ) : (
+      <table
+        border="1"
+        cellPadding="10"
+        style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}
+      >
+        <thead
+          className="columns-header"
+          style={{
+            position: 'sticky',
+            top: 0,
+            backgroundColor: '#f2f2f2',
+            zIndex: 1,
+          }}
+        >
+          <tr>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Category</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Mode of Travel</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Depart Date</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Return Date</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>From</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>To</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Accommodation Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Advance Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Purpose Of Travel</th>
+            <th style={{ ...thStyle, minWidth: '180px' }}>Status</th>
+            <th style={{ ...thStyle, minWidth: '180px' }}>Download Ticket</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Use filteredActiveTickets for the map function */}
+          {filteredActiveTickets.map((ticket) => (
+            <tr key={ticket.id}>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.category}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.modeOfTravel}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  {new Date(ticket.departureDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+</td>
+<td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  {ticket.returnDate
+    ? new Date(ticket.returnDate).toLocaleDateString('en-GB').replace(/\//g, '-')
+    : ''}
+</td>
+
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.fromLocation}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.toLocation}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.accommodationRequired}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.advanceRequired}</td>
+
+<td
+  style={{
+    padding: '10px',
+    borderBottom: '1px solid #ddd',
+    whiteSpace: 'pre-wrap', // preserve line breaks
+    fontFamily: 'monospace', // makes rows align evenly
+  }}
+>
+  {splitIntoRows(ticket.remarks, 50).map((row, idx) => (
+    <div key={idx}>{row}</div>
+  ))}
+</td>
+
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.status}</td>
+
+<td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  <button
+    style={{
+      backgroundColor: ticket.status === 'Booked' ? '#007bff' : '#cccccc', // Conditional background color
+      color: 'white',
+      border: 'none',
+      padding: '4px 8px',
+      cursor: ticket.status === 'Booked' ? 'pointer' : 'not-allowed', // Conditional cursor
+      borderRadius: '4px',
+      fontSize: '0.85em'
+    }}
+    onClick={async () => {
+      try {
+        // Step 1: Fetch the list of documents for this request
+        const res = await fetch(`/api/travel/documents/${ticket.id}`);
+        if (!res.ok) throw new Error("Failed to fetch documents");
+        const docs = await res.json();
+
+        if (docs.length === 0) {
+          alert("No documents found for this request.");
+          return;
+        }
+
+        // Step 2: Download each document
+        for (const doc of docs) {
+          const downloadRes = await fetch(`/api/travel/download-document/${doc.id}`);
+          if (!downloadRes.ok) throw new Error("Download failed for file: " + doc.fileName);
+
+          const blob = await downloadRes.blob();
+          const url = window.URL.createObjectURL(blob);
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = doc.fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          window.URL.revokeObjectURL(url);
+        }
+
+        // ✅ Step 3: Mark request as downloaded
+        await fetch(`/api/travel/mark-downloaded/${ticket.id}`, {
+          method: "PUT"
+        });
+
+        // ✅ Step 4: Remove ticket from the correct state
+        if (activeTab === "Pending Requests") {
+          setPendingRequests(prev => prev.filter(t => t.id !== ticket.id));
+        } else if (activeTab === "Awaiting Approval") {
+          setActiveTickets(prev => prev.filter(t => t.id !== ticket.id));
+        } else if (activeTab === "History") {
+          setHistoryTickets(prev => prev.filter(t => t.id !== ticket.id));
+        }
+
+      } catch (err) {
+        alert("Error fetching/downloading documents: " + err.message);
+      }
+    }}
+    disabled={ticket.status !== 'Booked'}
+  >
+    Booking Details
+  </button>
+</td>
+
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+)}
+
+{activeTab === 'History' && (
+  <div
+    style={{
+      height: 'calc(100vh - 200px)',  // fixed height like Drafts for scrolling
+      overflowY: 'auto',
+      border: '1px solid #ccc',
+      padding: '0px',
+    }}
+  >
+    <h3>Booking History</h3>
+    {/* <div style={{ marginBottom: '10px' }}>
+      <input
+        type="text"
+        placeholder="Search history..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ width: '100%', padding: '8px' }}
+      />
+    </div> */}
+    {filteredHistory.length === 0 ? (
+      <p>No bookings found.</p>
+    ) : (
+      <table
+        border="1"
+        cellPadding="10"
+        style={{
+          width: '100%',
+          textAlign: 'left',
+          borderCollapse: 'collapse',
+        }}
+      >
+<thead
+          className="columns-header"
+          style={{
+            position: 'sticky',
+            top: 0,
+            backgroundColor: '#f2f2f2',
+            zIndex: 1,
+          }}
+        >
+          <tr>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Category</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Mode of Travel</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Depart Date</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Return Date</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>From</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>To</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Accommodation Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Advance Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Purpose Of Travel</th>
+
+            <th style={{ ...thStyle, minWidth: '180px' }}>Status</th>
+                 <th style={{ ...thStyle, minWidth: '180px' }}>Rejected Reason</th>
+
+            <th style={{ ...thStyle, minWidth: '180px' }}>Download Booking Details</th>
+          </tr>
+        </thead>
+ <tbody>
+  {filteredHistory.map((ticket) => (
+    <tr key={ticket.id}>
+      {/* <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.id}</td> */}
+      <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.category}</td>
+      <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.modeOfTravel}</td>
+     <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  {new Date(ticket.departureDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+</td>
+<td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  {ticket.returnDate
+    ? new Date(ticket.returnDate).toLocaleDateString('en-GB').replace(/\//g, '-')
+    : ''}
+</td>
+
+      <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.fromLocation}</td>
+      <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.toLocation}</td>
+      <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.accommodationRequired}</td>
+      <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.advanceRequired}</td>
+  
+<td
+  style={{
+    padding: '10px',
+    borderBottom: '1px solid #ddd',
+    whiteSpace: 'pre-wrap', // preserve line breaks
+    fontFamily: 'monospace', // makes rows align evenly
+  }}
+>
+  {splitIntoRows(ticket.remarks, 50).map((row, idx) => (
+    <div key={idx}>{row}</div>
+  ))}
+</td>
+      <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.status}</td>
+      <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{ticket.rejectedReason}</td>
+<td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  <button
+    style={{
+      backgroundColor: (ticket.status === 'Booked' || ticket.status === 'Downloaded') ? '#007bff' : '#cccccc',
+      color: 'white',
+      border: 'none',
+      padding: '4px 8px',
+      cursor: (ticket.status === 'Booked' || ticket.status === 'Downloaded') ? 'pointer' : 'not-allowed',
+      borderRadius: '4px',
+      fontSize: '0.85em'
+    }}
+    onClick={async () => {
+      try {
+        // Step 1: Fetch the list of documents for this request
+        const res = await fetch(`/api/travel/documents/${ticket.id}`);
+        if (!res.ok) throw new Error("Failed to fetch documents");
+        const docs = await res.json();
+
+        if (docs.length === 0) {
+          alert("No documents found for this request.");
+          return;
+        }
+
+        // Step 2: Use a for...of loop to download each file sequentially
+        for (const doc of docs) {
+          const downloadRes = await fetch(`/api/travel/download-document/${doc.id}`);
+          if (!downloadRes.ok) throw new Error("Download failed for file: " + doc.fileName);
+
+          const blob = await downloadRes.blob();
+          const url = window.URL.createObjectURL(blob);
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = doc.fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          
+          window.URL.revokeObjectURL(url);
+        }
+      } catch (err) {
+        alert("Error fetching/downloading documents: " + err.message);
+      }
+    }}
+    disabled={!(ticket.status === 'Booked' || ticket.status === 'Downloaded')}
+  >
+    Booking Details
+  </button>
+</td>
+
+    </tr>
+  ))}
+</tbody>
+      </table>
+    )}
+  </div>
+)}
+
+{activeTab === 'Pending Requests' && (role === "Manager" ) && (
+  <div
+    style={{
+      height: 'calc(100vh - 200px)',
+      overflowY: 'auto',
+      border: '1px solid #ccc',
+      padding: '0px',
+    }}
+  >
+    <h3>Pending Travel Requests</h3>
+    {/* Use filteredPendingRequests for the length check */}
+    {filteredPendingRequests.length === 0 ? (
+      <p>No pending requests found.</p>
+    ) : (
+      <table
+        border="1"
+        cellPadding="10"
+        style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}
+      >
+        <thead
+          style={{
+            position: 'sticky',
+            top: 0,
+            backgroundColor: '#f2f2f2',
+            zIndex: 1,
+          }}
+        >
+          <tr>
+            
+            <th style={{ ...thStyle, minWidth: '140px' }}>Employee ID</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Employee Name</th>
+             <th style={{ ...thStyle, minWidth: '140px' }}>Category</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Mode of Travel</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Depart Date</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Return Date</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>From</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>To</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Accommodation Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Advance Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Purpose Of Travel</th>
+            <th style={thStyle}>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Use filteredPendingRequests for the map function */}
+          {filteredPendingRequests.map((req) => (
+            <tr key={req.id}>
+            
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.employeeId}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.employeeName}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.category}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.modeOfTravel}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  {new Date(req.departureDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+</td>
+<td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  {req.returnDate
+    ? new Date(req.returnDate).toLocaleDateString('en-GB').replace(/\//g, '-')
+    : ''}
+</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.fromLocation}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.toLocation}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.accommodationRequired}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.advanceRequired}</td>
+           <td
+  style={{
+    padding: '10px',
+    borderBottom: '1px solid #ddd',
+    whiteSpace: 'pre-wrap', // preserve line breaks
+    fontFamily: 'monospace', // makes rows align evenly
+  }}
+>
+  {splitIntoRows(req.remarks, 50).map((row, idx) => (
+    <div key={idx}>{row}</div>
+  ))}
+</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                <button
+                  onClick={() => handleApprove(req.id)}
+                  style={{
+                    marginRight: '10px',
+                    backgroundColor: 'green',
+                    color: 'white',
+                    border: 'none',
+                    padding: '6px 12px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    marginBottom: '10px'
+                  }}
+                >
+                  Approve
+                </button>
+         <button
+  onClick={() => handleReject(req.id)}
+  style={{
+    backgroundColor: 'red',
+    color: 'white',
+    border: 'none',
+    padding: '6px 12px',
+    cursor: 'pointer',
+    borderRadius: '4px',
+    width: '75px', // <-- Increased width
+  }}
+>
+  Reject
+</button>
+
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+)}
+{activeTab === 'Pending Requests' && (role === "admin") && (
+  <div
+    style={{
+      height: 'calc(100vh - 200px)',
+      overflowY: 'auto',
+      border: '1px solid #ccc',
+      padding: '0px',
+    }}
+  >
+    <h3>Pending Travel Requests</h3>
+    {/* Use filteredPendingRequests for the length check */}
+    {filteredPendingRequests.length === 0 ? (
+      <p>No pending requests found.</p>
+    ) : (
+      <table
+        border="1"
+        cellPadding="10"
+        style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}
+      >
+        <thead
+          style={{
+            position: 'sticky',
+            top: 0,
+            backgroundColor: '#f2f2f2',
+            zIndex: 1,
+          }}
+        >
+          <tr>
+         <th style={{ ...thStyle, minWidth: '140px' }}>Employee ID</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Employee Name</th>
+             <th style={{ ...thStyle, minWidth: '140px' }}>Category</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Mode of Travel</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Depart Date</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Return Date</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>From</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>To</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Accommodation Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Advance Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Purpose Of Travel</th>
+            <th style={{ ...thStyle, minWidth: '180px' }}>Upload Ticket (PDF)*</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Use filteredPendingRequests for the map function */}
+          {filteredPendingRequests.map((req) => (
+            <tr key={req.id}>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.employeeId}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.employeeName}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.category}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.modeOfTravel}</td>
+             <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  {new Date(req.departureDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+</td>
+<td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  {req.returnDate
+    ? new Date(req.returnDate).toLocaleDateString('en-GB').replace(/\//g, '-')
+    : ''}
+</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.fromLocation}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.toLocation}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.accommodationRequired}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{req.advanceRequired}</td>
+            <td
+  style={{
+    padding: '10px',
+    borderBottom: '1px solid #ddd',
+    whiteSpace: 'pre-wrap', // preserve line breaks
+    fontFamily: 'monospace', // makes rows align evenly
+  }}
+>
+  {splitIntoRows(req.remarks, 50).map((row, idx) => (
+    <div key={idx}>{row}</div>
+  ))}
+</td>
+            <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+  <label
+    htmlFor={`file-upload-${req.id}`}
+    style={{
+      display: 'inline-block',
+      padding: '6px 12px',
+      backgroundColor: '#6e7073ff',
+      color: 'white',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '0.9em',
+      userSelect: 'none',
+    }}
+  >
+    Choose File
+  </label>
+  <input
+    id={`file-upload-${req.id}`}
+    type="file"
+    accept="application/pdf"
+    multiple // <-- ALLOW MULTIPLE FILES
+    style={{ display: 'none' }}
+    onChange={(e) => handleFileChange(req.id, e)}
+  />
+
+  <div style={{ marginTop: '5px', fontSize: '0.9em', color: '#333' }}>
+    {selectedFiles[req.id] && selectedFiles[req.id].length > 0
+      ? selectedFiles[req.id].map((file, index) => {
+          const truncatedName =
+            file.name.length > 10 ? file.name.slice(0, 10) + '...' : file.name;
+          return (
+            <div
+              key={index}
+              title={file.name}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingRight: '10px', // Spacing for the 'x'
+                cursor: 'default',
+              }}
+            >
+              <div style={{ flexGrow: 1 }}>{truncatedName}</div>
+              <span
+                onClick={() => handleRemoveFile(req.id, index)}
+                style={{
+                  cursor: 'pointer',
+                  color: 'red',
+                  fontWeight: 'bold',
+                  marginLeft: '10px',
+                  userSelect: 'none',
+                }}
+              >
+                &times;
+              </span>
+            </div>
+          );
+        })
+      : 'No file selected'}
+  </div>
+</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                <button
+                  onClick={() => handleUpload(req.id)}
+                  style={{
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    padding: '6px 12px',
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                  }}
+                >
+                  Confirm
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+)}
+
+{activeTab === 'Drafts' && (
+  <div
+    style={{
+      height: 'calc(100vh - 200px)',
+      overflowY: 'auto',
+      border: '1px solid #ccc',
+      padding: '0px',
+    }}
+  >
+    <h3>Saved Drafts</h3>
+    {/* Use filteredDrafts for the length check */}
+    {filteredDrafts.length === 0 ? (
+      <p>No drafts found.</p>
+    ) : (
+      <table
+        border="1"
+        cellPadding="10"
+        style={{
+          width: '100%',
+          borderCollapse: 'collapse',
+          textAlign: 'left',
+        }}
+      >
+        <thead
+          style={{
+            position: 'sticky',
+            top: 0,
+            backgroundColor: '#f2f2f2',
+            zIndex: 1,
+          }}
+        >
+          <tr>
+             <th style={{ ...thStyle, minWidth: '140px' }}>Category</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Mode of Travel</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Depart Date</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Return Date</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>From</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>To</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Accommodation Required</th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Advance Required</th>
+            <th style={{ ...thStyle, minWidth: '140px' }}>Purpose Of Travel </th>
+            <th style={{ ...thStyle, minWidth: '120px' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Use filteredDrafts for the map function */}
+          {filteredDrafts.map((draft) => (
+            <tr key={draft.id}>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{draft.category}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{draft.modeOfTravel}</td>
+              <td>
+  {draft.departureDate
+    ? new Date(draft.departureDate)
+        .toLocaleDateString('en-GB')
+        .replace(/\//g, '-')
+    : ''}
+</td>
+<td>
+  {draft.returnDate
+    ? new Date(draft.returnDate)
+        .toLocaleDateString('en-GB')
+        .replace(/\//g, '-')
+    : ''}
+</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{draft.fromLocation}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{draft.toLocation}</td>
+
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{draft.accommodationRequired}</td>
+              <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{draft.advanceRequired}</td>
+               
+<td
+  style={{
+    padding: '10px',
+    borderBottom: '1px solid #ddd',
+    whiteSpace: 'pre-wrap', // preserve line breaks
+    fontFamily: 'monospace', // makes rows align evenly
+  }}
+>
+  {splitIntoRows(draft.remarks, 50).map((row, idx) => (
+    <div key={idx}>{row}</div>
+  ))}
+</td>
+            <td style={{ padding: '20px', borderBottom: '1px solid #ddd', width: '25px' }}>
+  <button
+    onClick={() => handleEditDraft(draft)}
+    style={{
+      marginRight: '10px',
+      backgroundColor: '#007bff',
+      color: 'white',
+      width: '80px',   // fixed width
+      height: '40px',  // fixed height
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      margin: '2px'
+    }}
+  >
+    Edit
+  </button>
+  <button
+    onClick={() => handleDeleteDraft(draft.id)}
+    style={{
+      backgroundColor: '#dc3545',
+      color: 'white',
+      width: '80px',   // same width
+      height: '40px',  // same height
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    }}
+  >
+    Delete
+  </button>
+</td>
+
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Travel;
+
+
