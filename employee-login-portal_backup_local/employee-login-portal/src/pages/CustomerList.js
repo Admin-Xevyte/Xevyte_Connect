@@ -452,17 +452,18 @@ function CustomerList() {
  // Filter the customers based on the search term
 // Filter the customers based on the search term
 const filteredCustomers = customers.filter(customer => {
-  const lowerCaseSearchTerm = searchTerm.toLowerCase();
-  const customerIdString = `CID${customer.customerId}`.toLowerCase(); // Convert ID to 'CID...' string for comparison
+  const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  const customerIdString = `CID${customer.customerId}`.toLowerCase();
 
-  return (
-    (customerIdString).includes(lowerCaseSearchTerm) || // Check the customer ID
-    (customer.customerName || "").toLowerCase().includes(lowerCaseSearchTerm) ||
-    (customer.msaDoc || "").toLowerCase().includes(lowerCaseSearchTerm) ||
-    (customer.startDate || "").toString().toLowerCase().includes(lowerCaseSearchTerm) ||
-    (customer.endDate || "").toString().toLowerCase().includes(lowerCaseSearchTerm)
-  );
+  return (
+    customerIdString.includes(lowerCaseSearchTerm) ||
+    (customer.customerName || "").toLowerCase().includes(lowerCaseSearchTerm) ||
+    (customer.msaDocName || "").toLowerCase().includes(lowerCaseSearchTerm) || // ✅ fixed line
+    (customer.startDate || "").toString().toLowerCase().includes(lowerCaseSearchTerm) ||
+    (customer.endDate || "").toString().toLowerCase().includes(lowerCaseSearchTerm)
+  );
 });
+
 
     return (
         <div className="dashboard-container">
