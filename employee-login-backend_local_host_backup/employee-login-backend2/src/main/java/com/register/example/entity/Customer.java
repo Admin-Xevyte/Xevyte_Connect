@@ -9,14 +9,18 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "customer_id")   // DB column is customer_id
-    private Long customerId;        // 👈 property name is camelCase
+    @Column(name = "customer_id")
+    private Long customerId;
 
     @Column(name = "customer_name")
     private String customerName;
 
-    @Column(name = "msa_doc")
-    private String msaDoc;
+    @Column(name = "msa_doc_name")
+    private String msaDocName;
+
+    @Lob
+    @Column(name = "msa_doc_blob", columnDefinition = "LONGBLOB")
+    private byte[] msaDocBlob;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -41,12 +45,20 @@ public class Customer {
         this.customerName = customerName;
     }
 
-    public String getMsaDoc() {
-        return msaDoc;
+    public String getMsaDocName() {
+        return msaDocName;
     }
 
-    public void setMsaDoc(String msaDoc) {
-        this.msaDoc = msaDoc;
+    public void setMsaDocName(String msaDocName) {
+        this.msaDocName = msaDocName;
+    }
+
+    public byte[] getMsaDocBlob() {
+        return msaDocBlob;
+    }
+
+    public void setMsaDocBlob(byte[] msaDocBlob) {
+        this.msaDocBlob = msaDocBlob;
     }
 
     public LocalDate getStartDate() {
