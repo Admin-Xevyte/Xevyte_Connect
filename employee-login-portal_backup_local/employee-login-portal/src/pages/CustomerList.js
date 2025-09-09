@@ -657,26 +657,22 @@ const filteredCustomers = customers.filter(customer => {
     <td>{`CID${customer.customerId}`}</td>
 
       <td>{customer.customerName}</td>
-      <td>
-  {customer.msaDoc ? (
+<td>
+  {customer.msaDocName ? (
     <span
-  onClick={() => handleDownload(customer.customerId, customer.msaDoc)}
-  title={customer.msaDoc}
-  style={{
-    color: "blue",
-    textDecoration: "none",
-    cursor: "pointer",
-  }}
->
-  {customer.msaDoc.length > 10
-    ? `${customer.msaDoc.substring(0, 10)}...`
-    : customer.msaDoc}
-</span>
-
+      onClick={() => handleDownload(customer.customerId, customer.msaDocName)}
+      title={customer.msaDocName}
+      style={{ color: "blue", textDecoration: "none", cursor: "pointer" }}
+    >
+      {customer.msaDocName.length > 10
+        ? `${customer.msaDocName.substring(0, 10)}...`
+        : customer.msaDocName}
+    </span>
   ) : (
     "No document"
   )}
 </td>
+
 
       <td>
         {customer.startDate
