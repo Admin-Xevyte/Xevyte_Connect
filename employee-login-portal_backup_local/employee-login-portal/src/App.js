@@ -129,11 +129,11 @@ function App() {
                         <Route path="/hrgreq" element={<Hrtimesheetds/>} /> 
                       <Route path="/timesheets" element={<HRTimesheet />} />
                       <Route path="/mytimesheets" element={<Mytimesheets/>} />
-            <Route path="/projects/:customerId/:sowId" element={<ProjectPage />} />
+            <Route path="/projects" element={<ProjectPage />} />
   
 <Route path="/customers" element={<CustomerList />} /> 
-<Route path="/customers/:customerId/sows" element={<SowPage />} />
-  <Route path="/customers/:customerId/sows/:sowId/projects/:projectId/allocations" element={<AllocationPage />} />
+<Route path="/sows" element={<SowPage />} />
+  <Route path="/allocations" element={<AllocationPage />} />
 
 
  
