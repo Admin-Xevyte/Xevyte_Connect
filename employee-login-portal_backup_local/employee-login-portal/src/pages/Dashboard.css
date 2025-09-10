@@ -24,22 +24,22 @@
 }
 
 
-.hom{
-  color:#4E5480;
-
+.hom {
+  color: #00b4c6;
+  text-decoration: none;
   font-size: 18px;
   cursor: pointer;
   width: 101px;
-  height:33px;
+  height: 33px;
   text-align: left;
-  left:30px;
-  top:104px;
   margin-top: 20px;
   transition: background-color 0.2s;
-  gap:8px;
+  gap: 8px;
 }
+
 .side {
-  color:#4E5480;
+    color: #00b4c6;
+  text-decoration: none;
   font-size: 18px;
   width: 66px;
   height:33px;
