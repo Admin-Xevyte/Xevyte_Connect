@@ -5,9 +5,12 @@ import java.time.LocalDate;
 
 @Entity
 public class Sow {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sowId;
+
+    private String sowName; // ✅ New field added
 
     private LocalDate sowStartDate;
     private LocalDate sowEndDate;
@@ -18,22 +21,61 @@ public class Sow {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    // getters and setters
-    public Long getSowId() { return sowId; }
-    public void setSowId(Long sowId) { this.sowId = sowId; }
+    // Getters and Setters
 
-    public LocalDate getSowStartDate() { return sowStartDate; }
-    public void setSowStartDate(LocalDate sowStartDate) { this.sowStartDate = sowStartDate; }
+    public Long getSowId() {
+        return sowId;
+    }
 
-    public LocalDate getSowEndDate() { return sowEndDate; }
-    public void setSowEndDate(LocalDate sowEndDate) { this.sowEndDate = sowEndDate; }
+    public void setSowId(Long sowId) {
+        this.sowId = sowId;
+    }
 
-    public int getTotalEffort() { return totalEffort; }
-    public void setTotalEffort(int totalEffort) { this.totalEffort = totalEffort; }
+    public String getSowName() {
+        return sowName;
+    }
 
-    public double getTotalCost() { return totalCost; }
-    public void setTotalCost(double totalCost) { this.totalCost = totalCost; }
+    public void setSowName(String sowName) {
+        this.sowName = sowName;
+    }
 
-    public Customer getCustomer() { return customer; }
-    public void setCustomer(Customer customer) { this.customer = customer; }
+    public LocalDate getSowStartDate() {
+        return sowStartDate;
+    }
+
+    public void setSowStartDate(LocalDate sowStartDate) {
+        this.sowStartDate = sowStartDate;
+    }
+
+    public LocalDate getSowEndDate() {
+        return sowEndDate;
+    }
+
+    public void setSowEndDate(LocalDate sowEndDate) {
+        this.sowEndDate = sowEndDate;
+    }
+
+    public int getTotalEffort() {
+        return totalEffort;
+    }
+
+    public void setTotalEffort(int totalEffort) {
+        this.totalEffort = totalEffort;
+    }
+
+    public double getTotalCost() {
+        return totalCost;
+    }
+
+    public void setTotalCost(double totalCost) {
+        this.totalCost = totalCost;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
 }
