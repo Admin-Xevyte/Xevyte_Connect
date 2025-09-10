@@ -238,13 +238,13 @@ const toggleContractMenu = () => {
                             to="/customers"
                             style={{
                               textDecoration: 'none',
-                              color: 'rgba(255, 255, 255, 0.7)',
-                              fontSize: '18px',
+                                color:'rgba(255, 255, 255, 0.7)',
+                              fontSize: '16px',
                               display: 'block',
                               padding: '4px 0',
                             }}
                             onMouseOver={(e) => (e.target.style.color = '#fff')}
-                            onMouseOut={(e) => (e.target.style.color = 'rgba(255, 255, 255, 0.7)')}
+                            onMouseOut={(e) => (e.target.style.color ='rgba(255, 255, 255, 0.7)')}
                           >
                             Customers
                           </Link>
@@ -254,8 +254,8 @@ const toggleContractMenu = () => {
                             to="/sows"
                             style={{
                               textDecoration: 'none',
-                              color: 'rgba(255, 255, 255, 0.7)',
-                              fontSize: '18px',
+                              color:'rgba(255, 255, 255, 0.7)',
+                              fontSize: '16px',
                               display: 'block',
                               padding: '4px 0',
                             }}
@@ -270,8 +270,8 @@ const toggleContractMenu = () => {
                             to="/projects"
                             style={{
                               textDecoration: 'none',
-                              color: 'rgba(255, 255, 255, 0.7)',
-                              fontSize: '18px',
+                             color:'rgba(255, 255, 255, 0.7)',
+                              fontSize: '16px',
                               display: 'block',
                               padding: '4px 0',
                             }}
@@ -286,13 +286,13 @@ const toggleContractMenu = () => {
                             to="/allocation"
                             style={{
                               textDecoration: 'none',
-                              color: 'rgba(255, 255, 255, 0.7)',
-                              fontSize: '18px',
+                             color:'white',
+                              fontSize: '16px',
                               display: 'block',
                               padding: '4px 0',
                             }}
                             onMouseOver={(e) => (e.target.style.color = '#fff')}
-                            onMouseOut={(e) => (e.target.style.color = 'rgba(255, 255, 255, 0.7)')}
+                            onMouseOut={(e) => (e.target.style.color = 'white')}
                           >
                             Allocation
                           </Link>
