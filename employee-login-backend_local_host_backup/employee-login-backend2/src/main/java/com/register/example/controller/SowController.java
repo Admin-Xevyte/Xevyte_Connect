@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/sows")
-
 public class SowController {
 
     @Autowired
@@ -21,13 +20,13 @@ public class SowController {
     @Autowired
     private CustomerRepository customerRepository;
 
-    // Get all SOWs by Customer ID
+    // ✅ Get all SOWs by Customer ID
     @GetMapping("/customer/{customerId}")
     public List<Sow> getSowsByCustomer(@PathVariable Long customerId) {
         return sowRepository.findByCustomerCustomerId(customerId);
     }
 
-    // Add new SOW using DTO
+    // ✅ Add new SOW using DTO
     @PostMapping
     public Sow createSow(@RequestBody SowCreateRequest sowRequest) {
         if (sowRequest.getCustomerId() == null) {
@@ -35,9 +34,10 @@ public class SowController {
         }
 
         Customer customer = customerRepository.findById(sowRequest.getCustomerId())
-            .orElseThrow(() -> new RuntimeException("Customer not found with id: " + sowRequest.getCustomerId()));
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + sowRequest.getCustomerId()));
 
         Sow sow = new Sow();
+        sow.setSowName(sowRequest.getSowName()); // ✅ Set SOW name
         sow.setSowStartDate(sowRequest.getSowStartDate());
         sow.setSowEndDate(sowRequest.getSowEndDate());
         sow.setTotalEffort(sowRequest.getTotalEffort());
@@ -46,4 +46,9 @@ public class SowController {
 
         return sowRepository.save(sow);
     }
+    @GetMapping
+    public List<Sow> getAllSows() {
+        return sowRepository.findAll();
+    }
+
 }
