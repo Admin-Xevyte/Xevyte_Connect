@@ -37,6 +37,7 @@ public class ProjectController {
 
         Project project = new Project();
         project.setSow(sow);
+        project.setProjectName(request.getProjectName());  // NEW
         project.setProjectStartDate(request.getProjectStartDate());
         project.setProjectEndDate(request.getProjectEndDate());
         project.setTotalEffort(request.getTotalEffort());
@@ -44,8 +45,8 @@ public class ProjectController {
         project.setManager(request.getManager());
         project.setReviewer(request.getReviewer());
         project.setHr(request.getHr());
-        project.setFinance(request.getFinance()); // new field
-        project.setAdmin(request.getAdmin());   // new field
+        project.setFinance(request.getFinance());
+        project.setAdmin(request.getAdmin());
 
         return projectRepository.save(project);
     }
@@ -71,4 +72,9 @@ public class ProjectController {
             super(message);
         }
     }
+    @GetMapping
+    public List<Project> getAllProjects() {
+        return projectRepository.findAll();
+    }
+
 }
