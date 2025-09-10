@@ -523,13 +523,13 @@ const filteredCustomers = customers.filter(customer => {
                               to="/customers"
                               style={{
                                 textDecoration: 'none',
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '18px',
+                                color: 'white',
+                                fontSize: '16px',
                                 display: 'block',
                                 padding: '4px 0',
                               }}
-                              onMouseOver={(e) => (e.target.style.color = '#fff')}
-                              onMouseOut={(e) => (e.target.style.color = 'rgba(255, 255, 255, 0.7)')}
+                              onMouseOver={(e) => (e.target.style.color = 'white')}
+                              onMouseOut={(e) => (e.target.style.color = 'white')}
                             >
                               Customers
                             </Link>
@@ -539,8 +539,8 @@ const filteredCustomers = customers.filter(customer => {
                               to="/sows"
                               style={{
                                 textDecoration: 'none',
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '18px',
+                              color:'rgba(255, 255, 255, 0.7)',
+                                fontSize: '16px',
                                 display: 'block',
                                 padding: '4px 0',
                               }}
@@ -555,8 +555,8 @@ const filteredCustomers = customers.filter(customer => {
                               to="/projects"
                               style={{
                                 textDecoration: 'none',
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '18px',
+                           color:'rgba(255, 255, 255, 0.7)',
+                                fontSize: '16px',
                                 display: 'block',
                                 padding: '4px 0',
                               }}
@@ -571,8 +571,8 @@ const filteredCustomers = customers.filter(customer => {
                               to="/allocation"
                               style={{
                                 textDecoration: 'none',
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: '18px',
+                           color:'rgba(255, 255, 255, 0.7)',
+                                fontSize: '16px',
                                 display: 'block',
                                 padding: '4px 0',
                               }}
