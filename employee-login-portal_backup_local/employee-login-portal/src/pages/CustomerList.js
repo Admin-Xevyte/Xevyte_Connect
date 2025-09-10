@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
-
+const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
 // A new component for the modal form
 const ModalForm = ({ onClose, onSubmit }) => {
   const [customerName, setCustomerName] = useState("");
@@ -334,6 +334,11 @@ function CustomerList() {
     const fileInputRef = useRef(null);
     const profileDropdownRef = useRef(null);
     const navigate = useNavigate();
+ const [isContractOpen, setIsContractOpen] = useState(false);
+
+const toggleContractMenu = () => {
+  setIsContractOpen(!isContractOpen);
+};
 
     useEffect(() => {
         fetchCustomers();
