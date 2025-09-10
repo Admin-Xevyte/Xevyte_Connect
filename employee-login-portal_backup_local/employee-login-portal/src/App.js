@@ -133,7 +133,7 @@ function App() {
   
 <Route path="/customers" element={<CustomerList />} /> 
 <Route path="/sows" element={<SowPage />} />
-  <Route path="/allocations" element={<AllocationPage />} />
+  <Route path="/allocation" element={<AllocationPage />} />
 
 
  
