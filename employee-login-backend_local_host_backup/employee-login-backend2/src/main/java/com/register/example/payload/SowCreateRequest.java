@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class SowCreateRequest {
 
+    private String sowName; // ✅ New field added
     private LocalDate sowStartDate;
     private LocalDate sowEndDate;
     private int totalEffort;   // in PD (Person Days)
@@ -11,6 +12,15 @@ public class SowCreateRequest {
     private Long customerId;
 
     // Getters and Setters
+
+    public String getSowName() {
+        return sowName;
+    }
+
+    public void setSowName(String sowName) {
+        this.sowName = sowName;
+    }
+
     public LocalDate getSowStartDate() {
         return sowStartDate;
     }
