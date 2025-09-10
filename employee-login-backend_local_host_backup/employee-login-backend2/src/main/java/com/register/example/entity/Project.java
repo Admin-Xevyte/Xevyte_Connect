@@ -12,6 +12,8 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long projectId;
 
+    private String projectName;  // NEW FIELD
+
     private LocalDate projectStartDate;
 
     private LocalDate projectEndDate;
@@ -25,9 +27,9 @@ public class Project {
     private String reviewer;
 
     private String hr;
-    
+
     private String finance; // new field
-    
+
     private String admin;   // new field
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,6 +45,14 @@ public class Project {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    public String getProjectName() {   // NEW
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {  // NEW
+        this.projectName = projectName;
     }
 
     public LocalDate getProjectStartDate() {
@@ -100,8 +110,7 @@ public class Project {
     public void setHr(String hr) {
         this.hr = hr;
     }
-    
-    // new getters and setters
+
     public String getFinance() {
         return finance;
     }
