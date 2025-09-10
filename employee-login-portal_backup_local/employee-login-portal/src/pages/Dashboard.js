@@ -189,7 +189,7 @@ const toggleContractMenu = () => {
                        to="/customers"
                        style={{
                          textDecoration: 'none',
-                         color: 'rgba(255, 255, 255, 0.7)',
+                        color:'rgba(255, 255, 255, 0.7)',
                          fontSize: '16px',
                          display: 'block',
                          padding: '4px 0',
@@ -205,7 +205,7 @@ const toggleContractMenu = () => {
                        to="/sows"
                        style={{
                          textDecoration: 'none',
-                         color: 'rgba(255, 255, 255, 0.7)',
+                        color:'rgba(255, 255, 255, 0.7)',
                          fontSize: '16px',
                          display: 'block',
                          padding: '4px 0',
@@ -221,7 +221,7 @@ const toggleContractMenu = () => {
                        to="/projects"
                        style={{
                          textDecoration: 'none',
-                         color: 'rgba(255, 255, 255, 0.7)',
+                        color:'rgba(255, 255, 255, 0.7)',
                          fontSize: '16px',
                          display: 'block',
                          padding: '4px 0',
@@ -237,7 +237,7 @@ const toggleContractMenu = () => {
                        to="/allocation"
                        style={{
                          textDecoration: 'none',
-                         color: 'rgba(255, 255, 255, 0.7)',
+                        color:'rgba(255, 255, 255, 0.7)',
                          fontSize: '16px',
                          display: 'block',
                          padding: '4px 0',
