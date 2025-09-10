@@ -98,7 +98,7 @@ public class AuthController {
         PasswordResetToken resetToken = new PasswordResetToken(token, employeeId, expiry);
         tokenRepository.save(resetToken);
 
-        String resetLink = "http://localhost:3000/reset-password?token=" + token;
+        String resetLink = "/reset-password?token=" + token;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
