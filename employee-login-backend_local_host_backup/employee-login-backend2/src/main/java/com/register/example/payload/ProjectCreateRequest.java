@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class ProjectCreateRequest {
     private Long sowId;
+    private String projectName;   // NEW
     private LocalDate projectStartDate;
     private LocalDate projectEndDate;
     private Double totalEffort;
@@ -17,6 +18,14 @@ public class ProjectCreateRequest {
     // Getters and setters
     public Long getSowId() { return sowId; }
     public void setSowId(Long sowId) { this.sowId = sowId; }
+
+    public String getProjectName() {   // NEW
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {  // NEW
+        this.projectName = projectName;
+    }
 
     public LocalDate getProjectStartDate() { return projectStartDate; }
     public void setProjectStartDate(LocalDate projectStartDate) { this.projectStartDate = projectStartDate; }
