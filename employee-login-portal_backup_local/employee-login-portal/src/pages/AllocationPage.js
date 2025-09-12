@@ -20,6 +20,7 @@ const ProjectAllocationsDashboard = () => {
   const [isContractOpen, setIsContractOpen] = useState(false);
 const [validationErrors, setValidationErrors] = React.useState({});
 const [allocationErrors, setAllocationErrors] = React.useState([]);
+
 const toggleContractMenu = () => {
   setIsContractOpen(!isContractOpen);
 };
@@ -36,6 +37,7 @@ const formatDate = (dateStr) => {
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [allocations, setAllocations] = useState([]);
+  const selectedProject = projects.find(p => p.projectId === Number(selectedProjectId));
   const [formData, setFormData] = useState({
   employeeIds: "", // comma-separated input from user
   startDate: "",
@@ -548,11 +550,7 @@ const handleAddAllocation = (e) => {
           {/* Allocations Table */}
        <div>
   <h3 style={{ marginTop: 0 }}>Allocations</h3>
-  {successMessage && (
-  <div style={{ color: "green", fontWeight: "bold", marginBottom: 12 }}>
-    {successMessage}
-  </div>
-)}
+
 
   {loadingAllocations ? (
     <p>Loading allocations...</p>
@@ -729,38 +727,42 @@ const handleAddAllocation = (e) => {
 
       <label style={{ fontWeight: "bold" }}>
         Start Date:
-        <input
-          type="date"
-          name="startDate"
-          value={formData.startDate}
-          onChange={handleInputChange}
-          style={{
-            width: "100%",
-            padding: 8,
-            marginTop: 4,
-            borderRadius: 4,
-            border: "1px solid #ccc",
-          }}
-          required
-        />
+      <input
+  type="date"
+  name="startDate"
+  value={formData.startDate}
+  onChange={handleInputChange}
+  min={selectedProject?.projectStartDate}  // 👈 set min
+  max={selectedProject?.projectEndDate}    // 👈 set max
+  required
+  style={{
+    width: "100%",
+    padding: 8,
+    marginTop: 4,
+    borderRadius: 4,
+    border: "1px solid #ccc",
+  }}
+/>
       </label>
 
       <label style={{ fontWeight: "bold" }}>
         End Date:
-        <input
-          type="date"
-          name="endDate"
-          value={formData.endDate}
-          onChange={handleInputChange}
-          style={{
-            width: "100%",
-            padding: 8,
-            marginTop: 4,
-            borderRadius: 4,
-            border: "1px solid #ccc",
-          }}
-          required
-        />
+       <input
+  type="date"
+  name="endDate"
+  value={formData.endDate}
+  onChange={handleInputChange}
+  min={selectedProject?.projectStartDate}
+  max={selectedProject?.projectEndDate}
+  required
+  style={{
+    width: "100%",
+    padding: 8,
+    marginTop: 4,
+    borderRadius: 4,
+    border: "1px solid #ccc",
+  }}
+/>
       </label>
 
  {error && (
