@@ -18,19 +18,30 @@ const ProjectAllocationsDashboard = () => {
   const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
   const navigate = useNavigate();
   const [isContractOpen, setIsContractOpen] = useState(false);
-
+const [validationErrors, setValidationErrors] = React.useState({});
+const [allocationErrors, setAllocationErrors] = React.useState([]);
 const toggleContractMenu = () => {
   setIsContractOpen(!isContractOpen);
 };
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  if (isNaN(date)) return ""; // Return empty if date is invalid
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
   // State for the AllocationManager functionality
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [allocations, setAllocations] = useState([]);
   const [formData, setFormData] = useState({
-    employeeId: "",
-    startDate: "",
-    endDate: "",
-  });
+  employeeIds: "", // comma-separated input from user
+  startDate: "",
+  endDate: "",
+});
+
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [loadingAllocations, setLoadingAllocations] = useState(false);
   const [error, setError] = useState(null);
@@ -153,36 +164,75 @@ const toggleContractMenu = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleAddAllocation = (e) => {
-    e.preventDefault();
-    if (!selectedProjectId) {
-      setError("Please select a project first");
-      return;
-    }
-    if (!formData.employeeId || !formData.startDate || !formData.endDate) {
-      setError("Please fill all allocation fields");
-      return;
-    }
+const handleAddAllocation = (e) => {
+  e.preventDefault();
 
-    const payload = {
-      projectId: Number(selectedProjectId),
-      employeeId: formData.employeeId,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
-    };
+  if (!selectedProjectId) {
+    setError("Please select a Project before Allocating.");
+    return;
+  }
 
-    axios
-      .post("/api/allocations", payload)
-      .then((res) => {
-        setAllocations((prev) => [...prev, res.data]);
-        setFormData({ employeeId: "", startDate: "", endDate: "" });
-        setError(null);
-        setIsModalOpen(false);
-      })
-      .catch((err) => {
-        setError(err.response?.data?.message || "Failed to add allocation");
-      });
+  const employeeIdList = formData.employeeIds
+    .split(",")
+    .map((id) => id.trim())
+    .filter((id) => id); // remove empty entries
+
+  if (employeeIdList.length === 0) {
+    setError("Please enter at least one valid Employee ID");
+    return;
+  }
+
+  // Find duplicates: IDs that are already allocated in this project
+  const alreadyAllocatedIds = employeeIdList.filter(id =>
+    allocations.some(alloc => alloc.employeeId === id)
+  );
+
+  if (alreadyAllocatedIds.length > 0) {
+    setError(
+      `The following Employee IDs are already allocated to this project: ${alreadyAllocatedIds.join(", ")}`
+    );
+    return; // stop submitting
+  }
+
+  const payload = {
+    projectId: Number(selectedProjectId),
+    employeeIds: employeeIdList,
+    startDate: formData.startDate,
+    endDate: formData.endDate,
   };
+
+  axios
+    .post("/api/allocations/bulk", payload)
+    .then((res) => {
+      const { successfulAllocations, failedEmployeeIds } = res.data;
+
+      if (failedEmployeeIds.length > 0) {
+        setError(
+          `Failed to allocate the following Employee IDs: ${failedEmployeeIds.join(", ")}`
+        );
+        setSuccessMessage(""); // clear success on failure
+      } else {
+        // All successful
+        setAllocations((prev) => [...prev, ...successfulAllocations]);
+        setFormData({ employeeIds: "", startDate: "", endDate: "" });
+        setError(null);
+        setSuccessMessage("Successfully allocated the employees to this project.");
+        setIsModalOpen(false);
+
+        // Optionally clear the success message after 3 seconds
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 3000);
+      }
+    })
+    .catch((err) => {
+      console.error("Bulk allocation error:", err);
+      setError("Something went wrong while allocating employees. Please try again.");
+      setSuccessMessage("");
+    });
+};
+
+
 
   return (
     <div className="dashboard-container">
@@ -239,7 +289,7 @@ const toggleContractMenu = () => {
                             style={{
                               textDecoration: 'none',
                                 color:'rgba(255, 255, 255, 0.7)',
-                              fontSize: '16px',
+                              fontSize: '14px',
                               display: 'block',
                               padding: '4px 0',
                             }}
@@ -255,7 +305,7 @@ const toggleContractMenu = () => {
                             style={{
                               textDecoration: 'none',
                               color:'rgba(255, 255, 255, 0.7)',
-                              fontSize: '16px',
+                              fontSize: '14px',
                               display: 'block',
                               padding: '4px 0',
                             }}
@@ -271,7 +321,7 @@ const toggleContractMenu = () => {
                             style={{
                               textDecoration: 'none',
                              color:'rgba(255, 255, 255, 0.7)',
-                              fontSize: '16px',
+                              fontSize: '14px',
                               display: 'block',
                               padding: '4px 0',
                             }}
@@ -287,7 +337,7 @@ const toggleContractMenu = () => {
                             style={{
                               textDecoration: 'none',
                              color:'white',
-                              fontSize: '16px',
+                              fontSize: '14px',
                               display: 'block',
                               padding: '4px 0',
                             }}
@@ -423,7 +473,14 @@ const toggleContractMenu = () => {
 
         {/* Project Allocations Content */}
         <div style={{ padding: '20px' }}>
-          <h2>Project Allocations</h2>
+  <h2>
+  <span style={{ fontWeight: 'bold' }}>Project: </span>
+  <span style={{ fontWeight: 'normal', fontSize: '0.9em' }}>
+    {projects.find(p => p.projectId === Number(selectedProjectId))?.projectName} {selectedProjectId && `(P${selectedProjectId})`}
+  </span>
+</h2>
+
+
 
           {/* Allocation controls aligned to the right, full-width */}
      <div
@@ -466,68 +523,128 @@ const toggleContractMenu = () => {
     )}
   </select>
 
-  <button
-    onClick={() => {
-      if (!selectedProjectId) {
-        setError("Please select a project first");
-        return;
-      }
-      setError(null);
-      setIsModalOpen(true);
-    }}
-    style={{
-      backgroundColor: "#28a745",
-      color: "white",
-      padding: "8px 16px",
-      border: "none",
-      borderRadius: 5,
-      cursor: "pointer",
-      fontWeight: "bold",
-    }}
-  >
-    Add New Allocation
-  </button>
+ <button
+  onClick={() => {
+    if (!selectedProjectId) {
+      alert("Please select a Project before allocating. ");
+      return;
+    }
+    setIsModalOpen(true);
+  }}
+  style={{
+    backgroundColor: "#28a745",
+    color: "white",
+    padding: "8px 16px",
+    border: "none",
+    borderRadius: 5,
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  Add New Allocation
+</button>
+
 </div>
           {/* Allocations Table */}
-          <div>
-            <h3 style={{ marginTop: 0 }}>Allocations</h3>
-            {loadingAllocations ? (
-              <p>Loading allocations...</p>
-            ) : allocations.length === 0 ? (
-              <p>No allocations found for this project.</p>
-            ) : (
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  marginTop: 10,
-                }}
-              >
-                <thead style={{ backgroundColor: '#f0f0f0' }}>
-                  <tr>
-                    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>
-                      Employee ID
-                    </th>
-                    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>
-                      Start Date
-                    </th>
-                    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>
-                      End Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allocations.map((alloc, index) => (
-                    <tr key={alloc.allocationId || index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f9f9f9' }}>
-                      <td style={{ borderBottom: "1px solid #eee", padding: 12 }}>{alloc.employeeId}</td>
-                      <td style={{ borderBottom: "1px solid #eee", padding: 12 }}>{alloc.startDate}</td>
-                      <td style={{ borderBottom: "1px solid #eee", padding: 12 }}>{alloc.endDate}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+       <div>
+  <h3 style={{ marginTop: 0 }}>Allocations</h3>
+  {successMessage && (
+  <div style={{ color: "green", fontWeight: "bold", marginBottom: 12 }}>
+    {successMessage}
+  </div>
+)}
+
+  {loadingAllocations ? (
+    <p>Loading allocations...</p>
+  ) : allocations.length === 0 ? (
+    <p>No allocations found for this project.</p>
+  ) : (
+    <div
+    style={{
+  maxHeight: "calc(100vh - 300px)",
+  overflowY: "scroll",        // keep scrolling, use scroll for consistent behavior
+  border: "1px solid #ccc",
+  borderRadius: 4,
+  scrollbarWidth: "none",      // Firefox
+  msOverflowStyle: "none",     // IE and Edge
+}}
+
+    >
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+        }}
+      >
+        <thead>
+          <tr>
+            <th
+              style={{
+                position: "sticky",
+                top: 0,
+                backgroundColor: "#2c3e50",
+                color: "white",
+                padding: "10px",
+                textAlign: "left",
+                zIndex: 1,
+              }}
+            >
+              Employee ID
+            </th>
+            <th
+              style={{
+                position: "sticky",
+                top: 0,
+                backgroundColor: "#2c3e50",
+                color: "white",
+                padding: "10px",
+                textAlign: "left",
+                zIndex: 1,
+              }}
+            >
+              Start Date
+            </th>
+            <th
+              style={{
+                position: "sticky",
+                top: 0,
+                backgroundColor: "#2c3e50",
+                color: "white",
+                padding: "10px",
+                textAlign: "left",
+                zIndex: 1,
+              }}
+            >
+              End Date
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {allocations.map((alloc, index) => (
+            <tr
+              key={alloc.allocationId || index}
+              style={{
+                backgroundColor: index % 2 === 0 ? "#fff" : "#f9f9f9",
+              }}
+            >
+              <td style={{ borderBottom: "1px solid #eee", padding: 12 }}>
+                {alloc.employeeId}
+              </td>
+            <td style={{ borderBottom: "1px solid #eee", padding: 12 }}>
+  {formatDate(alloc.startDate)}
+</td>
+<td style={{ borderBottom: "1px solid #eee", padding: 12 }}>
+  {formatDate(alloc.endDate)}
+</td>
+
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
         </div>
 
         {/* Modal for Add Allocation */}
@@ -560,97 +677,174 @@ const toggleContractMenu = () => {
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 15 }}>
                 <h3 style={{ margin: 0 }}>Add New Allocation</h3>
                 <button
-                  onClick={() => setIsModalOpen(false)}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    fontSize: 20,
-                    color:"black",
-                    cursor: "pointer",
-                  }}
-                  aria-label="Close modal"
-                >
-                  &times;
-                </button>
+  onClick={() => {
+    setFormData({
+      employeeIds: "",
+      startDate: "",
+      endDate: "",
+    });
+    setError(""); // Optional
+    setIsModalOpen(false);
+  }}
+  style={{
+    border: "none",
+    background: "transparent",
+    fontSize: 20,
+    color: "black",
+    cursor: "pointer",
+  }}
+  aria-label="Close modal"
+>
+  &times;
+</button>
               </div>
+ <form
+      onSubmit={handleAddAllocation}
+      style={{ display: "flex", flexDirection: "column", gap: 12 }}
+    >
+      <label style={{ fontWeight: "bold" }}>Employee ID:</label>
+      <textarea
+  name="employeeIds"
+  value={formData.employeeIds}
+  onChange={handleInputChange}
+  placeholder="e.g., H100111, H100222, H100333"
+  style={{
+    maxWidth: 400,
+    padding: 8,
+    marginTop: 4,
+    borderRadius: 4,
+    border: "1px solid #ccc",
+    resize: "vertical",
+    maxHeight: 150,
+    overflowY: "scroll",
+    scrollbarWidth: "none",        // Firefox
+    msOverflowStyle: "none",       // IE 10+
+  }}
+  rows={4}
+/>
 
-              {error && (
-                <p style={{ color: "red", marginBottom: 10, fontWeight: "bold" }}>{error}</p>
-              )}
 
-              <form
-                onSubmit={handleAddAllocation}
-                style={{ display: "flex", flexDirection: "column", gap: 12 }}
-              >
-                <label style={{ fontWeight: "bold" }}>
-                  Employee ID:
-                  <input
-                    type="text"
-                    name="employeeId"
-                    value={formData.employeeId}
-                    onChange={handleInputChange}
-                    placeholder="e.g., E101"
-                    style={{ width: "100%", padding: 8, marginTop: 4, borderRadius: 4, border: "1px solid #ccc" }}
-                    required
-                  />
-                </label>
+      {/* Error message */}
+   
 
-                <label style={{ fontWeight: "bold" }}>
-                  Start Date:
-                  <input
-                    type="date"
-                    name="startDate"
-                    value={formData.startDate}
-                    onChange={handleInputChange}
-                    style={{ width: "100%", padding: 8, marginTop: 4, borderRadius: 4, border: "1px solid #ccc" }}
-                    required
-                  />
-                </label>
+      <label style={{ fontWeight: "bold" }}>
+        Start Date:
+        <input
+          type="date"
+          name="startDate"
+          value={formData.startDate}
+          onChange={handleInputChange}
+          style={{
+            width: "100%",
+            padding: 8,
+            marginTop: 4,
+            borderRadius: 4,
+            border: "1px solid #ccc",
+          }}
+          required
+        />
+      </label>
 
-                <label style={{ fontWeight: "bold" }}>
-                  End Date:
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={formData.endDate}
-                    onChange={handleInputChange}
-                    style={{ width: "100%", padding: 8, marginTop: 4, borderRadius: 4, border: "1px solid #ccc" }}
-                    required
-                  />
-                </label>
+      <label style={{ fontWeight: "bold" }}>
+        End Date:
+        <input
+          type="date"
+          name="endDate"
+          value={formData.endDate}
+          onChange={handleInputChange}
+          style={{
+            width: "100%",
+            padding: 8,
+            marginTop: 4,
+            borderRadius: 4,
+            border: "1px solid #ccc",
+          }}
+          required
+        />
+      </label>
 
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 10 }}>
-                  <button
-                    type="submit"
-                    style={{
-                      backgroundColor: "#007bff",
-                      color: "white",
-                      padding: "8px 16px",
-                      borderRadius: 5,
-                      border: "none",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Submit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    style={{
-                      backgroundColor: "#6c757d",
-                      color: "white",
-                      padding: "8px 16px",
-                      borderRadius: 5,
-                      border: "none",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
+ {error && (
+  <div
+    style={{
+      color: "red",
+      marginTop: 8,
+      fontWeight: "bold",
+      maxWidth: 400,
+      wordBreak: "break-word",
+      whiteSpace: "normal",
+      maxHeight: 100,
+      overflowY: "auto",
+      border: "1px solid red",
+      padding: 8,
+      borderRadius: 4,
+      backgroundColor: "#ffe6e6",
+
+      /* === Hide scrollbar completely === */
+      scrollbarWidth: "none",          // Firefox
+      msOverflowStyle: "none",         // IE/Edge
+
+      // Chrome, Safari, Edge (WebKit)
+      WebkitOverflowScrolling: "touch", // Optional smooth scrolling
+    }}
+  >
+    <div
+      style={{
+        overflow: "hidden",
+      }}
+    >
+      {error}
+    </div>
+  </div>
+)}
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: 10,
+          marginTop: 10,
+        }}
+      >
+        <button
+          type="submit"
+          style={{
+            backgroundColor: "#007bff",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: 5,
+            border: "none",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          Submit
+        </button>
+        <button
+  type="button"
+  onClick={() => {
+    setFormData({
+      employeeIds: "",
+      startDate: "",
+      endDate: "",
+    });
+    setError(""); // Optional: clear error messages
+    setIsModalOpen(false); // Close the modal
+  }}
+  style={{
+    backgroundColor: "#6c757d",
+    color: "white",
+    padding: "8px 16px",
+    borderRadius: 5,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  Cancel
+</button>
+
+      </div>
+    </form>
             </div>
           </div>
         )}
