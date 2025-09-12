@@ -4,7 +4,7 @@ import './Dashboard.css';
 import image1 from '../assets/Xevytegrppic.jpg';
 import image2 from '../assets/IMG_3104.JPG';
 import image3 from '../assets/Media.jpeg';
-import image4 from '../assets/imagei.png';
+import image4 from '../assets/IMG_6102 - Copy.JPG';
 import image5 from '../assets/1C1A7036.JPG';
 import image6 from '../assets/imaged.png';
 
