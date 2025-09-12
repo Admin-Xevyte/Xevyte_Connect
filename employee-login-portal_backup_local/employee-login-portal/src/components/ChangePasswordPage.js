@@ -20,55 +20,62 @@ function ChangePasswordPage() {
     }
   }, []);
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
+const handleChangePassword = async (e) => {
+  e.preventDefault();
+  setError("");
+  setMessage("");
 
-    if (!newPassword || !confirmPassword) {
-      setError("❌ Please fill in all fields.");
-      return;
+  if (!newPassword || !confirmPassword) {
+    setError("❌ Please fill in all fields.");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setError("❌ Passwords do not match.");
+    return;
+  }
+
+  const passwordPattern =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+  if (!passwordPattern.test(newPassword)) {
+    setError(
+      "Password must be at least 8 characters, include uppercase, lowercase, number, and special character."
+    );
+    return;
+  }
+
+  if (!employeeId) {
+    setError("Employee ID is missing. Please login again.");
+    return;
+  }
+
+  try {
+    const res = await axios.post("/api/auth/change-password", {
+      employeeId,
+      newPassword,
+    });
+
+    if (res.data.message === "Password changed successfully") {
+      setMessage("✅ Password changed successfully! Redirecting to LoginPage...");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } else {
+      setError("❌ " + res.data.message);
     }
-
-    if (newPassword !== confirmPassword) {
-      setError("❌ Passwords do not match.");
-      return;
+  } catch (err) {
+    const serverMsg = err.response?.data?.message;
+    if (
+      serverMsg ===
+      "Your new password cannot be the same as your previous password. Please choose a different one."
+    ) {
+      setError(" Please choose a new Password.");
+    } else {
+      setError(serverMsg || "❌ Server error. Please try again.");
     }
+  }
+};
 
-    const passwordPattern =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
-    if (!passwordPattern.test(newPassword)) {
-      setError(
-        "Password must be at least 8 characters, include uppercase, lowercase, number, and special character."
-      );
-      return;
-    }
-
-    if (!employeeId) {
-      setError("Employee ID is missing. Please login again.");
-      return;
-    }
-
-    try {
-      const res = await axios.post(
-        "/api/auth/change-password",
-        { employeeId, newPassword }
-      );
-
-      if (res.data.message === "Password changed successfully") {
-        setMessage("✅ Password changed successfully! Redirecting to LoginPage...");
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      } else {
-        setError("❌ " + res.data.message);
-      }
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "❌ Server error. Please try again."
-      );
-    }
-  };
 
   return (
     <div className="reset-page">
