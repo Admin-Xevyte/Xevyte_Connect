@@ -7,6 +7,7 @@ function SowsAndProjects() {
   const [selectedSowId, setSelectedSowId] = useState(null);
   const [projects, setProjects] = useState([]);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  
   const [projectFormData, setProjectFormData] = useState({
     projectName: "",
     projectStartDate: "",
@@ -19,6 +20,26 @@ function SowsAndProjects() {
     finance: "",
     admin: "",
   });
+const resetForm = () => {
+  setProjectFormData({
+    projectName: '',
+    projectStartDate: '',
+    projectEndDate: '',
+    totalEffort: '',
+    totalCost: '',
+    manager: '',
+    reviewer: '',
+    hr: '',
+    finance: '',
+    admin: '',
+  });
+};
+
+
+const handleCloseModal = () => {
+  resetForm();
+  setShowProjectForm(false);
+};
 
   const employeeId = localStorage.getItem("employeeId");
   const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
@@ -184,6 +205,14 @@ const toggleContractMenu = () => {
       alert("Error uploading profile picture. See console for details.");
     }
   };
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  if (isNaN(date)) return ""; // handle invalid date
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
 
 
   return (
@@ -235,13 +264,13 @@ const toggleContractMenu = () => {
                
                    {isContractOpen && (
                      <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                       <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                       <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                          <Link
                            to="/customers"
                            style={{
                              textDecoration: 'none',
                          color:'rgba(255, 255, 255, 0.7)',
-                             fontSize: '18px',
+                             fontSize: '14px',
                              display: 'block',
                              padding: '4px 0',
                            }}
@@ -251,13 +280,13 @@ const toggleContractMenu = () => {
                            Customers
                          </Link>
                        </li>
-                       <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                       <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                          <Link
                            to="/sows"
                            style={{
                              textDecoration: 'none',
                                color:'rgba(255, 255, 255, 0.7)',
-                             fontSize: '18px',
+                             fontSize: '14px',
                              display: 'block',
                              padding: '4px 0',
                            }}
@@ -267,13 +296,13 @@ const toggleContractMenu = () => {
                            SOWs
                          </Link>
                        </li>
-                       <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                       <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                          <Link
                            to="/projects"
                            style={{
                              textDecoration: 'none',
                             color:'white',
-                             fontSize: '18px',
+                             fontSize: '14px',
                              display: 'block',
                              padding: '4px 0',
                            }}
@@ -283,13 +312,13 @@ const toggleContractMenu = () => {
                            Projects
                          </Link>
                        </li>
-                       <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                       <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                          <Link
                            to="/allocation"
                            style={{
                              textDecoration: 'none',
                           color:'rgba(255, 255, 255, 0.7)',
-                             fontSize: '18px',
+                             fontSize: '14px',
                              display: 'block',
                              padding: '4px 0',
                            }}
@@ -427,6 +456,16 @@ const toggleContractMenu = () => {
 
         {/* Content from SowsAndProjects */}
         <div style={{ padding: "20px", backgroundColor: "#f7f8fa" }}>
+
+    <h2>
+  <span style={{ fontWeight: 'bold' }}>SOW:</span>{' '}
+  {selectedSowId && (
+    <span style={{ fontWeight: 'normal', fontSize: '0.9em'}}>
+      {sows.find((sow) => sow.sowId.toString() === selectedSowId.toString())?.sowName} (SOW{selectedSowId})
+    </span>
+  )}
+</h2>
+
 <div style={{ 
   marginBottom: "15px", 
   display: "flex", 
@@ -462,7 +501,7 @@ const toggleContractMenu = () => {
       boxSizing: "border-box"
     }}
   >
-    <option value="">Select a SOW</option>
+        <option value="">-- Select a sow --</option>
     {sows.map((sow) => (
       <option key={sow.sowId} value={sow.sowId}>
         {sow.sowName}
@@ -504,71 +543,84 @@ const toggleContractMenu = () => {
             {projects.length === 0 ? (
               <p>No projects found for this SOW.</p>
             ) : (
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  backgroundColor: "white",
-                  marginTop: 10,
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                }}
-              >
-             <thead>
-  <tr>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Project ID</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Project Name</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Start Date</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>End Date</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Total Effort (PD)</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Total Cost</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Manager</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Reviewer</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>HR</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Finance</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Admin</th>
+              <div
+  style={{
+    maxHeight: "calc(100vh - 300px)",
+    overflowY: "scroll",
+    border: "1px solid #ccc",
+    borderRadius: 4,
+    backgroundColor: "white",
+    scrollbarWidth: "none", // Firefox
+    msOverflowStyle: "none", // IE and Edge
+  }}
+>
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+      backgroundColor: "white",
+      marginTop: 0,
+      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+    }}
+  >
+    <thead>
+      <tr>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Project ID</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Project Name</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Start Date</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>End Date</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Total Effort (PD)</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Total Cost</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Manager</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Reviewer</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>HR</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Finance</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: 10, textAlign: 'left', border: '1px solid #ddd' }}>Admin</th>
+      </tr>
+    </thead>
 
-  </tr>
-</thead>
-
-                <tbody>
-                  {projects.map((project) => (
-                    <tr key={project.projectId}>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.projectId}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd" }}>{project.projectName}</td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.projectStartDate}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.projectEndDate}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.totalEffort}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.totalCost}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.manager}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.reviewer}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.hr}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.finance}
-                      </td>
-                      <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
-                        {project.admin}
-                      </td>
-             
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+    <tbody>
+      {projects
+        .slice()
+        .sort((a, b) => b.projectId - a.projectId) // 👈 newest projects first
+        .map((project) => (
+          <tr key={project.projectId}>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {`P${project.projectId}`}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd" }}>{project.projectName}</td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {formatDate(project.projectStartDate)}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {formatDate(project.projectEndDate)}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {project.totalEffort}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {project.totalCost}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {project.manager}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {project.reviewer}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {project.hr}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {project.finance}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {project.admin}
+            </td>
+          </tr>
+        ))}
+    </tbody>
+  </table>
+</div>
             )}
           </div>
 
@@ -589,169 +641,216 @@ const toggleContractMenu = () => {
               }}
               onClick={() => setShowProjectForm(false)}
             >
-              <form
-                onClick={(e) => e.stopPropagation()}
-                onSubmit={handleSubmit}
-                style={{
-                  backgroundColor: "white",
-                  padding: "25px 30px",
-                  borderRadius: 8,
-                  minWidth: 400,
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
-                }}
-              >
-                <h3>Add New Project</h3>
 
-                <label>
-                  Project Name *
-                  <input
-                    required
-                    name="projectName"
-                    value={projectFormData.projectName}
-                    onChange={handleInputChange}
-                    type="text"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
+            
+<form
+  onClick={(e) => e.stopPropagation()}
+  onSubmit={handleSubmit}
+  style={{
+    backgroundColor: "white",
+    padding: "15px 20px",
+    borderRadius: 8,
+    maxWidth: 550,
+    boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
+    margin: "auto",
+    position: "relative", // Important for positioning the close button inside form
+  }}
+>
+  {/* Close button */}
+  <button
+  type="button"
+  onClick={() => {
+    resetForm();              // Clear form data
+    setShowProjectForm(false); // Close form
+  }}
+  style={{
+    position: "absolute",
+    top: 12,
+    right: 12,
+    border: "none",
+    background: "transparent",
+    fontSize: 20,
+    cursor: "pointer",
+    fontWeight: "bold",
+    color: "#333",
+    padding: 0,
+    lineHeight: 1,
+  }}
+  aria-label="Close form"
+>
+  ×
+</button>
 
-                <label>
-                  Start Date *
-                  <input
-                    required
-                    name="projectStartDate"
-                    value={projectFormData.projectStartDate}
-                    onChange={handleInputChange}
-                    type="date"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
+  <h3 style={{ marginBottom: 15 }}>Add New Project</h3>
 
-                <label>
-                  End Date *
-                  <input
-                    required
-                    name="projectEndDate"
-                    value={projectFormData.projectEndDate}
-                    onChange={handleInputChange}
-                    type="date"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
 
-                <label>
-                  Total Effort *
-                  <input
-                    required
-                    name="totalEffort"
-                    value={projectFormData.totalEffort}
-                    onChange={handleInputChange}
-                    type="number"
-                    min={0}
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
 
-                <label>
-                  Total Cost *
-                  <input
-                    required
-                    name="totalCost"
-                    value={projectFormData.totalCost}
-                    onChange={handleInputChange}
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
+  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px 20px" }}>
+    <label style={{ flex: "1 1 40%", minWidth: 400 }}>
+      Project Name *
+      <input
+        required
+        name="projectName"
+        value={projectFormData.projectName}
+        onChange={handleInputChange}
+        type="text"
+        style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+      />
+    </label>
 
-                <label>
-                  Manager
-                  <input
-                    name="manager"
-                    value={projectFormData.manager}
-                    onChange={handleInputChange}
-                    type="text"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
+    <label style={{ flex: "1 1 40%", minWidth: 200 }}>
+      Start Date *
+      <input
+        required
+        name="projectStartDate"
+        value={projectFormData.projectStartDate}
+        onChange={handleInputChange}
+        type="date"
+        style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+      />
+    </label>
 
-                <label>
-                  Reviewer
-                  <input
-                    name="reviewer"
-                    value={projectFormData.reviewer}
-                    onChange={handleInputChange}
-                    type="text"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
+    <label style={{ flex: "1 1 40%", minWidth: 200 }}>
+      End Date *
+      <input
+        required
+        name="projectEndDate"
+        value={projectFormData.projectEndDate}
+        onChange={handleInputChange}
+        type="date"
+        style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+      />
+    </label>
 
-                <label>
-                  HR
-                  <input
-                    name="hr"
-                    value={projectFormData.hr}
-                    onChange={handleInputChange}
-                    type="text"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
+     <label style={{ flex: "1 1 40%", minWidth: 200 }}>
+      Total Cost *
+      <input
+        required
+        name="totalCost"
+        value={projectFormData.totalCost}
+        onChange={handleInputChange}
+        type="number"
+        min={0}
+        step="0.01"
+        style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+      />
+    </label>
 
-                <label>
-                  Finance
-                  <input
-                    name="finance"
-                    value={projectFormData.finance}
-                    onChange={handleInputChange}
-                    type="text"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
+    <label style={{ flex: "1 1 40%", minWidth: 200 }}>
+      Total Effort *
+      <input
+        required
+        name="totalEffort"
+        value={projectFormData.totalEffort}
+        onChange={handleInputChange}
+        type="number"
+        min={0}
+        style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+      />
+    </label>
 
-                <label>
-                  Admin
-                  <input
-                    name="admin"
-                    value={projectFormData.admin}
-                    onChange={handleInputChange}
-                    type="text"
-                    style={{ width: "100%", padding: 8, marginBottom: 10 }}
-                  />
-                </label>
+   
 
-                <div style={{ textAlign: "right" }}>
-                  <button
-                    type="submit"
-                    style={{
-                      backgroundColor: "#007bff",
-                      color: "white",
-                      border: "none",
-                      padding: "8px 15px",
-                      marginRight: 10,
-                      borderRadius: 4,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Submit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowProjectForm(false)}
-                    style={{
-                      backgroundColor: "#6c757d",
-                      color: "white",
-                      border: "none",
-                      padding: "8px 15px",
-                      borderRadius: 4,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+<label style={{ flex: "1 1 40%", minWidth: 200 }}>
+  Manager ID *
+  <input
+    required
+    name="manager"
+    value={projectFormData.manager}
+    onChange={handleInputChange}
+    type="text"
+    style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+  />
+</label>
+
+<label style={{ flex: "1 1 40%", minWidth: 200 }}>
+  Reviewer ID *
+  <input
+    required
+    name="reviewer"
+    value={projectFormData.reviewer}
+    onChange={handleInputChange}
+    type="text"
+    style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+  />
+</label>
+
+<label style={{ flex: "1 1 40%", minWidth: 200 }}>
+  HR ID *
+  <input
+    required
+    name="hr"
+    value={projectFormData.hr}
+    onChange={handleInputChange}
+    type="text"
+    style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+  />
+</label>
+
+<label style={{ flex: "1 1 40%", minWidth: 200 }}>
+  Finance ID *
+  <input
+    required
+    name="finance"
+    value={projectFormData.finance}
+    onChange={handleInputChange}
+    type="text"
+    style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+  />
+</label>
+
+<label style={{ flex: "1 1 40%", minWidth: 200 }}>
+  Admin ID *
+  <input
+    required
+    name="admin"
+    value={projectFormData.admin}
+    onChange={handleInputChange}
+    type="text"
+    style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+  />
+</label>
+
+  </div>
+
+  <div style={{ textAlign: "right", marginTop: 15 }}>
+    <button
+      type="submit"
+      style={{
+        backgroundColor: "#007bff",
+        color: "white",
+        border: "none",
+        padding: "6px 14px",
+        marginRight: 10,
+        borderRadius: 4,
+        cursor: "pointer",
+        fontSize: "0.9rem",
+      }}
+    >
+      Submit
+    </button>
+    <button
+type="button"
+  onClick={() => {
+    resetForm();              // Clear form data
+    setShowProjectForm(false); // Close form
+  }}
+      style={{
+        backgroundColor: "#6c757d",
+        color: "white",
+        border: "none",
+        padding: "6px 14px",
+        borderRadius: 4,
+        cursor: "pointer",
+        fontSize: "0.9rem",
+      }}
+    >
+      Cancel
+    </button>
+  </div>
+</form>
+
+         </div>
           )}
         </div>
       </div>
