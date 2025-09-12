@@ -6,7 +6,7 @@ import image2 from '../assets/IMG_3104.JPG';
 import image3 from '../assets/Media.jpeg';
 import image4 from '../assets/IMG_6102 - Copy.JPG';
 import image5 from '../assets/1C1A7036.JPG';
-import image6 from '../assets/imaged.png';
+import image6 from '../assets/WhatsApp Image 2025-08-16 at 8.56.05 PM.jpeg';
 
 function Dashboard() {
   const employeeId = localStorage.getItem("employeeId");
