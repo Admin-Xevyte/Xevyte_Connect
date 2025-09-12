@@ -76,7 +76,7 @@ const formatDate = (dateStr) => {
   // Fetch updated profile info
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://localhost:8082/profile/${employeeId}`)
+      fetch(`/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -129,7 +129,7 @@ const formatDate = (dateStr) => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://localhost:8082/profile/update/${employeeId}`, {
+      const res = await fetch(`/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
