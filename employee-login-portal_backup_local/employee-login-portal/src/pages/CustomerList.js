@@ -9,8 +9,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
   const [msaDoc, setMsaDoc] = useState(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [totalEffort, setTotalEffort] = useState("");
-  const [totalCost, setTotalCost] = useState("");
+
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -22,8 +21,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
     setMsaDoc(null);
     setStartDate("");
     setEndDate("");
-    setTotalEffort("");
-    setTotalCost("");
+   
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -41,9 +39,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
       !customerName ||
       !msaDoc ||
       !startDate ||
-      !endDate ||
-      !totalEffort ||
-      !totalCost
+      !endDate 
     ) {
       alert("Please fill all fields and upload the MSA document.");
       return;
@@ -54,8 +50,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
       msaDoc,
       startDate,
       endDate,
-      totalEffort,
-      totalCost,
+     
     });
     handleClear();
   };
@@ -93,7 +88,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
           }}
         >
           <h2 style={{ margin: 0, fontWeight: "bold", fontSize: 18 }}>
-            Add New SOW
+            Add New Customer
           </h2>
           <button
             onClick={onClose}
@@ -157,7 +152,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
           <label
             style={{ fontWeight: "600", marginBottom: 6, display: "block" }}
           >
-            SOW Start Date <span style={{ color: "red" }}>*</span>
+            MSA Start Date <span style={{ color: "red" }}>*</span>
           </label>
           <input
             type="date"
@@ -180,7 +175,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
           <label
             style={{ fontWeight: "600", marginBottom: 6, display: "block" }}
           >
-            SOW End Date <span style={{ color: "red" }}>*</span>
+            MSA End Date <span style={{ color: "red" }}>*</span>
           </label>
           <input
             type="date"
@@ -199,51 +194,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
             }}
           />
 
-          {/* Total Effort & Total Cost side by side */}
-          <div style={{ display: "flex", gap: 15, marginBottom: 20 }}>
-            <div style={{ flex: 1 }}>
-              <label
-                style={{ fontWeight: "600", marginBottom: 6, display: "block" }}
-              >
-                Total Effort (PD) <span style={{ color: "red" }}>*</span>
-              </label>
-              <input
-                type="number"
-                value={totalEffort}
-                onChange={(e) => setTotalEffort(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  fontSize: 14,
-                  borderRadius: 4,
-                  border: "1px solid #ccc",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label
-                style={{ fontWeight: "600", marginBottom: 6, display: "block" }}
-              >
-                Total Cost <span style={{ color: "red" }}>*</span>
-              </label>
-              <input
-                type="number"
-                value={totalCost}
-                onChange={(e) => setTotalCost(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  fontSize: 14,
-                  borderRadius: 4,
-                  border: "1px solid #ccc",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-          </div>
+       
 
           {/* Buttons */}
           <div style={{ display: "flex", gap: 15 }}>
@@ -518,13 +469,13 @@ const filteredCustomers = customers.filter(customer => {
                   
                       {isContractOpen && (
                         <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                          <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                          <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                             <Link
                               to="/customers"
                               style={{
                                 textDecoration: 'none',
                                 color: 'white',
-                                fontSize: '16px',
+                                fontSize: '14px',
                                 display: 'block',
                                 padding: '4px 0',
                               }}
@@ -534,13 +485,13 @@ const filteredCustomers = customers.filter(customer => {
                               Customers
                             </Link>
                           </li>
-                          <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                          <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                             <Link
                               to="/sows"
                               style={{
                                 textDecoration: 'none',
                               color:'rgba(255, 255, 255, 0.7)',
-                                fontSize: '16px',
+                                fontSize: '14px',
                                 display: 'block',
                                 padding: '4px 0',
                               }}
@@ -550,13 +501,13 @@ const filteredCustomers = customers.filter(customer => {
                               SOWs
                             </Link>
                           </li>
-                          <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                          <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                             <Link
                               to="/projects"
                               style={{
                                 textDecoration: 'none',
                            color:'rgba(255, 255, 255, 0.7)',
-                                fontSize: '16px',
+                                fontSize: '14px',
                                 display: 'block',
                                 padding: '4px 0',
                               }}
@@ -566,13 +517,13 @@ const filteredCustomers = customers.filter(customer => {
                               Projects
                             </Link>
                           </li>
-                          <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                          <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                             <Link
                               to="/allocation"
                               style={{
                                 textDecoration: 'none',
                            color:'rgba(255, 255, 255, 0.7)',
-                                fontSize: '16px',
+                                fontSize: '14px',
                                 display: 'block',
                                 padding: '4px 0',
                               }}
@@ -719,68 +670,66 @@ const filteredCustomers = customers.filter(customer => {
 </button>
 
                     </div>
-                                       <div
-  className="sow-table-container"
+                 <div
   style={{
     maxHeight: "calc(100vh - 250px)",
-    overflowY: "auto",
-     // optional for horizontal scroll
+    overflowY: "scroll",
     border: "1px solid #ccc",
-    borderRadius: "6px",
+    borderRadius: 4,
+    backgroundColor: "white",
+    scrollbarWidth: "none", // Firefox
+    msOverflowStyle: "none", // IE and Edge
   }}
 >
-                    <table border="1" cellPadding="10" cellSpacing="0" style={{ width: "100%", borderCollapse: "collapse" }}>
-                        <thead>
-                            <tr>
-                                <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>Customer ID</th>
-                                <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>Customer Name</th>
-                                <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>MSA Document</th>
-                                <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>Start Date</th>
-                                <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>End Date</th>
-                               
-                            </tr>
-                        </thead>
-<tbody>
-  {filteredCustomers.map(customer => (
-    <tr key={customer.customerId}>
-    <td>{`CID${customer.customerId}`}</td>
+  <table border="1" cellPadding="10" cellSpacing="0" style={{ width: "100%", borderCollapse: "collapse" }}>
+    <thead>
+      <tr>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>Customer ID</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>Customer Name</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>MSA Document</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>Start Date</th>
+        <th style={{ backgroundColor: '#2c3e50', color: 'white' }}>End Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredCustomers
+        .slice()
+        .sort((a, b) => b.customerId - a.customerId) // sort by customerId descending
+        .map(customer => (
+          <tr key={customer.customerId}>
+            <td>{`CID${customer.customerId}`}</td>
+            <td>{customer.customerName}</td>
+            <td>
+              {customer.msaDocName ? (
+                <span
+                  onClick={() => handleDownload(customer.customerId, customer.msaDocName)}
+                  title={customer.msaDocName}
+                  style={{ color: "blue", textDecoration: "none", cursor: "pointer" }}
+                >
+                  {customer.msaDocName.length > 10
+                    ? `${customer.msaDocName.substring(0, 10)}...`
+                    : customer.msaDocName}
+                </span>
+              ) : (
+                "No document"
+              )}
+            </td>
+            <td>
+              {customer.startDate
+                ? new Date(customer.startDate).toLocaleDateString("en-GB")
+                : ""}
+            </td>
+            <td>
+              {customer.endDate
+                ? new Date(customer.endDate).toLocaleDateString("en-GB")
+                : ""}
+            </td>
+          </tr>
+        ))}
+    </tbody>
+  </table>
+</div>
 
-      <td>{customer.customerName}</td>
-<td>
-  {customer.msaDocName ? (
-    <span
-      onClick={() => handleDownload(customer.customerId, customer.msaDocName)}
-      title={customer.msaDocName}
-      style={{ color: "blue", textDecoration: "none", cursor: "pointer" }}
-    >
-      {customer.msaDocName.length > 10
-        ? `${customer.msaDocName.substring(0, 10)}...`
-        : customer.msaDocName}
-    </span>
-  ) : (
-    "No document"
-  )}
-</td>
-
-
-      <td>
-        {customer.startDate
-          ? new Date(customer.startDate).toLocaleDateString("en-GB")
-          : ""}
-      </td>
-      <td>
-        {customer.endDate
-          ? new Date(customer.endDate).toLocaleDateString("en-GB")
-          : ""}
-      </td>
-    
-    </tr>
-  ))}
-</tbody>
-
-
-                    </table>
-                </div>
                 </div>
             </div>
             {showModal && <ModalForm onClose={() => setShowModal(false)} onSubmit={handleFormSubmit} />}
