@@ -1,33 +1,38 @@
 /* Container for the full layout (sidebar + main content) */
 .dashboard-container {
   display: flex;
-  
   height: 100vh;          /* Full screen height */
-  overflow: auto;       /* No scrollbars */
+  overflow: hidden;       /* Hide unwanted scrollbars */
   font-family: sans-serif;
 }
 
 /* Sidebar styling */
 .sidebar {
   width: 266px;
-  height:832px;
-  background-color:#040c42;
-
-  
-}
-.sidebar img{
-  width:146px;
-  height:39px;
-  top:32px;
-  left:30px;
-  margin:20px;
+  height: 100vh;                      /* Dynamic height */
+  background-color: #040c42;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;   
+                 /* Enable scroll if needed */
 }
 
+/* Optional: Hide scrollbar */
+.sidebar::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+.sidebar img {
+  width: 146px;
+  height: 39px;
+  margin: 20px;
+}
 
 .hom {
   color: #00b4c6;
   text-decoration: none;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   width: 101px;
   height: 33px;
@@ -38,32 +43,31 @@
 }
 
 .side {
-    color: #00b4c6;
+  color: #00b4c6;
   text-decoration: none;
-  font-size: 18px;
+  font-size: 16px;
   width: 66px;
-  height:33px;
-  font-family: "poppins","sansarif";
+  height: 33px;
+  font-family: "Poppins", sans-serif;
   text-align: left;
   transition: background-color 0.2s;
-  margin-top: 30px;
+  margin-top: 10px;
   gap: 20px;
-  
+}
 
-}
-.sidebar .side{
-gap: 20px;
-  
-}
-.sidebar .hom{
- 
-  margin-top:20px;
-  
-  
-}
-.hom .side{
-margin-top: 20px;
+.sidebar .side {
   gap: 20px;
+}
+.sidebar .hom {
+  margin-top: 20px;
+}
+.hom .side {
+  margin-top: 20px;
+  gap: 20px;
+}
+
+.sidebar h3 {
+  margin-top: 10px;
 }
 .sidebar h3:hover {
   background-color: #34495e;
@@ -83,14 +87,15 @@ margin-top: 20px;
 /* Adjusting divider space */
 .main-content .divider-line {
   border: none;
-  border-top: 2px solid #ccc;  /* Light gray line */
-  margin: 10px 0;  
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-    width: 100%;           /* Reduced spacing between sections */
+  border-top: 2px solid #ccc;
+  margin: 10px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
+
 /* Wraps the image grid and centers it */
 .image-grid-container {
-  flex: 1;                          /* Fill remaining height */
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -100,8 +105,7 @@ margin-top: 20px;
 /* Image grid layout: 3 per row, consistent spacing */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columns */
-  
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   width: 100%;
   max-height: 100%;
@@ -113,36 +117,33 @@ margin-top: 20px;
 .image-grid img {
   width: 100%;
   height: 300px;
-  object-fit: cover;         /* Crop image to fit box */
+  object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-.office-vng{
+
+.office-vng {
   width: 146px;
   height: 39px;
   object-fit: cover;
-  display:block;
-  top:32px;
-  left:30px
-
-}
-.sidebar h3{
-  margin-top: 10px;
+  display: block;
+  top: 32px;
+  left: 30px;
 }
 
-.collapsed-wrapper .collapsed-toggle{
+.collapsed-wrapper .collapsed-toggle {
   height: 25px;
   width: 30px;
-  margin-top:69px;
-
+  margin-top: 69px;
 }
+
 .sidebar.collapsed {
   width: 91px;
   display: flex;
   align-items: top;
   justify-content: center;
-  
 }
+
 .dashboard-topbar {
   display: flex;
   justify-content: space-between;
@@ -150,12 +151,13 @@ margin-top: 20px;
   padding-right: 20px;
   margin-bottom: 20px;
 }
+
 .top-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0;
-  margin-bottom:0;
+  margin-bottom: 0;
   background: none;
 }
 
@@ -170,13 +172,13 @@ margin-top: 20px;
   border-radius: 20px;
   padding: 5px 12px;
   font-size: 14px;
-  width: 140px; /* same as your hand-drawn layout */
+  width: 140px;
   outline: none;
 }
 
 .icon {
   width: 50px;
-  height: 45px ;
+  height: 45px;
   margin-bottom: 12px;
   cursor: pointer;
 }
@@ -189,9 +191,10 @@ margin-top: 20px;
   object-fit: cover;
   cursor: pointer;
 }
+
 .profile-dropdown {
   position: absolute;
-  top: 60px; /* adjust based on your layout */
+  top: 60px;
   right: 0;
   background-color: white;
   border: 1px solid #ccc;
@@ -214,4 +217,12 @@ margin-top: 20px;
 
 .profile-dropdown button:hover {
   background-color: #f0f0f0;
+}
+.collapsed-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;  /* Push content to top */
+  height: 100vh;                /* Full height like sidebar */
+  padding-top: 20px;            /* Optional spacing */
 }
