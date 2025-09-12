@@ -8,6 +8,16 @@ function SowsAndProjects() {
   const [projects, setProjects] = useState([]);
   const [showProjectForm, setShowProjectForm] = useState(false);
   
+  const selectedSow = sows.find((sow) => sow.sowId.toString() === selectedSowId?.toString());
+
+const sowStartDate = selectedSow?.sowStartDate
+  ? new Date(selectedSow.sowStartDate).toISOString().split("T")[0]
+  : null;
+
+const sowEndDate = selectedSow?.sowEndDate
+  ? new Date(selectedSow.sowEndDate).toISOString().split("T")[0]
+  : null;
+
   const [projectFormData, setProjectFormData] = useState({
     projectName: "",
     projectStartDate: "",
@@ -699,28 +709,33 @@ const formatDate = (dateStr) => {
     </label>
 
     <label style={{ flex: "1 1 40%", minWidth: 200 }}>
-      Start Date *
-      <input
-        required
-        name="projectStartDate"
-        value={projectFormData.projectStartDate}
-        onChange={handleInputChange}
-        type="date"
-        style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
-      />
-    </label>
+  Start Date *
+  <input
+    required
+    name="projectStartDate"
+    value={projectFormData.projectStartDate}
+    onChange={handleInputChange}
+    type="date"
+    min={sowStartDate}
+    max={sowEndDate}
+    style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+  />
+</label>
+
 
     <label style={{ flex: "1 1 40%", minWidth: 200 }}>
-      End Date *
-      <input
-        required
-        name="projectEndDate"
-        value={projectFormData.projectEndDate}
-        onChange={handleInputChange}
-        type="date"
-        style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
-      />
-    </label>
+  End Date *
+  <input
+    required
+    name="projectEndDate"
+    value={projectFormData.projectEndDate}
+    onChange={handleInputChange}
+    type="date"
+    min={sowStartDate}
+    max={sowEndDate}
+    style={{ width: "100%", padding: "6px 8px", marginTop: 4 }}
+  />
+</label>
 
      <label style={{ flex: "1 1 40%", minWidth: 200 }}>
       Total Cost *
