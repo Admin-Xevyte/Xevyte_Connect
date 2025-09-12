@@ -24,18 +24,22 @@ const inputStyle = {
   border: '1px solid #ccc'
 };
 
+
 function CustomerSowManager() {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [selectedCustomerName, setSelectedCustomerName] = useState('');
-  
+  const [selectedCustomerStartDate, setSelectedCustomerStartDate] = useState('');
+const [selectedCustomerEndDate, setSelectedCustomerEndDate] = useState('');
   const [sows, setSows] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
+     sowName: '',   
     sowStartDate: '',
     sowEndDate: '',
     totalEffort: '',
-    totalCost: ''
+    totalCost: '',
+      sowDoc: null
   });
 
   const employeeId = localStorage.getItem("employeeId");
@@ -54,6 +58,7 @@ function CustomerSowManager() {
 const toggleContractMenu = () => {
   setIsContractOpen(!isContractOpen);
 };
+
 
   // Fetch customers
   useEffect(() => {
@@ -105,14 +110,24 @@ const toggleContractMenu = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileOpen]);
 
-  const handleCustomerChange = (e) => {
-    const id = e.target.value;
-    const name = customers.find(c => c.customerId === parseInt(id))?.customerName || '';
-    setSelectedCustomerId(id);
-    setSelectedCustomerName(name);
-  };
+const handleCustomerChange = (e) => {
+  const selectedId = e.target.value;
+  setSelectedCustomerId(selectedId);
 
-  const handleOpenModal = () => setShowModal(true);
+  const customer = customers.find(c => c.customerId.toString() === selectedId);
+  if (customer) {
+    setSelectedCustomerName(customer.customerName || '');
+    setSelectedCustomerStartDate(customer.startDate || '');
+    setSelectedCustomerEndDate(customer.endDate || '');
+  } else {
+    setSelectedCustomerName('');
+    setSelectedCustomerStartDate('');
+    setSelectedCustomerEndDate('');
+  }
+};
+
+
+
   const handleCloseModal = () => {
     setShowModal(false);
     setFormData({
@@ -120,32 +135,129 @@ const toggleContractMenu = () => {
       sowStartDate: '',
       sowEndDate: '',
       totalEffort: '',
-      totalCost: ''
+      totalCost: '',
+       sowDoc: null 
     });
   };
 
-  const handleSubmitSow = () => {
-    const newSow = {
-      sowName: formData.sowName,
-      sowStartDate: formData.sowStartDate,
-      sowEndDate: formData.sowEndDate,
-      totalEffort: parseInt(formData.totalEffort),
-      totalCost: parseFloat(formData.totalCost),
-      customerId: parseInt(selectedCustomerId)
-    };
+// const handleSubmitSow = () => {
+//   // Validate required fields
+//   if (!formData.sowName.trim()) {
+//     alert("Please enter the SOW Name.");
+//     return;
+//   }
+//   if (!formData.sowStartDate) {
+//     alert("Please select the SOW Start Date.");
+//     return;
+//   }
+//   if (!formData.sowEndDate) {
+//     alert("Please select the SOW End Date.");
+//     return;
+//   }
+//   if (!formData.totalEffort || isNaN(parseInt(formData.totalEffort)) || parseInt(formData.totalEffort) <= 0) {
+//     alert("Please enter a valid Total Effort (positive number).");
+//     return;
+//   }
+//   if (!formData.totalCost || isNaN(parseFloat(formData.totalCost)) || parseFloat(formData.totalCost) <= 0) {
+//     alert("Please enter a valid Total Cost (positive number).");
+//     return;
+//   }
+//   if (!selectedCustomerId) {
+//     alert("Please select a customer.");
+//     return;
+//   }
+//   if (new Date(formData.sowStartDate) > new Date(formData.sowEndDate)) {
+//     alert("SOW Start Date cannot be after the End Date.");
+//     return;
+//   }
+//   if (!formData.sowDoc) {
+//     alert("Please upload a SOW document (PDF, Word, etc.).");
+//     return;
+//   }
 
-    fetch('/api/sows', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newSow)
+//   // Create FormData for multipart/form-data
+//   const payload = new FormData();
+//   payload.append("sowName", formData.sowName.trim());
+//   payload.append("sowStartDate", formData.sowStartDate);
+//   payload.append("sowEndDate", formData.sowEndDate);
+//   payload.append("totalEffort", formData.totalEffort);
+//   payload.append("totalCost", formData.totalCost);
+//   payload.append("customerId", selectedCustomerId);
+//   payload.append("sowDoc", formData.sowDoc); // ✅ File attachment
+
+//   // Send request to backend
+//   fetch('/api/sows', {
+//     method: 'POST',
+//     body: payload
+//     // ❌ Don't set Content-Type manually — browser will set the correct boundary
+//   })
+//     .then(res => {
+//       if (!res.ok) {
+//         throw new Error("Failed to create SOW");
+//       }
+//       return res.json();
+//     })
+//     .then(data => {
+//       setSows(prev => [...prev, data]);
+//       handleCloseModal();
+//     })
+//     .catch(err => {
+//       console.error('Failed to create SOW:', err);
+//       alert("SOW creation failed. See console for details.");
+//     });
+// };
+const handleSubmitSow = (event) => {
+  event.preventDefault();
+
+  const form = event.target;
+
+  // Use native HTML5 validation
+  if (!form.checkValidity()) {
+    form.reportValidity(); // This shows the native tooltip message (like in your screenshot)
+    return;
+  }
+
+  // Additional JS validations that HTML can't handle (e.g. date comparison)
+  if (new Date(formData.sowStartDate) > new Date(formData.sowEndDate)) {
+    // Show custom validation message with setCustomValidity and reportValidity
+    const endDateInput = form.querySelector('input[name="sowEndDate"]');
+    endDateInput.setCustomValidity("SOW Start Date cannot be after the End Date.");
+    endDateInput.reportValidity();
+    endDateInput.setCustomValidity(""); // Reset after showing
+    return;
+  }
+
+  // Create FormData for multipart/form-data
+  const payload = new FormData();
+  payload.append("sowName", formData.sowName.trim());
+  payload.append("sowStartDate", formData.sowStartDate);
+  payload.append("sowEndDate", formData.sowEndDate);
+  payload.append("totalEffort", formData.totalEffort);
+  payload.append("totalCost", formData.totalCost);
+  payload.append("customerId", selectedCustomerId);
+  payload.append("sowDoc", formData.sowDoc); // File attachment
+
+  // Send request to backend
+  fetch('/api/sows', {
+    method: 'POST',
+    body: payload,
+  })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("Failed to create SOW");
+      }
+      return res.json();
     })
-      .then(res => res.json())
-      .then(data => {
-        setSows(prev => [...prev, data]);
-        handleCloseModal();
-      })
-      .catch(err => console.error('Failed to create SOW:', err));
-  };
+    .then(data => {
+      setSows(prev => [...prev, data]);
+      handleCloseModal();
+    })
+    .catch(err => {
+      console.error('Failed to create SOW:', err);
+      // Optional: use a toast notification instead of alert here if you want no popups at all
+      alert("SOW creation failed. See console for details.");
+    });
+};
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const toggleProfileMenu = () => setProfileOpen(!profileOpen);
@@ -197,6 +309,47 @@ const toggleContractMenu = () => {
       alert("Error uploading profile picture. See console for details.");
     }
   };
+const handleOpenModal = () => {
+  if (!selectedCustomerId) {
+    alert('Please select a customer before adding SOWs.');
+    return;
+  }
+  setShowModal(true);
+};
+const handleDownload = async (sowId, filename) => {
+  try {
+    const response = await fetch(`/api/sows/${sowId}/download`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      alert('Failed to download file.');
+      return;
+    }
+
+    // Get the file data as a blob
+    const blob = await response.blob();
+
+    // Create a URL for the blob object
+    const url = window.URL.createObjectURL(blob);
+
+    // Create a temporary link element
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;  // Set the filename for the download
+    document.body.appendChild(a);
+    a.click();
+
+    // Clean up
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error downloading the file:', error);
+    alert('An error occurred while downloading the file.');
+  }
+};
+
+
 
   return (
     <div className="dashboard-container">
@@ -247,13 +400,13 @@ const toggleContractMenu = () => {
                    
                        {isContractOpen && (
                          <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                           <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                           <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                              <Link
                                to="/customers"
                                style={{
                                  textDecoration: 'none',
                             color:'rgba(255, 255, 255, 0.7)',
-                                 fontSize: '18px',
+                                 fontSize: '14px',
                                  display: 'block',
                                  padding: '4px 0',
                                }}
@@ -263,13 +416,13 @@ const toggleContractMenu = () => {
                                Customers
                              </Link>
                            </li>
-                           <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                           <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                              <Link
                                to="/sows"
                                style={{
                                  textDecoration: 'none',
                                 color:'white',
-                                 fontSize: '18px',
+                                 fontSize: '14px',
                                  display: 'block',
                                  padding: '4px 0',
                                }}
@@ -279,13 +432,13 @@ const toggleContractMenu = () => {
                                SOWs
                              </Link>
                            </li>
-                           <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                           <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                              <Link
                                to="/projects"
                                style={{
                                  textDecoration: 'none',
                                color:'rgba(255, 255, 255, 0.7)',
-                                 fontSize: '18px',
+                                 fontSize: '14px',
                                  display: 'block',
                                  padding: '4px 0',
                                }}
@@ -295,13 +448,13 @@ const toggleContractMenu = () => {
                                Projects
                              </Link>
                            </li>
-                           <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                           <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                              <Link
                                to="/allocation"
                                style={{
                                  textDecoration: 'none',
                             color:'rgba(255, 255, 255, 0.7)',
-                                 fontSize: '18px',
+                                 fontSize: '14px',
                                  display: 'block',
                                  padding: '4px 0',
                                }}
@@ -439,7 +592,14 @@ const toggleContractMenu = () => {
 
         {/* Content from CustomerSowManager */}
         <div style={{ padding: '30px', backgroundColor: '#f6f8fb', minHeight: 'calc(100vh - 80px)', fontFamily: 'Arial, sans-serif' }}>
-          <h2 style={{ fontWeight: 'bold' }}>Customer: {selectedCustomerName} (ID: {selectedCustomerId})</h2>
+  <h2>
+  <span style={{ fontWeight: 'bold' }}>Customer:</span>{' '}
+  <span style={{ fontWeight: 'normal', fontSize: '0.9em' }}>
+    {selectedCustomerName} {selectedCustomerId && `(CID${selectedCustomerId})`}
+  </span>
+</h2>
+
+
 
          <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '20px 0' }}>
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -464,7 +624,7 @@ const toggleContractMenu = () => {
         cursor: 'pointer'
       }}
     >
-      <option value="" disabled>Select a customer</option>
+      <option value="" disabled>-- Select a customer --</option>
       {customers.map(c => (
         <option key={c.customerId} value={c.customerId}>{c.customerName}</option>
       ))}
@@ -486,120 +646,238 @@ const toggleContractMenu = () => {
     </button>
   </div>
 </div>
+         <div style={{ marginTop: 20 }}>
+  <h3 style={{ fontWeight: "bold" }}>SOWs</h3>
+  {sows.length === 0 ? (
+    <p style={{ color: "#666", marginTop: 4 }}>
+      No SOWs found for this customer.
+    </p>
+  ) : (
+   <div
+  style={{
+    maxHeight: "calc(100vh - 300px)",
+    overflowY: "scroll",
+    border: "1px solid #ccc",
+    borderRadius: 4,
+    backgroundColor: "white",
+    scrollbarWidth: "none", // Firefox
+    msOverflowStyle: "none", // IE and Edge
+  }}
+>
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+      marginTop: 0,
+      backgroundColor: "white",
+    }}
+  >
+    <thead>
+      <tr>
+        <th style={{ backgroundColor: "#2c3e50", color: "white", padding: 10, textAlign: "left", border: "1px solid #ddd" }}>SOW ID</th>
+        <th style={{ backgroundColor: "#2c3e50", color: "white", padding: 10, textAlign: "left", border: "1px solid #ddd" }}>SOW Name</th>
+        <th style={{ backgroundColor: "#2c3e50", color: "white", padding: 10, textAlign: "left", border: "1px solid #ddd" }}>SOW Document</th>
+        <th style={{ backgroundColor: "#2c3e50", color: "white", padding: 10, textAlign: "left", border: "1px solid #ddd" }}>Start Date</th>
+        <th style={{ backgroundColor: "#2c3e50", color: "white", padding: 10, textAlign: "left", border: "1px solid #ddd" }}>End Date</th>
+        <th style={{ backgroundColor: "#2c3e50", color: "white", padding: 10, textAlign: "left", border: "1px solid #ddd" }}>Total Effort (PD)</th>
+        <th style={{ backgroundColor: "#2c3e50", color: "white", padding: 10, textAlign: "left", border: "1px solid #ddd" }}>Total Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      {sows
+        .slice()
+        .sort((a, b) => b.sowId - a.sowId) // 👈 Sort by SOW ID descending
+        .map((sow) => (
+          <tr key={sow.sowId}>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              SOW{sow.sowId}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd" }}>{sow.sowName}</td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {sow.sowDocName ? (
+                <span
+                  onClick={() => handleDownload(sow.sowId, sow.sowDocName)}
+                  title={sow.sowDocName}
+                  style={{ color: "blue", textDecoration: "none", cursor: "pointer" }}
+                >
+                  {sow.sowDocName.length > 10
+                    ? `${sow.sowDocName.substring(0, 10)}...`
+                    : sow.sowDocName}
+                </span>
+              ) : (
+                <span style={{ color: "#999" }}>No document</span>
+              )}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {new Date(sow.sowStartDate).toLocaleDateString("en-GB")}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {new Date(sow.sowEndDate).toLocaleDateString("en-GB")}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {sow.totalEffort}
+            </td>
+            <td style={{ padding: 10, border: "1px solid #ddd", textAlign: "center" }}>
+              {sow.totalCost}
+            </td>
+          </tr>
+        ))}
+    </tbody>
+  </table>
+</div>
 
-          {selectedCustomerId && (
-            <>
-              <h3 style={{ fontWeight: 'bold' }}>SOWs for Customer ID: CID{selectedCustomerId}</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px', backgroundColor: 'white' }}>
-                <thead>
-  <tr> 
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>SOW ID</th>
-     <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>SOW Name</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>SOW Start Date</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>SOW End Date</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>Total Effort (PD)</th>
-    <th style={{ backgroundColor: '#2c3e50', color: 'white', padding: '10px', textAlign: 'left' }}>Total Cost</th>
-   
-  </tr>
-</thead>
+  )}
+</div>
 
-                <tbody>
-                  {sows.map((sow) => (
-                    <tr key={sow.sowId}>
-                      <td style={cellBody}>SOW{sow.sowId}</td>
-                          <td style={cellBody}>{sow.sowName}</td>
-                      <td style={cellBody}>{sow.sowStartDate}</td>
-                      <td style={cellBody}>{sow.sowEndDate}</td>
-                      <td style={cellBody}>{sow.totalEffort}</td>
-                      <td style={cellBody}>{sow.totalCost}</td>
-                  
-                    </tr>
-                  ))}
-                  {sows.length === 0 && (
-                    <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>No SOWs available.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </>
-          )}
 
           {/* Modal for Adding New SOW */}
-          {showModal && (
-            <div style={{
-              position: 'fixed',
-              top: 0, left: 0,
-              width: '100%', height: '100%',
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 9999
-            }}>
-              <div style={{
-                backgroundColor: 'white',
-                padding: '30px',
-                borderRadius: '10px',
-                width: '500px',
-                position: 'relative'
-              }}>
-                <h3 style={{ marginBottom: '20px' }}>Add New SOW</h3>
-<label>SOW Name *</label>
-<input
-  type="text"
-  value={formData.sowName}
-  onChange={(e) => setFormData({ ...formData, sowName: e.target.value })}
+        {showModal && (
+  <div
+    style={{
+      position: 'fixed',
+      top: 0, left: 0,
+      width: '100%', height: '100%',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        backgroundColor: 'white',
+        padding: '30px',
+        borderRadius: '10px',
+        width: '500px',
+        position: 'relative',
+      }}
+    >
+      <h3 style={{ marginBottom: '20px' }}>Add New SOW</h3>
+
+      {/* Wrap inputs inside a form */}
+      <form onSubmit={handleSubmitSow} noValidate>
+        <label>SOW Name *</label>
+        <input
+          type="text"
+          value={formData.sowName}
+          onChange={(e) => setFormData({ ...formData, sowName: e.target.value })}
+          required
+          style={inputStyle}
+        />
+
+        <label>SOW Document *</label>
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+          onChange={(e) => setFormData({ ...formData, sowDoc: e.target.files[0] })}
+          required
+          style={inputStyle}
+        />
+
+        <label>SOW Start Date *</label>
+        <input
+  type="date"
+  value={formData.sowStartDate}
+  onChange={(e) => setFormData({ ...formData, sowStartDate: e.target.value })}
+  min={selectedCustomerStartDate}
+  max={selectedCustomerEndDate}
+  required
   style={inputStyle}
 />
 
-                <label>SOW Start Date *</label>
-                <input type="date" value={formData.sowStartDate}
-                  onChange={(e) => setFormData({ ...formData, sowStartDate: e.target.value })}
-                  style={inputStyle}
-                />
+        <label>SOW End Date *</label>
+        <input
+  type="date"
+  value={formData.sowEndDate}
+  onChange={(e) => setFormData({ ...formData, sowEndDate: e.target.value })}
+  min={selectedCustomerStartDate}
+  max={selectedCustomerEndDate}
+  required
+  style={inputStyle}
+/>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ flex: 1 }}>
+            <label>Total Effort (PD) *</label>
+            <input
+              type="number"
+              value={formData.totalEffort}
+              onChange={(e) => setFormData({ ...formData, totalEffort: e.target.value })}
+              required
+              min="1"
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label>Total Cost *</label>
+            <input
+              type="number"
+              value={formData.totalCost}
+              onChange={(e) => setFormData({ ...formData, totalCost: e.target.value })}
+              required
+              min="1"
+              style={inputStyle}
+            />
+          </div>
+        </div>
 
-                <label>SOW End Date *</label>
-                <input type="date" value={formData.sowEndDate}
-                  onChange={(e) => setFormData({ ...formData, sowEndDate: e.target.value })}
-                  style={inputStyle}
-                />
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginTop: '20px',
+          }}
+        >
+          <button
+            type="submit"
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              padding: '10px 16px',
+              border: 'none',
+              borderRadius: '4px',
+              marginRight: '10px',
+              cursor: 'pointer',
+            }}
+          >
+            Submit
+          </button>
+          <button
+            type="button"
+            onClick={handleCloseModal}
+            style={{
+              backgroundColor: '#6c757d',
+              color: 'white',
+              padding: '10px 16px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
 
-                <div style={{ display: 'flex', gap: '20px' }}>
-                  <div style={{ flex: 1 }}>
-                    <label>Total Effort (PD) *</label>
-                    <input type="number" value={formData.totalEffort}
-                      onChange={(e) => setFormData({ ...formData, totalEffort: e.target.value })}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <label>Total Cost *</label>
-                    <input type="number" value={formData.totalCost}
-                      onChange={(e) => setFormData({ ...formData, totalCost: e.target.value })}
-                      style={inputStyle}
-                    />
-                  </div>
-                </div>
+      <button
+        onClick={handleCloseModal}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '15px',
+          background: 'none',
+          border: 'none',
+          fontSize: '20px',
+          color: 'black',
+          cursor: 'pointer',
+        }}
+      >
+        ×
+      </button>
+    </div>
+  </div>
+)}
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-                  <button onClick={handleSubmitSow}
-                    style={{ backgroundColor: '#007bff', color: 'white', padding: '10px 16px', border: 'none', borderRadius: '4px', marginRight: '10px' }}>
-                    Submit
-                  </button>
-                  <button onClick={handleCloseModal}
-                    style={{ backgroundColor: '#6c757d', color: 'white', padding: '10px 16px', border: 'none', borderRadius: '4px' }}>
-                    Cancel
-                  </button>
-                </div>
-
-                <button onClick={handleCloseModal}
-                  style={{ position: 'absolute', top: '10px', right: '15px', background: 'none', border: 'none', fontSize: '20px',   color:"black", cursor: 'pointer' }}>
-                  ×
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
