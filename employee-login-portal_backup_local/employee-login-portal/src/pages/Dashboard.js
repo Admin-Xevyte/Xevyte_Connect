@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
-import image1 from '../assets/image1.jpg';
-import image2 from '../assets/image2.jpg';
-import image3 from '../assets/image3.jpg';
-import image4 from '../assets/image4.jpg';
-import image5 from '../assets/image5.jpg';
-import image6 from '../assets/image6.jpg';
+import image1 from '../assets/Xevytegrppic.jpg';
+import image2 from '../assets/IMG_3104.JPG';
+import image3 from '../assets/imageo.png';
+import image4 from '../assets/imagei.png';
+import image5 from '../assets/1C1A7036.JPG';
+import image6 from '../assets/imaged.png';
 
 function Dashboard() {
   const employeeId = localStorage.getItem("employeeId");
@@ -106,16 +106,14 @@ const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
 
   const images = [
     { src: image1, name: 'City' },
-    { src: image2, name: 'Mountain' },
+    { src: image2, name: 'City' },
     { src: image3, name: 'City' },
     { src: image4, name: 'City' },
     { src: image5, name: 'City' },
     { src: image6, name: 'City' },
   ];
 
-  const filteredImages = images.filter((img) =>
-    img.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+const filteredImages = images; // ✅ Show all images, ignore search input
 
   const [isContractOpen, setIsContractOpen] = useState(false);
 
@@ -138,15 +136,15 @@ const toggleContractMenu = () => {
               alt="collapse"
               className="toggle-btn"
               onClick={toggleSidebar}
-              style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
+              style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px", fill: '#00b4c6'  }}
             />
-      <h3>
+<h3>
   <Link
     to="/dashboard"
     className="side"
     style={{
       textDecoration: 'none',
-      color: isContractOpen ? '#00b4c6' : 'white' // 👈 change color dynamically
+      color: isContractOpen ? '#00b4c6' : 'white',
     }}
   >
     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -155,19 +153,77 @@ const toggleContractMenu = () => {
   </Link>
 </h3>
 
-            <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Claims</Link></h3>
-            <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color:'#00b4c6' }}>Time Sheet</Link></h3>
-            <h3><Link to="/home2" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Handbook</Link></h3>
-            <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color:'#00b4c6' }}>Employee Directory</Link></h3>
-            <h3><Link to="/home4" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Exit Management</Link></h3>
-            <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color:'#00b4c6' }}>Holiday Calendar</Link></h3>
-            <h3><Link to="/home6" className="side" style={{ textDecoration: 'none',color:'#00b4c6' }}>Helpdesk</Link></h3>
-            <h3><Link to="/home7" className="side" style={{ textDecoration: 'none',color:'#00b4c6' }}>Leaves</Link></h3>
-          
-            <h3><Link to="/home9" className="side" style={{ textDecoration: 'none',  color:'#00b4c6'}}>Pay slips</Link></h3>
-            <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color:'#00b4c6'}}>Performance</Link></h3>
-            <h3><Link to="/home11" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Training</Link></h3>
-            <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color:'#00b4c6' }}>Travel</Link></h3>
+<h3>
+  <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+  </Link>
+</h3>
+
+<h3>
+  <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+  </Link>
+</h3>
       {allowedUsers.includes(employeeId) && (
              <>
              <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
@@ -184,13 +240,13 @@ const toggleContractMenu = () => {
            
                {isContractOpen && (
                  <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px'}}>
-                   <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                   <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                      <Link
                        to="/customers"
                        style={{
                          textDecoration: 'none',
                         color:'rgba(255, 255, 255, 0.7)',
-                         fontSize: '16px',
+                         fontSize: '14px',
                          display: 'block',
                          padding: '4px 0',
                        }}
@@ -200,13 +256,13 @@ const toggleContractMenu = () => {
                        Customers
                      </Link>
                    </li>
-                   <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                   <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                      <Link
                        to="/sows"
                        style={{
                          textDecoration: 'none',
                         color:'rgba(255, 255, 255, 0.7)',
-                         fontSize: '16px',
+                         fontSize: '14px',
                          display: 'block',
                          padding: '4px 0',
                        }}
@@ -216,13 +272,13 @@ const toggleContractMenu = () => {
                        SOWs
                      </Link>
                    </li>
-                   <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                   <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                      <Link
                        to="/projects"
                        style={{
                          textDecoration: 'none',
                         color:'rgba(255, 255, 255, 0.7)',
-                         fontSize: '16px',
+                         fontSize: '14px',
                          display: 'block',
                          padding: '4px 0',
                        }}
@@ -232,13 +288,13 @@ const toggleContractMenu = () => {
                        Projects
                      </Link>
                    </li>
-                   <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                   <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                      <Link
                        to="/allocation"
                        style={{
                          textDecoration: 'none',
                         color:'rgba(255, 255, 255, 0.7)',
-                         fontSize: '16px',
+                         fontSize: '14px',
                          display: 'block',
                          padding: '4px 0',
                        }}
