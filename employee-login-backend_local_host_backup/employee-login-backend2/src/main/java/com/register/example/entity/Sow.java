@@ -10,12 +10,16 @@ public class Sow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sowId;
 
-    private String sowName; // ✅ New field added
-
+    private String sowName;
     private LocalDate sowStartDate;
     private LocalDate sowEndDate;
     private int totalEffort;   // in PD
     private double totalCost;
+
+    private String sowDocName;
+
+    @Lob
+    private byte[] sowDocBlob;
 
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
@@ -69,6 +73,22 @@ public class Sow {
 
     public void setTotalCost(double totalCost) {
         this.totalCost = totalCost;
+    }
+
+    public String getSowDocName() {
+        return sowDocName;
+    }
+
+    public void setSowDocName(String sowDocName) {
+        this.sowDocName = sowDocName;
+    }
+
+    public byte[] getSowDocBlob() {
+        return sowDocBlob;
+    }
+
+    public void setSowDocBlob(byte[] sowDocBlob) {
+        this.sowDocBlob = sowDocBlob;
     }
 
     public Customer getCustomer() {
