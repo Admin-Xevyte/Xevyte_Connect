@@ -285,7 +285,7 @@ const handleAddAllocation = (e) => {
                 
                     {isContractOpen && (
                       <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                        <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                        <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                           <Link
                             to="/customers"
                             style={{
@@ -301,7 +301,7 @@ const handleAddAllocation = (e) => {
                             Customers
                           </Link>
                         </li>
-                        <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                        <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                           <Link
                             to="/sows"
                             style={{
@@ -317,7 +317,7 @@ const handleAddAllocation = (e) => {
                             SOWs
                           </Link>
                         </li>
-                        <li style={{ marginBottom: '4px' ,marginLeft:'100px'}}>
+                        <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
                           <Link
                             to="/projects"
                             style={{
@@ -333,7 +333,7 @@ const handleAddAllocation = (e) => {
                             Projects
                           </Link>
                         </li>
-                        <li style={{ marginBottom: '4px',marginLeft:'100px' }}>
+                        <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
                           <Link
                             to="/allocation"
                             style={{
