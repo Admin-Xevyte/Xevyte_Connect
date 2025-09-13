@@ -17,7 +17,55 @@ function MyTasks() {
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
+const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+  const [isContractOpen, setIsContractOpen] = useState(false);
+  const cardStyle = {
+  backgroundColor: '#fff',
+  borderRadius: '12px',
+  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+  padding: '25px',
+  textAlign: 'left',
+  width: '350px',
+  cursor: 'pointer',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  marginBottom: '20px'
+};
+useEffect(() => {
+  if (employeeId) {
+    fetch(`/claims/assigned-ids/${employeeId}`)
+      .then(res => res.json())
+      .then(data => {
+        // This backend only returns { canViewTasks: true/false }, so you might need to modify backend
+        // But let's assume you update backend to return:
+        // {
+        //   manager: true,
+        //   finance: false,
+        //   hr: true
+        // }
 
+        setAssignedRoles({
+          manager: data.manager || false,
+          finance: data.finance || false,
+          hr: data.hr || false
+        });
+      })
+      .catch(err => {
+        console.error("Failed to fetch assigned roles:", err);
+      });
+  }
+}, [employeeId]);
+
+
+  const [assignedRoles, setAssignedRoles] = useState({
+  manager: false,
+  finance: false,
+  hr: false
+});
+
+
+const toggleContractMenu = () => {
+  setIsContractOpen(!isContractOpen);
+};
   // Load profile info
   useEffect(() => {
     if (employeeId) {
@@ -125,26 +173,170 @@ function MyTasks() {
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
      <h3>
-                            <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                              <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                Home
-                               
-                              </span>
-                            </Link>
-                          </h3>
-                          <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'white' }}>Claims</Link></h3>
-                          <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                          <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                          <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                          <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                          <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                          <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                          <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-                        
-                          <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                          <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Performance</Link></h3>
-                          <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                          <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
+        <Link
+          to="/dashboard"
+          className="side"
+          style={{
+            textDecoration: 'none',
+            color:'#00b4c6',
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            Home
+          </span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+        </Link>
+      </h3>
+      {allowedUsers.includes(employeeId) && (
+                                            <>
+                                              <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                                <span className="side" style={{  color:'#00b4c6' }}>
+                                                  Contract Management {isContractOpen ? '▾' : '▸'}
+                                                </span>
+                                              </h3>
+                                          
+                                              {isContractOpen && (
+                                                <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                  <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                    <Link
+                                                      to="/customers"
+                                                      style={{
+                                                        textDecoration: 'none',
+                                                       color:'#00b4c6',
+                                                        fontSize: '14px',
+                                                        display: 'block',
+                                                        padding: '4px 0',
+                                                      }}
+                                                      onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                      onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                    >
+                                                      Customers
+                                                    </Link>
+                                                  </li>
+                                                  <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                    <Link
+                                                      to="/sows"
+                                                      style={{
+                                                        textDecoration: 'none',
+                                                       color:'#00b4c6',
+                                                        fontSize: '14px',
+                                                        display: 'block',
+                                                        padding: '4px 0',
+                                                      }}
+                                                      onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                      onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                    >
+                                                      SOWs
+                                                    </Link>
+                                                  </li>
+                                                  <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                    <Link
+                                                      to="/projects"
+                                                      style={{
+                                                        textDecoration: 'none',
+                                                       color:'#00b4c6',
+                                                        fontSize: '14px',
+                                                        display: 'block',
+                                                        padding: '4px 0',
+                                                      }}
+                                                      onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                      onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                    >
+                                                      Projects
+                                                    </Link>
+                                                  </li>
+                                                  <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                    <Link
+                                                      to="/allocation"
+                                                      style={{
+                                                        textDecoration: 'none',
+                                                       color:'#00b4c6',
+                                                        fontSize: '14px',
+                                                        display: 'block',
+                                                        padding: '4px 0',
+                                                      }}
+                                                      onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                      onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                    >
+                                                      Allocation
+                                                    </Link>
+                                                  </li>
+                                                </ul>
+                                              )}
+                                            </>
+                                          )}
+              
           </>
         ) : (
           <div className="collapsed-wrapper">
@@ -252,51 +444,58 @@ function MyTasks() {
           <hr className="divider-line" />
         </div>
 
+  
    <button
     onClick={() => navigate(-1)}
     style={{
-      backgroundColor: 'transparent',
-      border: 'none',
-      color: '#007bff',
-      fontSize: '16px',
-      cursor: 'pointer',
-      marginBottom: '10px',
-      padding: '5px 0',
-      textAlign: 'left'
+        padding: "8px 16px", // Slightly reduced padding
+         backgroundColor: "#f0f0f0",
+       color: "#333",
+       fontSize: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      cursor: "pointer",
+      margin: "20px 0 20px 0", // Top and bottom margins only
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        transition: "background-color 0.3s ease",
+        width: "fit-content", // Make width only as big as content
+        display: "block", // Ensure it respects margin auto if needed
     }}
-  >
-    ← Back
-  </button>
-  <h2 style={{ marginBottom: '20px' }}>Choose Your Dashboard</h2>
-  <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-    {["Manager", "Finance", "HR"].map((role) => (
-      <div
-        key={role}
-        onClick={() => handleCardClick(role)}
-        style={{
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-          padding: '25px',
-          textAlign: 'left',
-          width: '350px',
-          cursor: 'pointer',
-          transition: 'transform 0.2s, box-shadow 0.2s',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.transform = 'scale(1.03)';
-          e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.12)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 0, 0, 0.08)';
-        }}
-      >
-        <h3 style={{ margin: '0 0 10px', fontSize: '18px' }}>{role} Dashboard</h3>
-        <p style={{ margin: 0, color: '#6c757d' }}>Go to {role} Panel</p>
-      </div>
-    ))}
-  </div>
+>
+    ⬅ Back
+</button>
+
+  <h2 style={{ marginTop: '20px',}}>Choose Your Dashboard</h2>
+<div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+  {assignedRoles.manager && (
+    <div
+      onClick={() => handleCardClick("Manager")}
+      style={cardStyle}
+    >
+      <h3 style={{ margin: '0 0 10px', fontSize: '18px' }}>Manager Dashboard</h3>
+      <p style={{ margin: 0, color: '#6c757d' }}>Go to Manager Panel</p>
+    </div>
+  )}
+  {assignedRoles.finance && (
+    <div
+      onClick={() => handleCardClick("Finance")}
+      style={cardStyle}
+    >
+      <h3 style={{ margin: '0 0 10px', fontSize: '18px' }}>Finance Dashboard</h3>
+      <p style={{ margin: 0, color: '#6c757d' }}>Go to Finance Panel</p>
+    </div>
+  )}
+  {assignedRoles.hr && (
+    <div
+      onClick={() => handleCardClick("HR")}
+      style={cardStyle}
+    >
+      <h3 style={{ margin: '0 0 10px', fontSize: '18px' }}>HR Dashboard</h3>
+      <p style={{ margin: 0, color: '#6c757d' }}>Go to HR Panel</p>
+    </div>
+  )}
+</div>
+
 </div>
 
       </div>
