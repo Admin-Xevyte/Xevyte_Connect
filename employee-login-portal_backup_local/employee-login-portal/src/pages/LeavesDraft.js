@@ -14,12 +14,43 @@ function LeavesDrafts() {
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
+  const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
+ 
+  const [isContractOpen, setIsContractOpen] = useState(false);
+const [validationErrors, setValidationErrors] = React.useState({});
+const [allocationErrors, setAllocationErrors] = React.useState([]);
 
+const toggleContractMenu = () => {
+  setIsContractOpen(!isContractOpen);
+};
   // States for LeavesDrafts functionality
   const [drafts, setDrafts] = useState([]);
   const [loadingDrafts, setLoadingDrafts] = useState(false);
   const [draftsError, setDraftsError] = useState("");
   
+ const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+const calculateTotalDays = (startDate, endDate) => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const timeDifference = end.getTime() - start.getTime();
+    const dayDifference = timeDifference / (1000 * 3600 * 24) + 1; // +1 to include both start and end dates
+    return dayDifference > 0 ? dayDifference : 0;
+};
+
+const draftsWithDays = useMemo(() => {
+    return drafts.map(draft => ({
+        ...draft,
+        totalDays: calculateTotalDays(draft.startDate, draft.endDate),
+    }));
+}, [drafts]);
 
   // Fetch updated profile info on component mount
   useEffect(() => {
@@ -45,30 +76,39 @@ function LeavesDrafts() {
     }
   }, [employeeId]);
 
-  // ✅ Load drafts from backend
-  useEffect(() => {
-    async function loadDrafts() {
-      if (!employeeId) return;
-      setLoadingDrafts(true);
-      setDraftsError("");
-      try {
-        const res = await fetch(`/leaves/drafts/${employeeId}`);
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
+ // ✅ Load drafts from backend and calculate total days
+useEffect(() => {
+  async function loadDrafts() {
+    if (!employeeId) return;
+    setLoadingDrafts(true);
+    setDraftsError("");
+    try {
+      const res = await fetch(`/leaves/drafts/${employeeId}`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
 
-        // Sort drafts by ID desc (most recent first)
-        const sortedDrafts = (Array.isArray(data) ? data : []).sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
-        setDrafts(sortedDrafts);
-      } catch (err) {
-        console.error("Failed to fetch drafts from backend", err);
-        setDrafts([]);
-        setDraftsError("Failed to load drafts. Please try again.");
-      } finally {
-        setLoadingDrafts(false);
-      }
+      // Ensure data is an array before sorting
+      const draftsData = Array.isArray(data) ? data : [];
+
+      // Add totalDays to each draft and sort by ID desc
+      const sortedAndCalculatedDrafts = draftsData
+        .map(draft => ({
+          ...draft,
+          totalDays: calculateTotalDays(draft.startDate, draft.endDate),
+        }))
+        .sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+
+      setDrafts(sortedAndCalculatedDrafts);
+    } catch (err) {
+      console.error("Failed to fetch drafts from backend", err);
+      setDrafts([]);
+      setDraftsError("Failed to load drafts. Please try again.");
+    } finally {
+      setLoadingDrafts(false);
     }
-    loadDrafts();
-  }, [employeeId]);
+  }
+  loadDrafts();
+}, [employeeId]);
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -191,6 +231,7 @@ function LeavesDrafts() {
         String(draft.type ?? ''),
         String(draft.startDate ?? ''),
         String(draft.endDate ?? ''),
+        String(draft.totalDays ?? ''),
         String(draft.fileName || ''),
         String(draft.reason ?? ''),
       ].map(value => value.toLowerCase());
@@ -217,28 +258,172 @@ function LeavesDrafts() {
               onClick={toggleSidebar}
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
-            <h3>
-                                   <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                       Home
-                                      
-                                     </span>
-                                   </Link>
-                                 </h3>
-                                 <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
-                                 <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                                 <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                                 <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                                 <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                                 <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                                 <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                                 <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'white' }}>Leaves</Link></h3>
+       <h3>
+                         <Link
+                           to="/dashboard"
+                           className="side"
+                           style={{
+                             textDecoration: 'none',
+                             color:'#00b4c6',
+                           }}
+                         >
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                             Home
+                           </span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+                         </Link>
+                       </h3>
+                       
+                       <h3>
+                         <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+                         </Link>
+                       </h3>
+                       {allowedUsers.includes(employeeId) && (
+                                                             <>
+                                                               <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                                                 <span className="side" style={{  color:'#00b4c6' }}>
+                                                                   Contract Management {isContractOpen ? '▾' : '▸'}
+                                                                 </span>
+                                                               </h3>
+                                                           
+                                                               {isContractOpen && (
+                                                                 <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                                   <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                                     <Link
+                                                                       to="/customers"
+                                                                       style={{
+                                                                         textDecoration: 'none',
+                                                                        color:'#00b4c6',
+                                                                         fontSize: '14px',
+                                                                         display: 'block',
+                                                                         padding: '4px 0',
+                                                                       }}
+                                                                       onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                       onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                                     >
+                                                                       Customers
+                                                                     </Link>
+                                                                   </li>
+                                                                   <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                                     <Link
+                                                                       to="/sows"
+                                                                       style={{
+                                                                         textDecoration: 'none',
+                                                                        color:'#00b4c6',
+                                                                         fontSize: '14px',
+                                                                         display: 'block',
+                                                                         padding: '4px 0',
+                                                                       }}
+                                                                       onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                       onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                                     >
+                                                                       SOWs
+                                                                     </Link>
+                                                                   </li>
+                                                                   <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                                     <Link
+                                                                       to="/projects"
+                                                                       style={{
+                                                                         textDecoration: 'none',
+                                                                        color:'#00b4c6',
+                                                                         fontSize: '14px',
+                                                                         display: 'block',
+                                                                         padding: '4px 0',
+                                                                       }}
+                                                                       onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                       onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                                     >
+                                                                       Projects
+                                                                     </Link>
+                                                                   </li>
+                                                                   <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                                     <Link
+                                                                       to="/allocation"
+                                                                       style={{
+                                                                         textDecoration: 'none',
+                                                                        color:'#00b4c6',
+                                                                         fontSize: '14px',
+                                                                         display: 'block',
+                                                                         padding: '4px 0',
+                                                                       }}
+                                                                       onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                       onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                                     >
+                                                                       Allocation
+                                                                     </Link>
+                                                                   </li>
+                                                                 </ul>
+                                                               )}
+                                                             </>
+                                                           )}
                                
-                                 <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                                 <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Performance</Link></h3>
-                                 <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                                 <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
-          </>
+                               </>
         ) : (
           <div className="collapsed-wrapper">
             <img
@@ -297,6 +482,25 @@ function LeavesDrafts() {
         </div>
 
         <hr className="divider-line" />
+             <button
+    onClick={() => navigate(-1)}
+    style={{
+        padding: "8px 16px", // Slightly reduced padding
+         backgroundColor: "#f0f0f0",
+       color: "#333",
+       fontSize: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      cursor: "pointer",
+      margin: "20px 0 20px 0", // Top and bottom margins only
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        transition: "background-color 0.3s ease",
+        width: "fit-content", // Make width only as big as content
+        display: "block", // Ensure it respects margin auto if needed
+    }}
+>
+    ⬅ Back
+</button>
 
         {/* Leaves Drafts Content */}
         <div className="dashboard-content" style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
@@ -332,7 +536,7 @@ function LeavesDrafts() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                   <thead>
                     <tr>
-                      {['Leave Type', 'Start Date', 'End Date', 'Uploaded File', 'Reason', 'Actions'].map((heading) => (
+                      {['Draft ID','Leave Type', 'Start Date', 'End Date','Total Days', 'Uploaded File', 'Reason', 'Actions'].map((heading) => (
                         <th
                           key={heading}
                           style={{
@@ -352,17 +556,23 @@ function LeavesDrafts() {
                     </tr>
                   </thead>
                 </table>
-                <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 260px)' }}>
+                <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 350px)' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                     <tbody>
                       {filteredDrafts.map((draft) => (
                        <tr key={draft.id} style={{ borderBottom: '1px solid #eee' }}>
-  <td style={{ padding: '12px', border: '1px solid #ddd' }}>{draft.type || "--"}</td>
-  <td style={{ padding: '12px', border: '1px solid #ddd' }}>{draft.startDate || "--"}</td>
-  <td style={{ padding: '12px', border: '1px solid #ddd' }}>{draft.endDate || "--"}</td>
-  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-    {draft.hasFile ? (
-      <button
+                         <td style={{ padding: '12px', border: '1px solid #ddd' , textAlign: 'center'}}>{draft.id || "--"}</td>
+                      <td style={{ padding: '12px', border: '1px solid #ddd' }}>{draft.type || "--"}</td>
+                      <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                        {draft.startDate ? formatDate(draft.startDate) : "--"}
+                      </td>
+                      <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                        {draft.endDate ? formatDate(draft.endDate) : "--"}
+                      </td>
+                      <td style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'center' }}>{draft.totalDays || "--"}</td>
+                      <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                        {draft.hasFile ? (
+                          <button
         onClick={() => handleDownloadDraft(draft)}
         style={{ color: '#007bff', background: 'none', border: 'none', cursor: 'pointer' }}
       >
@@ -372,7 +582,7 @@ function LeavesDrafts() {
       'No File Uploaded'
     )}
   </td>
-  <td style={{ padding: '12px', border: '1px solid #ddd' }}>{draft.reason || "--"}</td>
+  <td style={{ padding: '12px', border: '1px solid #ddd',wordWrap: 'break-word', whiteSpace: 'normal' }}>{draft.reason || "--"}</td>
   <td
     style={{
       padding: '12px',
@@ -426,3 +636,5 @@ function LeavesDrafts() {
 }
 
 export default LeavesDrafts;
+
+
