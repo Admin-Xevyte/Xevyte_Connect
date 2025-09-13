@@ -15,8 +15,9 @@ const ProjectAllocationsDashboard = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
+   const navigate = useNavigate();
   const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
-  const navigate = useNavigate();
+ 
   const [isContractOpen, setIsContractOpen] = useState(false);
 const [validationErrors, setValidationErrors] = React.useState({});
 const [allocationErrors, setAllocationErrors] = React.useState([]);
