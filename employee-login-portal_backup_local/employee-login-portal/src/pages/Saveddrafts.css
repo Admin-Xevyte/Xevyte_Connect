@@ -146,17 +146,20 @@ table td, table th {
   opacity: 0.9;
 }
 .table-scroll {
-  max-height:450px;         /* Adjust height as needed */
-  overflow-y: auto;
-  border: 1px solid #ddd;    /* Optional: matches table borders */
+  max-height: 400px;
+  overflow-y: scroll; /* Use scroll to ensure it works always */
+  border: 1px solid #ddd;
   margin-top: 0px;
+
+  /* Hide scrollbar (cross-browser) */
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE and Edge */
 }
- 
-/* Optional: style the scrollbar for modern browsers */
+
 .table-scroll::-webkit-scrollbar {
-  width: 8px;
+  display: none;                /* Chrome, Safari */
 }
- 
+
 .table-scroll::-webkit-scrollbar-thumb {
   background-color: #ccc;
   border-radius: 4px;
