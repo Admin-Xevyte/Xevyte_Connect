@@ -24,11 +24,21 @@ html, body {
 
 /* Ensures the table wrapper scrolls properly */
 .table {
-  max-height: calc(100vh - 200px); /* Adjust based on your layout */
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  margin-top: 10px;
+  flex: 1;
+  overflow-y: scroll; /* Use scroll for proper behavior */
+  padding-right: 10px;
+  padding-bottom: 20px;
+  max-height: calc(100vh - 300px);
+
+  /* Hide scrollbar but keep scroll functionality */
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE and Edge */
 }
+
+.table::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari */
+}
+
 
 /* Table styling */
 .status {
