@@ -25,34 +25,26 @@ body {
         /* IE/Edge */
 }
 
-/* Links */
-.back-link {
-  color: #3b6efb;
-  text-decoration: none;
-  font-weight: 300;
-  margin:0 ;
-  margin-left: 30px;
-  display: inline-block;
-}
+
 
 /* Typography */
 .page-title {
   font-size: 28px;
   margin-bottom: 4px;
-  margin-left: 20px;
+  margin-left: 45px;
 }
 
 .page-subtitle {
   color: #666;
   margin-bottom: 30px;
-  margin-left: 20px;
+  margin-left: 45px;
 }
 
 .section-desc {
   font-size: 14px;
   color: #888;
   margin-top: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
 }
 
@@ -62,7 +54,7 @@ body {
   gap: 30px;
   align-items: flex-start;
   margin-left: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   
 }
 
@@ -76,7 +68,7 @@ body {
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 label {
