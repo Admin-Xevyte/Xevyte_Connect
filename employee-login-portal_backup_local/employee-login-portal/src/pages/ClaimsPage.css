@@ -1,45 +1,45 @@
-/* Adjusting divider space */
+/* Base styles (Desktop & larger screens) */
+
+/* Divider line styling */
 .divider-line {
   border: none;
-  border-top: 2px solid #ccc;  /* Light gray line */
-  margin: 10px 0;     
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);         /* Reduced spacing between sections */
+  border-top: 2px solid #ccc;
+  margin: 10px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Adjusting space above divider */
 .main-container .divider {
-  margin-top: 10px;   /* Reduced margin from 60px to 10px */
+  margin-top: 10px;
   margin-bottom: 20px;
   height: 2px;
   width: 100%;
-  background-color: #ccc;  /* Light gray color */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Adding shadow for emphasis */
+  background-color: blueviolet; /* Changed as requested */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Quick actions grid updates */
+/* Quick actions grid */
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);  /* 3 equal-width columns */
-  gap: 16px;  /* Space between items */
-  margin-top: 10px; /* Reduced margin-top to bring the grid closer */
-  padding: 0 20px;  /* Prevent content from touching the sides */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 10px;
+  padding: 0 20px;
   box-sizing: border-box;
 }
-/* Quick actions grid updates */
-.quick-actions-grid .twi{
-width:80vh;
 
+.quick-actions-grid .twi {
+  width: 80vh;
 }
-.twi .action-box{
+
+.twi .action-box {
   margin-top: 15px;
 }
 
-
-/* Adjust each action box */
+/* Each action box styling */
 .action-box {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Changed from space-between */
+  justify-content: flex-start;
   padding: 20px;
   border-radius: 12px;
   background: #f9f9f9;
@@ -47,22 +47,14 @@ width:80vh;
   transition: box-shadow 0.2s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   min-height: 120px;
-  gap: 16px; /* Added gap to space out the items */
+  gap: 16px;
 }
 
-/* Arrow styling */
-.arrow {
-  margin-left: auto; /* This line is crucial for pushing the arrow to the right */
-  font-size: 22px;
-  color: #999;
-}
-
-/* Hover effect for action boxes */
 .action-box:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Icon styling */
+/* Icon & arrow styling */
 .icon {
   font-size: 26px;
   background: #ffffff70;
@@ -71,7 +63,13 @@ width:80vh;
   margin-right: 16px;
 }
 
-/* Title and description inside each action box */
+.arrow {
+  margin-left: auto;
+  font-size: 22px;
+  color: #999;
+}
+
+/* Text in action box */
 .action-box h3 {
   margin: 0;
   font-size: 16px;
@@ -84,38 +82,14 @@ width:80vh;
   color: #666;
 }
 
-/* Arrow styling */
-.arrow {
-  margin-left: auto;
-  font-size: 22px;
-  color: #999;
-}
+/* Background color variations */
+.light-blue { background: #e3ecff; }
+.light-green { background: #e4f8e9; }
+.light-yellow { background: #fff5db; }
+.light-purple { background: #f3ecff; }
+.action-box.saved-drafts { background-color: #f3cfbb; }
 
-/* Background color variations for different action boxes */
-.light-blue {
-  background: #e3ecff;
-}
-
-.light-green {
-  background: #e4f8e9;
-}
-
-.light-yellow {
-  background: #fff5db;
-}
-
-.light-purple {
-  background: #f3ecff;
-}
-
-/* Responsiveness for smaller screens */
-@media (max-width: 768px) {
-  .quick-actions-grid {
-    grid-template-columns: 1fr 1fr; /* Stack items in 2 columns */
-  }
-}
-
-/* Adjustments to Sidebar and Main Content */
+/* Sidebar */
 .sidebar {
   width: 270px;
   height: 832px;
@@ -150,7 +124,7 @@ width:80vh;
   display: block;
 }
 
-/* Action Buttons */
+/* Action buttons */
 .actions-section button {
   margin-right: 15px;
   padding: 10px 20px;
@@ -160,12 +134,11 @@ width:80vh;
   border-radius: 5px;
   cursor: pointer;
 }
-
 .actions-section button:hover {
   background-color: #125ea3;
 }
 
-/* Topbar search input adjustments */
+/* Search input */
 .main-search-wrapper {
   position: relative;
   width: 260px;
@@ -179,44 +152,50 @@ width:80vh;
   border-radius: 6px;
 }
 
-/* Divider Styling (within main container) */
-.main-container .divider {
-  margin-top: 10px;  /* Adjusted margin */
-  margin-bottom: 20px;
-  height: 2px;
-  width: 100%;
-  background-color: blueviolet;  /* Changed color to blueviolet */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Responsive Styles */
+
+/* Tablets (up to 1024px) */
+@media (max-width: 1024px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 0 16px;
+  }
+
+  .sidebar {
+    width: 200px;
+    height: auto; /* Let height adjust */
+  }
+
+  .main-search-wrapper {
+    width: 200px;
+  }
 }
 
-/* Responsive layout fixes */
+/* Mobile devices (up to 768px) */
 @media (max-width: 768px) {
-  .summary-card {
-    width: 100%;
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+    padding: 0 16px;
   }
 
   .actions-section {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  /* Updated Quick actions grid for 2 cards per row */
-.quick-actions-grid1 {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);  /* ✅ Now 2 equal-width columns */
-  gap: 20px;  /* Increased spacing between cards */
-  margin-top: 20px;
-  padding: 0 24px;
-  box-sizing: border-box;
-}
-
-}
-/* Mobile responsive: 1 card per row on small screens */
-@media (max-width: 768px) {
-  .quick-actions-grid {
-    grid-template-columns: 1fr;  /* Stack items vertically on mobile */
-    padding: 0 16px;
+  .sidebar {
+    width: 100%;
+    height: auto;
+    padding: 10px;
   }
-}
-.action-box.saved-drafts {
-  background-color: #f3cfbb;
+
+  .main-search-wrapper {
+    width: 100%;
+  }
+
+  .summary-card {
+    width: 100%;
+  }
 }
