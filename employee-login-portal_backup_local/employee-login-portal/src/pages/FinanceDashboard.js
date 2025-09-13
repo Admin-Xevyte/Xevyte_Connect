@@ -35,10 +35,16 @@ function FinanceDashboard() {
   const navigate = useNavigate();
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-
+const [loading, setLoading] = useState(true);
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const toggleProfileMenu = () => setProfileOpen(!profileOpen);
-
+  const [isContractOpen, setIsContractOpen] = useState(false);
+const [validationErrors, setValidationErrors] = React.useState({});
+const [allocationErrors, setAllocationErrors] = React.useState([]);
+  const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
+const toggleContractMenu = () => {
+  setIsContractOpen(!isContractOpen);
+};
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -124,17 +130,25 @@ function FinanceDashboard() {
     }
   }, [searchTerm, originalClaims]);
 
-  const fetchClaims = (financeId) => {
-    axios
-      .get(`/claims/finance/${financeId}`)
-      .then((response) => {
-        // Sort claims by submittedDate in descending order (latest first)
-        const sortedClaims = response.data.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
-        setClaims(sortedClaims);
-        setOriginalClaims(sortedClaims); // Save the sorted original data
-      })
-      .catch((error) => console.error("Error fetching assigned finance claims:", error));
-  };
+const fetchClaims = (financeId) => {
+  setLoading(true); // Start loading
+
+  axios
+    .get(`/claims/finance/${financeId}`)
+    .then((response) => {
+      const sortedClaims = response.data.sort(
+        (a, b) => new Date(b.submittedDate) - new Date(a.submittedDate)
+      );
+      setClaims(sortedClaims);
+      setOriginalClaims(sortedClaims);
+    })
+    .catch((error) => {
+      console.error("Error fetching assigned finance claims:", error);
+    })
+    .finally(() => {
+      setLoading(false); // End loading
+    });
+};
 
   const handleApprove = async (claimId) => {
     try {
@@ -280,27 +294,171 @@ function FinanceDashboard() {
               onClick={toggleSidebar}
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
- <h3>
-                        <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                            Home
-                           
-                          </span>
-                        </Link>
-                      </h3>
-                      <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'white' }}>Claims</Link></h3>
-                      <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                      <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                      <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                      <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                      <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                      <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                      <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-                    
-                      <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                      <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Performance</Link></h3>
-                      <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                      <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
+<h3>
+    <Link
+      to="/dashboard"
+      className="side"
+      style={{
+        textDecoration: 'none',
+        color:'#00b4c6',
+      }}
+    >
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        Home
+      </span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+    </Link>
+  </h3>
+  
+  <h3>
+    <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+    </Link>
+  </h3>
+  {allowedUsers.includes(employeeId) && (
+                                        <>
+                                          <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                            <span className="side" style={{  color:'#00b4c6' }}>
+                                              Contract Management {isContractOpen ? '▾' : '▸'}
+                                            </span>
+                                          </h3>
+                                      
+                                          {isContractOpen && (
+                                            <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                              <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                <Link
+                                                  to="/customers"
+                                                  style={{
+                                                    textDecoration: 'none',
+                                                   color:'#00b4c6',
+                                                    fontSize: '14px',
+                                                    display: 'block',
+                                                    padding: '4px 0',
+                                                  }}
+                                                  onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                  onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                >
+                                                  Customers
+                                                </Link>
+                                              </li>
+                                              <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                <Link
+                                                  to="/sows"
+                                                  style={{
+                                                    textDecoration: 'none',
+                                                   color:'#00b4c6',
+                                                    fontSize: '14px',
+                                                    display: 'block',
+                                                    padding: '4px 0',
+                                                  }}
+                                                  onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                  onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                >
+                                                  SOWs
+                                                </Link>
+                                              </li>
+                                              <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                <Link
+                                                  to="/projects"
+                                                  style={{
+                                                    textDecoration: 'none',
+                                                   color:'#00b4c6',
+                                                    fontSize: '14px',
+                                                    display: 'block',
+                                                    padding: '4px 0',
+                                                  }}
+                                                  onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                  onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                >
+                                                  Projects
+                                                </Link>
+                                              </li>
+                                              <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                <Link
+                                                  to="/allocation"
+                                                  style={{
+                                                    textDecoration: 'none',
+                                                   color:'#00b4c6',
+                                                    fontSize: '14px',
+                                                    display: 'block',
+                                                    padding: '4px 0',
+                                                  }}
+                                                  onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                  onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                >
+                                                  Allocation
+                                                </Link>
+                                              </li>
+                                            </ul>
+                                          )}
+                                        </>
+                                      )}
+          
           </>
         ) : (
           <div className="collapsed-wrapper">
@@ -390,24 +548,31 @@ function FinanceDashboard() {
           </div>
           <hr className="divider-line" />
         </div>
- <button
+<button
     onClick={() => navigate(-1)}
     style={{
-      backgroundColor: 'transparent',
-      border: 'none',
-      color: '#007bff',
-      fontSize: '16px',
-      cursor: 'pointer',
-      marginBottom: '10px',
-      padding: '5px 0',
-      textAlign: 'left'
+        padding: "8px 16px", // Slightly reduced padding
+         backgroundColor: "#f0f0f0",
+       color: "#333",
+       fontSize: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      cursor: "pointer",
+      margin: "20px 0 20px 0", // Top and bottom margins only
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        transition: "background-color 0.3s ease",
+        width: "fit-content", // Make width only as big as content
+        display: "block", // Ensure it respects margin auto if needed
     }}
-  >
-    ← Back
-  </button>
-        {claims.length === 0 ? (
-          <p>You do not have any assigned claims at the moment.</p>
-        ) : (
+>
+    ⬅ Back
+</button>
+             {loading ? (
+  <p>Loading claims...</p>
+) : claims.length === 0 ? (
+  <p>You do not have any assigned claims at the moment.</p>
+) : (
+
           <div className="table-wrapper">
             <table className="status-table">
               <thead>
@@ -416,8 +581,7 @@ function FinanceDashboard() {
                   <th>Employee ID</th>
                   <th>Employee Name</th>
                   <th>Category</th>
-                  <th>Business Purpose</th>
-                  <th>Additional Notes</th>
+             
                   <th>Amount</th>
                   <th>Description</th>
                   <th>Expense Date</th>
@@ -433,11 +597,10 @@ function FinanceDashboard() {
                     <td>{claim.employeeId}</td>
                     <td>{claim.name}</td>
                     <td>{claim.category}</td>
-                    <td>{claim.businessPurpose}</td>
-                    <td>{claim.additionalNotes}</td>
+                    
                     <td>{claim.amount}</td>
                     <td>{claim.expenseDescription}</td>
-                    <td>{claim.expenseDate}</td>
+                   <td>{new Date(claim.expenseDate).toLocaleDateString('en-GB')}</td>
                     <td>
                   {claim.receiptName ? (
                     <button
