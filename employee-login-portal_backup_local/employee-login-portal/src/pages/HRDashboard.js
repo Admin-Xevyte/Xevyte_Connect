@@ -561,11 +561,13 @@ function HRDashboard() {
 >
     ⬅ Back
 </button>
-                {loading ? (
-                    <h2>Loading your HR Dashboard...</h2>
-                ) : (!employeeId || claims.length === 0) ? (
-                    <p>You do not have any assigned claims at the moment.</p>
-                ) : (
+                           {loading ? null : !employeeId ? (
+  <p>Please login or provide an employee ID.</p>
+) : originalClaims.length === 0 ? (
+  <p>You do not have any assigned claims at the moment.</p>
+) : claims.length === 0 ? (
+  <p>No claims found matching your search criteria.</p>
+) : (
                     <div className="table-wrapper">
                         <table className="status-table">
                             <thead>
