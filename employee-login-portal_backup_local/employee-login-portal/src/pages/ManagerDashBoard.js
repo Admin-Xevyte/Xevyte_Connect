@@ -622,7 +622,7 @@ useEffect(() => {
                     {/* <td>{claim.additionalNotes}</td> */}
                     <td>{claim.amount}</td>
                     <td>{claim.expenseDescription}</td>
-                  <td>{new Date(claim.expenseDate).toLocaleDateString('en-GB')}</td>
+                <td>{new Date(claim.expenseDate).toLocaleDateString('en-GB').replaceAll('/', '-')}</td>
 
                     <td>
                       {claim.receiptName ? (
