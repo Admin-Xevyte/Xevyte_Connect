@@ -587,10 +587,12 @@ useEffect(() => {
 >
     ⬅ Back
 </button>
-        {loading ? (
-  <p>Loading claims...</p>
-) : claims.length === 0 ? (
+                 {loading ? null : !employeeId ? (
+  <p>Please login or provide an employee ID.</p>
+) : originalClaims.length === 0 ? (
   <p>You do not have any assigned claims at the moment.</p>
+) : claims.length === 0 ? (
+  <p>No claims found matching your search criteria.</p>
 ) : (
 
           <div className="table-wrapper">
