@@ -8,7 +8,8 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
 
-pdfjs.GlobalWorkerOptions.workerSrc = `${process.env.PUBLIC_URL}/pdf.worker.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = '/static/media/pdf.worker.min.6528d598f5e6651e9f85.mjs';
+
 function ManagerDashBoard() {
   const [claims, setClaims] = useState([]);
   const [originalClaims, setOriginalClaims] = useState([]); // New state to hold all claims
