@@ -1,8 +1,18 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 function LeaveHistory() {
+    
+    const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
     const employeeId = localStorage.getItem("employeeId");
     const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
     const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
@@ -30,7 +40,6 @@ function LeaveHistory() {
         status: '',
     });
    
-
 
     // Fetch updated profile info on mount (optional but recommended)
     useEffect(() => {
@@ -100,6 +109,7 @@ function LeaveHistory() {
     const toggleSidebar = () => setIsCollapsed(!isCollapsed);
     const toggleProfileMenu = () => setProfileOpen(!profileOpen);
 
+    
     const handleLogout = () => {
         localStorage.clear();
         sessionStorage.clear();
@@ -163,7 +173,6 @@ function LeaveHistory() {
     }
 };
 
-
     const handleCancelLeave = async (leaveId) => {
         if (window.confirm("Are you sure you want to cancel this leave request?")) {
             try {
@@ -194,6 +203,7 @@ function LeaveHistory() {
 
     const handleFilterChange = (event) => {
         const { name, value } = event.target;
+        
         setFilters(prevFilters => ({
             ...prevFilters,
             [name]: value
@@ -266,7 +276,6 @@ function LeaveHistory() {
         return finalFilteredLeaves;
     };
 
-
     const leavesToDisplay = sortedAndFilteredLeaves();
 
     const getSortIndicator = (key) => {
@@ -277,7 +286,10 @@ function LeaveHistory() {
     };
 
     return (
+
+        
         <div className="dashboard-container">
+            
             {/* Sidebar */}
             <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
                 {!isCollapsed ? (
@@ -295,26 +307,26 @@ function LeaveHistory() {
                             style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
                         />
                    <h3>
-                                          <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
+                                          <Link to="/dashboard" className="side" style={{ textDecoration: 'none',color:'#00b4c6'}}>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '10px',color:'#00b4c6'}}>
                                               Home
                                              
                                             </span>
                                           </Link>
                                         </h3>
-                                        <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
-                                        <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                                        <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                                        <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                                        <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                                        <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                                        <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
+                                        <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Claims</Link></h3>
+                                        <h3><Link to="/home1" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Time Sheet</Link></h3>
+                                        <h3><Link to="/home2" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Handbook</Link></h3>
+                                        <h3><Link to="/home3" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Directory</Link></h3>
+                                        <h3><Link to="/home4" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Exit Management</Link></h3>
+                                        <h3><Link to="/home5" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Holiday Calendar</Link></h3>
+                                        <h3><Link to="/home6" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Helpdesk</Link></h3>
                                         <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'white' }}>Leaves</Link></h3>
                                       
-                                        <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                                        <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Performance</Link></h3>
-                                        <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                                        <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
+                                        <h3><Link to="/home9" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Pay slips</Link></h3>
+                                        <h3><Link to="/home10" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Performance</Link></h3>
+                                        <h3><Link to="/home11" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Training</Link></h3>
+                                        <h3><Link to="/home12" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Travel</Link></h3>
                     </>
                 ) : (
                     <div className="collapsed-wrapper">
@@ -456,6 +468,25 @@ function LeaveHistory() {
                 </div>
 
                 <hr className="divider-line" />
+                <button
+    onClick={() => navigate(-1)}
+    style={{
+        padding: "8px 16px", // Slightly reduced padding
+         backgroundColor: "#f0f0f0",
+       color: "#333",
+       fontSize: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      cursor: "pointer",
+      margin: "20px 0 20px 0", // Top and bottom margins only
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        transition: "background-color 0.3s ease",
+        width: "fit-content", // Make width only as big as content
+        display: "block", // Ensure it respects margin auto if needed
+    }}
+>
+    ⬅ Back
+</button>
 
                 {/* Leave History Content */}
                 <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -485,6 +516,7 @@ function LeaveHistory() {
                                         <option value="Casual Leave">Casual Leave</option>
                                         <option value="Maternity Leave">Maternity Leave</option>
                                         <option value="Paternity Leave">Paternity Leave</option>
+                                         <option value="LOP">LOP</option>
                                         {/* Add more if needed */}
                                     </select>
 
@@ -502,6 +534,7 @@ function LeaveHistory() {
                                                 name="totalDays"
                                                 placeholder="Search..."
                                                 value={filters.totalDays}
+                                                  min="1"
                                                 onChange={handleFilterChange}
                                                 style={{ marginLeft: '5px', fontSize: '14px', padding: '5px', width: '100px' }}
                                             />
@@ -537,26 +570,32 @@ function LeaveHistory() {
                                <tbody>
                                 {leavesToDisplay.map((leave) => (
                                     <tr key={leave.id} style={{ borderBottom: '1px solid #eee' }}>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.id}</td>
+                                        <td style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'center' }}>{leave.id}</td>
                                         <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.type}</td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.startDate}</td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.endDate}</td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.totalDays}</td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.reason}</td>
+                                       <td style={{ padding: '12px', border: '1px solid #ddd' }}>{formatDate(leave.startDate)}</td>
+                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>{formatDate(leave.endDate)}</td>
+                                        <td style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'center' }}>{leave.totalDays}</td>
+                                        <td style={{ padding: '12px', border: '1px solid #ddd',  wordWrap: 'break-word',
+                                        wordBreak: 'break-all',
+                                        whiteSpace: 'normal',  width: '25%'}}>{leave.reason}</td>
                                         <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                            {leave.fileName ? (
-                                                <a
-                                                    href={`/leaves/download/${leave.id}`}
-                                                    download={leave.fileName}
-                                                    style={{ color: '#007bff', textDecoration: 'underline' }}
-                                                >
-                                                    Leave Document
-                                                </a>
-                                            ) : (
-                                                <span>No File</span>
-                                            )}
-                                        </td>
-                                        <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.rejectionReason}</td>
+    {leave.fileName ? (
+       <a
+            href={`/download/${leave.id}`} download={leave.fileName}
+            style={{ color: '#007bff', textDecoration: 'underline' }}
+            title={leave.fileName} // This attribute displays the full name on hover
+        >
+            {leave.fileName.length > 10 ? 
+                `${leave.fileName.substring(0, 10)}...` : 
+                leave.fileName}
+        </a> 
+    ) : (
+        <span>No File</span>
+    )}
+</td>
+                                        <td style={{ padding: '12px', border: '1px solid #ddd',  wordWrap: 'break-word',
+                                        wordBreak: 'break-all',
+                                        whiteSpace: 'normal',  width: '25%'}}>{leave.rejectionReason}</td>
                                         <td style={{ padding: '12px', border: '1px solid #ddd' }}>
                                             <span style={{
                                                 padding: '5px 10px',
