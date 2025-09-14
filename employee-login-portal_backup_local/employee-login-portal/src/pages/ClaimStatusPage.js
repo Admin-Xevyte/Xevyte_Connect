@@ -32,7 +32,7 @@ function ClaimStatusPage() {
   const navigate = useNavigate();
   const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
     const [isContractOpen, setIsContractOpen] = useState(false);
-  
+  const [loading, setLoading] = useState(true);
   const toggleContractMenu = () => {
     setIsContractOpen(!isContractOpen);
   };
@@ -73,24 +73,30 @@ const truncateFileName = (fileName, length = 10) => {
       .catch(err => console.error("Failed to fetch profile info:", err));
   }, [employeeId]);
  
-useEffect(() => {
+
+
+  useEffect(() => {
+    setLoading(true); // start loading before fetch
     fetch(`/claims/history/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const filteredClaims = data.filter(
           claim => claim.status !== "Rejected" && claim.status !== "Paid"
         );
-       
-        // Sort claims in descending order based on submittedDate
+
         const sortedClaims = filteredClaims.sort((a, b) => {
           const dateA = new Date(a.submittedDate);
           const dateB = new Date(b.submittedDate);
-          return dateB - dateA; // For descending order
+          return dateB - dateA;
         });
-       
+
         setClaims(sortedClaims);
+        setLoading(false); // done loading after data set
       })
-      .catch(err => console.error("Error fetching status:", err));
+      .catch(err => {
+        console.error("Error fetching status:", err);
+        setLoading(false); // also stop loading on error
+      });
   }, [employeeId]);
   useEffect(() => {
     function handleClickOutside(event) {
@@ -508,9 +514,11 @@ useEffect(() => {
  
   <h2>Your Claim Status</h2>
  
-  {filteredClaims.length === 0 ? (
-    <p>No claims submitted yet.</p>
-  ) : (
+{loading ? null : claims.length === 0 ? (
+  <p>No claims submitted yet.</p>
+) : filteredClaims.length === 0 ? (
+  <p>No claims found for your search criteria.</p>
+) : (
     <div className="table">
       <table className="status-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
