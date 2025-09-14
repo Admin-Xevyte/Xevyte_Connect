@@ -31,7 +31,8 @@ function ClaimHistoryPage() {
   const location = useLocation();
  const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
    const [isContractOpen, setIsContractOpen] = useState(false);
- 
+ const [loading, setLoading] = useState(true);
+
  const toggleContractMenu = () => {
    setIsContractOpen(!isContractOpen);
  };
@@ -55,16 +56,21 @@ const formatDate = (dateString) => {
     return fileName;
   };
  
-  // Memoized function to fetch claims to prevent unnecessary re-creations
-  const fetchClaims = useCallback(() => {
-    fetch(`/claims/history/${employeeId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const sortedClaims = data.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
-        setClaims(sortedClaims);
-      })
-      .catch((err) => console.error("Error fetching history:", err));
-  }, [employeeId]);
+const fetchClaims = useCallback(() => {
+  setLoading(true); // start loading
+  fetch(`/claims/history/${employeeId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      const sortedClaims = data.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
+      setClaims(sortedClaims);
+      setLoading(false); // done loading
+    })
+    .catch((err) => {
+      console.error("Error fetching history:", err);
+      setLoading(false); // stop loading even on error
+    });
+}, [employeeId]);
+
  
   // Combined useEffect for all data fetching and side effects
   useEffect(() => {
@@ -521,10 +527,11 @@ const formatDate = (dateString) => {
 >
     ⬅ Back
 </button>
-          <h2>Your Claim History</h2>
-          {filteredClaims.length === 0 ? (
-            <p>No claims found matching your search criteria.</p>
-          ) : (
+     {loading ? null : claims.length === 0 ? (
+  <p>No claims submitted yet.</p>
+) : filteredClaims.length === 0 ? (
+  <p>No claims found for your search criteria.</p>
+) : (
             <div className="tablee">
               <table className="status-table">
                 <thead>
