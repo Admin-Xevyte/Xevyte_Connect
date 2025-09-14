@@ -390,7 +390,25 @@ const filteredLeaves = useMemo(() => {
         </div>
 
         <hr className="divider-line" />
-
+        <button
+    onClick={() => navigate(-1)}
+    style={{
+        padding: "8px 16px", // Slightly reduced padding
+         backgroundColor: "#f0f0f0",
+       color: "#333",
+       fontSize: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      cursor: "pointer",
+      margin: "20px 0 20px 0", // Top and bottom margins only
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        transition: "background-color 0.3s ease",
+        width: "fit-content", // Make width only as big as content
+        display: "block", // Ensure it respects margin auto if needed
+    }}
+>
+    ⬅ Back
+</button>
         <div style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
           <h2 style={{ marginBottom: '20px' }}>Team Leave Data</h2>
           {loading ? (
