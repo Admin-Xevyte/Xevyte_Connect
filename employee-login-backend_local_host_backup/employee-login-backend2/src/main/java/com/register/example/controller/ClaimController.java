@@ -79,10 +79,7 @@ public class ClaimController {
         String result = claimService.approveClaim(id, role);
         return ResponseEntity.ok(result);
     }
-   @GetMapping("/new")
-    public String newClaim() {
-        return "This is the page for creating a new claim.";
-    }
+  
 
     @PostMapping("/reject/{id}")
     public ResponseEntity<String> rejectClaim(
