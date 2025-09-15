@@ -13,10 +13,31 @@ function MyTeam3() {
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
+const [isManager, setIsManager] = useState(false);
+const [isAdmin, setIsAdmin] = useState(false);
 
   const [roleView, setRoleView] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState({});
+const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+  const [isContractOpen, setIsContractOpen] = useState(false);
+ const [canViewTasks, setCanViewTasks] = useState(false);
+const toggleContractMenu = () => {
+  setIsContractOpen(!isContractOpen);
+};
+  useEffect(() => {
+  if (employeeId) {
+    fetch(`/access/assigned-ids/${employeeId}`)
+      .then(res => res.json())
+      .then(data => {
+        setIsManager(data.manager);
+        setIsAdmin(data.admin);
+      })
+      .catch(err => {
+        console.error("Error fetching assigned roles:", err);
+      });
+  }
+}, [employeeId]);
 
   useEffect(() => {
     if (employeeId) {
@@ -283,28 +304,172 @@ function MyTeam3() {
               onClick={toggleSidebar}
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
-         <h3>
-                                <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                    Home
-                                   
-                                  </span>
-                                </Link>
-                              </h3>
-                              <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
-                              <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                              <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                              <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                              <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                              <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                              <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                              <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-                            
-                              <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                              <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Performance</Link></h3>
-                              <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                              <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'white' }}>Travel</Link></h3>
-          </>
+          <h3>
+            <Link
+              to="/dashboard"
+              className="side"
+              style={{
+                textDecoration: 'none',
+                color:'#00b4c6',
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                Home
+              </span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+            </Link>
+          </h3>
+          {allowedUsers.includes(employeeId) && (
+                                                <>
+                                                  <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                                    <span className="side" style={{  color:'#00b4c6' }}>
+                                                      Contract Management {isContractOpen ? '▾' : '▸'}
+                                                    </span>
+                                                  </h3>
+                                              
+                                                  {isContractOpen && (
+                                                    <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                      <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                        <Link
+                                                          to="/customers"
+                                                          style={{
+                                                            textDecoration: 'none',
+                                                           color:'#00b4c6',
+                                                            fontSize: '14px',
+                                                            display: 'block',
+                                                            padding: '4px 0',
+                                                          }}
+                                                          onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                          onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                        >
+                                                          Customers
+                                                        </Link>
+                                                      </li>
+                                                      <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                        <Link
+                                                          to="/sows"
+                                                          style={{
+                                                            textDecoration: 'none',
+                                                           color:'#00b4c6',
+                                                            fontSize: '14px',
+                                                            display: 'block',
+                                                            padding: '4px 0',
+                                                          }}
+                                                          onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                          onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                        >
+                                                          SOWs
+                                                        </Link>
+                                                      </li>
+                                                      <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                        <Link
+                                                          to="/projects"
+                                                          style={{
+                                                            textDecoration: 'none',
+                                                           color:'#00b4c6',
+                                                            fontSize: '14px',
+                                                            display: 'block',
+                                                            padding: '4px 0',
+                                                          }}
+                                                          onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                          onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                        >
+                                                          Projects
+                                                        </Link>
+                                                      </li>
+                                                      <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                        <Link
+                                                          to="/allocation"
+                                                          style={{
+                                                            textDecoration: 'none',
+                                                           color:'#00b4c6',
+                                                            fontSize: '14px',
+                                                            display: 'block',
+                                                            padding: '4px 0',
+                                                          }}
+                                                          onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                          onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                        >
+                                                          Allocation
+                                                        </Link>
+                                                      </li>
+                                                    </ul>
+                                                  )}
+                                                </>
+                                              )}
+                  
+                  </>
         ) : (
           <div className="collapsed-wrapper">
             <img
@@ -423,204 +588,203 @@ function MyTeam3() {
         </div>
 
         <hr className="divider-line" />
+      <button
+    onClick={() => navigate(-1)}
+    style={{
+        padding: "8px 16px", // Slightly reduced padding
+         backgroundColor: "#f0f0f0",
+       color: "#333",
+       fontSize: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      cursor: "pointer",
+      margin: "20px 0 20px 0", // Top and bottom margins only
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        transition: "background-color 0.3s ease",
+        width: "fit-content", // Make width only as big as content
+        display: "block", // Ensure it respects margin auto if needed
+    }}
+>
+    ⬅ Back
+</button>
+         <div style={{ padding: "20px" }}>
+      <h2>View Pending Requests</h2>
 
-        <div style={{ padding: "20px" }}>
-          <h2>View Pending Requests</h2>
-
-          {!roleView && (
-            <div style={{ display: "flex", gap: "20px" }}>
-              <div
-                onClick={() => setRoleView("Manager")}
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "20px",
-                  cursor: "pointer",
-                  borderRadius: "8px",
-                  backgroundColor: "#f2f2f2",
-                }}
-              >
-                View as Manager
-              </div>
-              <div
-                onClick={() => setRoleView("Admin")}
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "20px",
-                  cursor: "pointer",
-                  borderRadius: "8px",
-                  backgroundColor: "#f2f2f2",
-                }}
-              >
-                View as Admin
-              </div>
+      {!roleView && (
+        <div style={{ display: "flex", gap: "20px" }}>
+          {isManager && (
+            <div
+              onClick={() => setRoleView("Manager")}
+              style={{
+                border: "1px solid #ccc",
+                padding: "20px",
+                cursor: "pointer",
+                borderRadius: "8px",
+                backgroundColor: "#f2f2f2",
+              }}
+            >
+              View as Manager
             </div>
           )}
 
-          {roleView && (
+          {isAdmin && (
             <div
+              onClick={() => setRoleView("Admin")}
               style={{
-                height: "calc(100vh - 200px)",
-                overflowY: "auto",
                 border: "1px solid #ccc",
-                marginTop: "20px",
+                padding: "20px",
+                cursor: "pointer",
+                borderRadius: "8px",
+                backgroundColor: "#f2f2f2",
               }}
             >
-              <h3>Pending Travel Requests ({roleView})</h3>
-              {pendingRequests.length === 0 ? (
-                <p style={{ padding: "10px" }}>No pending requests found.</p>
-              ) : (
-                <table border="1" cellPadding="10" style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead style={{ position: "sticky", top: 0, zIndex: 1 ,color:"black"}}>
-  <tr>
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>Employee ID</th>
-    <th style={{ backgroundColor: "#f0f0f0" ,color:"black"}}>Employee Name</th>
-    <th style={{ backgroundColor: "#f0f0f0" ,color:"black"}}>Category</th>
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>Mode</th>
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>Depart</th>
-    <th style={{ backgroundColor: "#f0f0f0" ,color:"black"}}>Return</th>
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>From</th>
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>To</th>
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>Accommodation</th>
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>Advance</th>
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>Purpose</th>
-    {roleView === "Admin" && <th style={{ backgroundColor: "#f0f0f0" ,color:"black"}}>Upload Ticket*</th>}
-    <th style={{ backgroundColor: "#f0f0f0",color:"black" }}>Action</th>
-  </tr>
-</thead>
-
-                  <tbody>
-                    {pendingRequests.map((req) => (
-                      <tr key={req.id}>
-                        <td>{req.employeeId}</td>
-                        <td>{req.employeeName}</td>
-                        <td>{req.category}</td>
-                        <td>{req.modeOfTravel}</td>
-                        <td>{new Date(req.departureDate).toLocaleDateString("en-GB").replace(/\//g, "-")}</td>
-                        <td>
-                          {req.returnDate
-                            ? new Date(req.returnDate).toLocaleDateString("en-GB").replace(/\//g, "-")
-                            : ""}
-                        </td>
-                        <td>{req.fromLocation}</td>
-                        <td>{req.toLocation}</td>
-                        <td>{req.accommodationRequired}</td>
-                        <td>{req.advanceRequired}</td>
-                        <td style={{ whiteSpace: "pre-wrap", fontFamily: "monospace" }}>
-                          {splitIntoRows(req.remarks, 50).map((row, idx) => (
-                            <div key={idx}>{row}</div>
-                          ))}
-                        </td>
-
-                        {roleView === "Admin" && (
-                          <td>
-                            <label
-                              htmlFor={`file-upload-${req.id}`}
-                              style={{
-                                display: "inline-block",
-                                padding: "6px 12px",
-                                backgroundColor: "#6e7073ff",
-                                color: "white",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                                fontSize: "0.9em",
-                              }}
-                            >
-                              Choose File
-                            </label>
-                            <input
-                              id={`file-upload-${req.id}`}
-                              type="file"
-                              accept="application/pdf,image/jpeg,image/png"
-                              multiple
-                              style={{ display: "none" }}
-                              onChange={(e) => handleFileChange(req.id, e)}
-                            />
-                            <div style={{ marginTop: "5px", fontSize: "0.9em", color: "#333" }}>
-                              {selectedFiles[req.id] && selectedFiles[req.id].length > 0
-                                ? selectedFiles[req.id].map((file, index) => {
-                                  const truncated =
-                                    file.name.length > 10 ? file.name.slice(0, 10) + "..." : file.name;
-                                  return (
-                                    <div
-                                      key={index}
-                                      style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      <div>{truncated}</div>
-                                      <span
-                                        onClick={() => handleRemoveFile(req.id, index)}
-                                        style={{ color: "red", cursor: "pointer" }}
-                                      >
-                                        &times;
-                                      </span>
-                                    </div>
-                                  );
-                                })
-                                : "No file selected"}
-                            </div>
-                          </td>
-                        )}
-
-                        <td>
-                          {roleView === "Manager" ? (
-                            <>
-                              <button
-                                onClick={() => handleApprove(req.id)}
-                                style={{
-                                  backgroundColor: "green",
-                                  color: "white",
-                                  border: "none",
-                                  padding: "6px 12px",
-                                  cursor: "pointer",
-                                  borderRadius: "4px",
-                                  marginBottom: "8px",
-                                }}
-                              >
-                                Approve
-                              </button>
-                              <br />
-                              <button
-                                onClick={() => handleReject(req.id)}
-                                style={{
-                                  backgroundColor: "red",
-                                  color: "white",
-                                  border: "none",
-                                  padding: "6px 12px",
-                                  cursor: "pointer",
-                                  borderRadius: "4px",
-                                  width: "75px",
-                                }}
-                              >
-                                Reject
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => handleUpload(req.id)}
-                              style={{
-                                backgroundColor: "#007bff",
-                                color: "white",
-                                border: "none",
-                                padding: "6px 12px",
-                                cursor: "pointer",
-                                borderRadius: "4px",
-                              }}
-                            >
-                              Confirm
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+              View as Admin
             </div>
           )}
         </div>
+      )}
+
+      {roleView && (
+        <div
+          style={{
+            height: "calc(100vh - 200px)",
+            overflowY: "auto",
+            border: "1px solid #ccc",
+            marginTop: "20px",
+          }}
+        >
+          <h3>Pending Travel Requests ({roleView})</h3>
+
+          {pendingRequests.length === 0 ? (
+            <p style={{ padding: "10px" }}>No pending requests found.</p>
+          ) : (
+            <table border="1" cellPadding="10" style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead style={{ position: "sticky", top: 0, zIndex: 1, color: "black" }}>
+                <tr>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Employee ID</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Employee Name</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Category</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Mode</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Depart</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Return</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>From</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>To</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Accommodation</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Advance</th>
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Purpose</th>
+                  {roleView === "Admin" && (
+                    <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Upload Ticket*</th>
+                  )}
+                  <th style={{ backgroundColor: "#f0f0f0", color: "black" }}>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {pendingRequests.map((req) => (
+                  <tr key={req.id}>
+                    <td>{req.employeeId}</td>
+                    <td>{req.employeeName}</td>
+                    <td>{req.category}</td>
+                    <td>{req.modeOfTravel}</td>
+                    <td>{new Date(req.departureDate).toLocaleDateString("en-GB").replace(/\//g, "-")}</td>
+                    <td>{req.returnDate ? new Date(req.returnDate).toLocaleDateString("en-GB").replace(/\//g, "-") : ""}</td>
+                    <td>{req.fromLocation}</td>
+                    <td>{req.toLocation}</td>
+                    <td>{req.accommodationRequired}</td>
+                    <td>{req.advanceRequired}</td>
+                    <td style={{ whiteSpace: "pre-wrap", fontFamily: "monospace" }}>
+                      {splitIntoRows(req.remarks, 50).map((row, idx) => (
+                        <div key={idx}>{row}</div>
+                      ))}
+                    </td>
+
+                    {roleView === "Admin" && (
+                      <td>
+                        <label htmlFor={`file-upload-${req.id}`} style={{
+                          display: "inline-block",
+                          padding: "6px 12px",
+                          backgroundColor: "#6e7073ff",
+                          color: "white",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          fontSize: "0.9em",
+                        }}>
+                          Choose File
+                        </label>
+                        <input
+                          id={`file-upload-${req.id}`}
+                          type="file"
+                          accept="application/pdf,image/jpeg,image/png"
+                          multiple
+                          style={{ display: "none" }}
+                          onChange={(e) => handleFileChange(req.id, e)}
+                        />
+                        <div style={{ marginTop: "5px", fontSize: "0.9em", color: "#333" }}>
+                          {selectedFiles[req.id] && selectedFiles[req.id].length > 0
+                            ? selectedFiles[req.id].map((file, index) => {
+                                const truncated = file.name.length > 10 ? file.name.slice(0, 10) + "..." : file.name;
+                                return (
+                                  <div key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <div>{truncated}</div>
+                                    <span onClick={() => handleRemoveFile(req.id, index)} style={{ color: "red", cursor: "pointer" }}>
+                                      &times;
+                                    </span>
+                                  </div>
+                                );
+                              })
+                            : "No file selected"}
+                        </div>
+                      </td>
+                    )}
+
+                    <td>
+                      {roleView === "Manager" ? (
+                        <>
+                          <button onClick={() => handleApprove(req.id)} style={{
+                            backgroundColor: "green",
+                            color: "white",
+                            border: "none",
+                            padding: "6px 12px",
+                            cursor: "pointer",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                          }}>
+                            Approve
+                          </button>
+                          <br />
+                          <button onClick={() => handleReject(req.id)} style={{
+                            backgroundColor: "red",
+                            color: "white",
+                            border: "none",
+                            padding: "6px 12px",
+                            cursor: "pointer",
+                            borderRadius: "4px",
+                            width: "75px",
+                          }}>
+                            Reject
+                          </button>
+                        </>
+                      ) : (
+                        <button onClick={() => handleUpload(req.id)} style={{
+                          backgroundColor: "#007bff",
+                          color: "white",
+                          border: "none",
+                          padding: "6px 12px",
+                          cursor: "pointer",
+                          borderRadius: "4px",
+                        }}>
+                          Confirm
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+    </div>
       </div>
     </div>
   );
