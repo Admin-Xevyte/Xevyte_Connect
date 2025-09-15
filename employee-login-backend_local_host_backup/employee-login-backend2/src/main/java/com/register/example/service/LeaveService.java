@@ -168,57 +168,42 @@ public class LeaveService {
 
 
     
-   // ===== Manager or HR action on leave =====
-@Transactional
-public LeaveRequest takeAction(LeaveActionDTO dto) {
-    LeaveRequest leave = leaveRequestRepository.findById(dto.getLeaveRequestId())
-            .orElseThrow(() -> new RuntimeException("Leave not found"));
+    @Transactional
+    public LeaveRequest takeAction(LeaveActionDTO dto) {
+        LeaveRequest leave = leaveRequestRepository.findById(dto.getLeaveRequestId())
+                .orElseThrow(() -> new RuntimeException("Leave not found"));
 
-    String status;
+        String status;
 
-    // Determine if the approver is the assigned manager or HR
-    boolean isManager = dto.getApproverId().equals(leave.getAssignedManagerId());
-    boolean isHr = dto.getApproverId().equals(leave.getAssignedHrId());
+        // Only Manager allowed to take action
+        boolean isManager = dto.getApproverId().equals(leave.getAssignedManagerId());
+        if (!isManager) {
+            throw new RuntimeException("Only the assigned manager can approve/reject this leave.");
+        }
 
-    if (!isManager && !isHr) {
-        throw new RuntimeException("Not authorized to approve or reject this leave.");
-    }
-    
-    // Handle actions
-    switch (dto.getAction().toUpperCase()) {
-        case "APPROVE":
-            if (isManager) {
-                // If manager approves, change status for HR review
+        switch (dto.getAction().toUpperCase()) {
+            case "APPROVE":
                 status = "Approved";
-            } else if (isHr) {
-                // If HR approves, finalize the leave
-                status = "Approved";
-                deductLeaves(leave);
-            } else {
-                throw new RuntimeException("Invalid approver role.");
-            }
-            leave.setStatus(status);
-            leave.setRejectionReason(null);
-            break;
-        case "REJECT":
-            // Both manager and HR can reject
-            status = "Rejected";
-            leave.setStatus(status);
-            leave.setRejectionReason(dto.getRemarks());
-            break;
-        default:
-            throw new RuntimeException("Invalid action");
+                leave.setStatus(status);
+                leave.setRejectionReason(null);
+                deductLeaves(leave);  // ✅ Deduct leave immediately
+                break;
+
+            case "REJECT":
+                status = "Rejected";
+                leave.setStatus(status);
+                leave.setRejectionReason(dto.getRemarks());
+                break;
+
+            default:
+                throw new RuntimeException("Invalid action");
+        }
+
+        LeaveRequest updatedLeave = leaveRequestRepository.save(leave);
+        saveHistory(updatedLeave, status, dto.getApproverId(), "Manager", dto.getRemarks());
+
+        return updatedLeave;
     }
-
-    // Save the updated leave request
-    LeaveRequest updatedLeave = leaveRequestRepository.save(leave);
-    
-    // Determine the role for history based on who approved
-    String actionRole = isManager ? "Manager" : "HR";
-    saveHistory(updatedLeave, status, dto.getApproverId(), actionRole, dto.getRemarks());
-
-    return updatedLeave;
-}
 
     // ===== Handles leave deductions and LOP logic (UPDATED) =====
     @Transactional
