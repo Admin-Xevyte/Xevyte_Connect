@@ -553,7 +553,7 @@ const toggleContractMenu = () => {
               <div className="arrow">→</div>
             </div>
 
-            <div className="action-box light-green" onClick={() => navigate("/status")}>
+            <div className="action-box light-green" onClick={() => navigate("/claims/status")}>
               <div className="icon">📜</div>
               <div>
                 <h3>Claims Status</h3>
@@ -562,7 +562,7 @@ const toggleContractMenu = () => {
               <div className="arrow">→</div>
             </div>
 
-            <div className="action-box light-yellow" onClick={() => navigate("/history")}>
+            <div className="action-box light-yellow" onClick={() => navigate("/claims/history")}>
               <div className="icon">📊</div>
               <div>
                 <h3>Claims History</h3>
