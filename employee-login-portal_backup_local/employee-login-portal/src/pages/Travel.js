@@ -19,7 +19,7 @@ const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
-
+ const [canViewTasks, setCanViewTasks] = useState(false);
   const [isContractOpen, setIsContractOpen] = useState(false);
 
 const toggleContractMenu = () => {
@@ -66,6 +66,24 @@ const handleFilterChange = (event) => {
     [name]: value
   }));
 };
+
+ useEffect(() => {
+  if (employeeId) {
+    fetch(`/access/assigned-ids/${employeeId}`)
+      .then(res => res.json())
+      .then(data => {
+        const { manager, admin } = data; // Only care about manager and admin
+
+        const canView = manager || admin; // Only manager or admin can view tasks
+
+        setCanViewTasks(canView);
+      })
+      .catch(err => {
+        console.error("Error fetching task visibility:", err);
+        setCanViewTasks(false); // Default to false if there's an error
+      });
+  }
+}, [employeeId]);
 
 
 const filteredHistory = useMemo(() => {
@@ -1035,17 +1053,24 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
         <hr className="divider-line" />
 
         <div className="travel-management">
-          <div className="tabs">
-            {['New Ticket', 'Awaiting Approval', 'History', 'Drafts', ...(role === "Manager" || role === "admin" ? ['Pending Requests'] : [])].map((tab) => (
-              <button
-                key={tab}
-                className={activeTab === tab ? 'tab active' : 'tab'}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+<div className="tabs">
+  {[
+    'New Ticket',
+    'Awaiting Approval',
+    'History',
+    'Drafts',
+    ...(canViewTasks ? ['Pending Requests'] : []),
+  ].map((tab) => (
+    <button
+      key={tab}
+      className={activeTab === tab ? 'tab active' : 'tab'}
+      onClick={() => setActiveTab(tab)}
+    >
+      {tab}
+    </button>
+  ))}
+</div>
+
 
           <div className="travel-content">
 {activeTab === 'New Ticket' && (
@@ -1703,7 +1728,9 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
       padding: '0px',
     }}
   >
+  
     <h3>Pending Travel Requests</h3>
+    
     {/* Use filteredPendingRequests for the length check */}
     {filteredPendingRequests.length === 0 ? (
       <p>No pending requests found.</p>
