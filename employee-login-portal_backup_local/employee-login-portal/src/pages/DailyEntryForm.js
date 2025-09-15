@@ -34,7 +34,7 @@ const [projects, setProjects] = useState([]);
 }, []);
 useEffect(() => {
   if (client) {
-    fetch(`/api/projects/customer/${client}/all-projects`)
+    fetch(`http://3.7.139.212:8080/api/projects/customer/${client}/all-projects`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -148,8 +148,8 @@ useEffect(() => {
 
       // Determine URL and method based on whether an entryId exists
       const url = entryId
-        ? `/daily-entry/update/${entryId}`
-        : `/daily-entry/submit/${employeeId}`;
+        ? `http://3.7.139.212:8080/daily-entry/update/${entryId}`
+        : `http://3.7.139.212:8080/daily-entry/submit/${employeeId}`;
       const method = entryId ? "PUT" : "POST";
 
       const response = await fetch(url, {
