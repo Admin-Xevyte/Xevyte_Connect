@@ -246,10 +246,10 @@ useEffect(() => {
   <div style={{ color: "red", marginLeft: "5px" }}>{errors.client}</div>
 )}
 
-
-         <label style={labelStyle} htmlFor="project-select">
+<label style={labelStyle} htmlFor="project-select">
   Project <span style={{ color: "red" }}>*</span>
 </label>
+
 <select
   id="project-select"
   value={project}
@@ -257,21 +257,27 @@ useEffect(() => {
     setProject(e.target.value);
     setErrors((prev) => ({ ...prev, project: "" }));
   }}
-  style={{ padding: "8px", margin: "5px", border: "1px solid #ccc", borderRadius: "5px", width: "99%" }}
+  style={{
+    padding: "8px",
+    margin: "5px",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    width: "99%",
+  }}
   disabled={!client}
 >
-  {/* <option value="">-- Select Project --</option>
+  {/* Default option */}
+  <option value="">-- Please select a project --</option>
+
+  {/* Loop project names */}
   {projects.map((p) => (
     <option key={p.projectId} value={p.projectId}>
-      {p.projectName}
-    </option> */}
- {projects.map((p) => (
-  <option key={p.projectId} value={p.projectId}>
-    {`P${p.projectId}`}
-  </option>
-))}
-
+      {p.projectName}   {/* 👈 show name instead of ID */}
+    </option>
+  ))}
 </select>
+
+{/* Error message */}
 {errors.project && (
   <div style={{ color: "red", marginLeft: "5px" }}>{errors.project}</div>
 )}
