@@ -185,7 +185,7 @@ public Claim submitUpdatedDraft(Long draftId, Claim updatedClaimData, MultipartF
         Claim claim = optionalClaim.get();
         switch (role) {
             case "Manager":
-                claim.setStatus("Pending");
+                claim.setStatus("Approved By Manager");
                 claim.setNextApprover("Finance");
                 sendNotification(claim.getAssignedFinanceId(), "New claim needs approval.");
                 break;
@@ -208,7 +208,7 @@ public Claim submitUpdatedDraft(Long draftId, Claim updatedClaimData, MultipartF
         Optional<Claim> optionalClaim = claimRepository.findById(id);
         if (!optionalClaim.isPresent()) return "Claim not found";
         Claim claim = optionalClaim.get();
-        claim.setStatus("Rejected");
+        claim.setStatus("Rejected by " + role);
         claim.setNextApprover(null);
         claim.setRejectionReason(reason);
         claimRepository.save(claim);
