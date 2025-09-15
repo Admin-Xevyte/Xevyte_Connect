@@ -1,6 +1,6 @@
 .dashboard-container {
   display: flex;
-  
+ 
   height: 100vh;          /* Full screen height */
   overflow: auto;       /* No scrollbars */
   font-family: sans-serif;
@@ -12,13 +12,13 @@
   padding: 10px;
   height: 100%;
 }
-
+ 
 .tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 5px;
 }
-
+ 
 .tab {
   background: darkblue;
   border: none;
@@ -29,11 +29,11 @@
   border-radius: 4px;
   color: white;
 }
-
+ 
 .tab.active {
   background: #00c2d7;
 }
-
+ 
 .warning-text {
   color: red;
   font-weight: bold;
@@ -41,7 +41,7 @@
   margin: 0 0 5px;
   font-size: 16px;
 }
-
+ 
 .travelform {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -50,13 +50,13 @@
   overflow-y: auto;
   padding-right: 5px;
 }
-
+ 
 .travelform label {
   display: flex;
   flex-direction: column;
   font-size: 16px;
 }
-
+ 
 .travelform input,
 .travelform select,
 .travelform textarea {
@@ -66,7 +66,7 @@
   border-radius: 4px;
   border: 1px solid #ccc;
 }
-
+ 
 .submit-button {
   grid-column: span 2;
   background: #00114d;
@@ -80,41 +80,41 @@
   transition: background 0.3s ease;
   margin-top: auto;
 }
-
+ 
 .submit-button:hover {
   background: #002080;
 }
-
+ 
 /* New CSS for the specific form layout */
-
-
+ 
+ 
 .travelform-container {
   display: flex;
   justify-content: space-between;
   gap: 40px;
 }
-
+ 
 .travelform-column {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
-
+ 
+ 
 .travelform {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
+ 
 .travelform label {
   display: flex;
   flex-direction: column;
   font-weight: 500;
   color: #333;
 }
-
+ 
 .travelform input,
 .travelform select,
 .travelform textarea {
@@ -127,7 +127,7 @@
   box-sizing: border-box;
   transition: border-color 0.3s ease;
 }
-
+ 
 .travelform input:focus,
 .travelform select:focus,
 .travelform textarea:focus {
@@ -135,18 +135,18 @@
   outline: none;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
 }
-
+ 
 .travelform textarea {
   resize: vertical;
   min-height: 120px;
 }
-
+ 
 .submit-button-container {
   text-align: center;
   margin-top: 0;
-
+ 
 }
-
+ 
 .submit-button {
   padding: 12px 40px;
   background-color: #007bff;
@@ -159,11 +159,11 @@
   transition: background-color 0.3s ease;
   margin: 20px;
 }
-
+ 
 .submit-button:hover {
   background-color: #0056b3;
 }
-
+ 
 /* General styles from the previous response can be kept */
 .warning-text {
   color: #dc3545;
@@ -175,7 +175,7 @@
   border-radius: 5px;
   border: 1px solid #f5c6cb;
 }
-
+ 
 .header {
   text-align: left;
   font-size: 24px; /* Adjust font size as needed */
@@ -184,7 +184,7 @@
   padding: 20px; /* Add some padding for spacing */
   width: 100%; /* Ensure it takes full width to center properly */
 }
-
+ 
 /* Styling for the main header container */
 .top-header-container {
   display: flex;
@@ -196,7 +196,7 @@
   width: 100%; /* Ensure it spans the full width */
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
-
+ 
 /* Styling for the welcome title */
 .welcome-title {
   font-size: 20px; /* Adjusted font size */
@@ -204,7 +204,7 @@
   color: #343a40;
   margin: 0; /* Remove default margin to prevent extra space */
 }
-
+ 
 /* Container for search, notification, and profile */
 .header-actions {
   display: flex;
@@ -212,7 +212,7 @@
   gap: 15px; /* Consistent spacing between elements */
   position: relative; /* For positioning dropdowns */
 }
-
+ 
 /* Styling for the search bar */
 .search-input {
   padding: 8px 12px;
@@ -222,11 +222,11 @@
   width: 250px;
   transition: all 0.3s ease;
 }
-
+ 
 .search-input::placeholder {
   color: #adb5bd;
 }
-
+ 
 /* Styling for notification icon */
 .notification-icon {
   width: 24px;
@@ -234,16 +234,16 @@
   cursor: pointer;
   transition: transform 0.2s ease;
 }
-
+ 
 .notification-icon:hover {
   transform: scale(1.1);
 }
-
+ 
 /* Styling for the profile image wrapper and dropdown */
 .profile-wrapper {
   position: relative;
 }
-
+ 
 .profile-pic {
   width: 40px;
   height: 40px;
@@ -253,11 +253,11 @@
   border: 2px solid transparent;
   transition: border-color 0.2s ease;
 }
-
+ 
 .profile-pic:hover {
   border-color: #007bff;
 }
-
+ 
 .profile-dropdown {
   position: absolute;
   top: 50px;
@@ -268,7 +268,7 @@
   z-index: 1000;
   width: 150px;
 }
-
+ 
 .profile-dropdown button {
   display: block;
   width: 100%;
@@ -280,15 +280,15 @@
   border-bottom: 1px solid #eee;
   font-size: 14px;
 }
-
+ 
 .profile-dropdown button:last-child {
   border-bottom: none;
 }
-
+ 
 .profile-dropdown button:hover {
   background-color: #f1f1f1;
 }
-
+ 
 /* Styles for the success message pop-up */
 .success-message {
   position: absolute;
@@ -304,7 +304,7 @@
   z-index: 1100;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-
+ 
 .main-content {
   flex: 1;
   padding: 20px;
@@ -314,7 +314,7 @@
   flex-direction: column;
   overflow: hidden;      /* Prevent internal scroll */
 }
-
+ 
 /* Styling for the divider line */
 .divider-line {
   border: none;
@@ -322,12 +322,12 @@
   margin: 0; /* Remove default margin */
 }
 /* Styling for the main header container */
-
+ 
 .columns-header {
     background-color: black !important;
     color: rgb(15, 14, 14);
 }
-
+ 
 .table-header-cell {
   position: sticky;
   top: 0;
@@ -337,7 +337,7 @@
   padding: 10px;
   border-bottom: 1px solid #ddd;
 }
-
+ 
 .table-header-cell-sortable {
   cursor: pointer;
   display: flex;
@@ -346,7 +346,7 @@
   justify-content: center;
   font-weight: bold;
 }
-
+ 
 .table-header-cell input,
 .table-header-cell select {
   width: 90%; /* Reduces the width slightly for better spacing */
@@ -355,4 +355,14 @@
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-
+ 
+.welcome-text {
+  background-color: #d4edda; /* Light green background */
+  color: #155724; /* Dark green text */
+  font-weight: 600;
+margin-bottom: 20px;
+text-align: center;
+padding: 10px;
+border-radius: 5px;
+}
+ 
