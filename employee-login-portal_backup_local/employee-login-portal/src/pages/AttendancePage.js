@@ -65,7 +65,7 @@ const cardStyle = {
 
 useEffect(() => {
   if (employeeId) {
-    fetch(`/access/assigned-ids/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         setRoles(data);
@@ -76,7 +76,7 @@ useEffect(() => {
   
  useEffect(() => {
   if (employeeId) {
-    fetch(`/access/assigned-ids/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const { manager, hr } = data;  // only manager and hr
