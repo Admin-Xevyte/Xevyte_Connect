@@ -75,27 +75,27 @@ const truncateFileName = (fileName, length = 10) => {
  
 
 
-  useEffect(() => {
-    setLoading(true); // start loading before fetch
-    fetch(`/claims/history/${employeeId}`)
-      .then(res => res.json())
-      .then(data => {
-        const filteredClaims = data.filter(
-          claim => claim.status !== "Rejected" && claim.status !== "Paid"
-        );
+ useEffect(() => {
+  setLoading(true); // start loading before fetch
 
- const sortedClaims = data.sort((a, b) => b.id - a.id);
-setClaims(sortedClaims);
-setLoading(false); // done loading
+  fetch(`/claims/history/${employeeId}`)
+    .then(res => res.json())
+    .then(data => {
+      const filteredClaims = data.filter(
+        claim => claim.status !== "Rejected" && claim.status !== "Paid"
+      );
 
-        setClaims(sortedClaims);
-        setLoading(false); // done loading after data set
-      })
-      .catch(err => {
-        console.error("Error fetching status:", err);
-        setLoading(false); // also stop loading on error
-      });
-  }, [employeeId]);
+      const sortedClaims = filteredClaims.sort((a, b) => b.id - a.id);
+
+      setClaims(sortedClaims);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error("Error fetching status:", err);
+      setLoading(false); // stop loading on error
+    });
+}, [employeeId]);
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
