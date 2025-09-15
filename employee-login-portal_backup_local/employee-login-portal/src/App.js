@@ -92,9 +92,9 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/password-reset-success" element={<PasswordReset/>}/>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/new" element={<NewClaim />} />
-        <Route path="/status" element={<ClaimStatusPage />} />
-        <Route path="/history" element={<ClaimHistoryPage />} />
+        <Route path="/claims/new" element={<NewClaim />} />
+        <Route path="/claims/status" element={<ClaimStatusPage />} />
+        <Route path="/claims/history" element={<ClaimHistoryPage />} />
         <Route path="/manager-dashboard" element={<ManagerDashBoard />} />
         <Route path="/finance-dashboard" element={<FinanceDashboard/>}/>
         <Route path="/finance" element={<HRDashboard/>}/>
