@@ -68,16 +68,20 @@ function HRDashboard() {
   axios
     .get(`/claims/hr/${hrId}`)
     .then((response) => {
-      const sortedClaims = response.data.sort(
-        (a, b) => new Date(b.submittedDate) - new Date(a.submittedDate)
-      );
-      setOriginalClaims(sortedClaims);
+     const sortedClaims = res.data.sort((a, b) => {
+        const dateA = new Date(a.submittedDate);
+        const dateB = new Date(b.submittedDate);
+        return dateB - dateA;
+      });
       setClaims(sortedClaims);
-      setLoading(false);
+      setOriginalClaims(sortedClaims);
+      console.log("Fetched and sorted assigned claims:", sortedClaims);
     })
-    .catch((error) => {
-      console.error("Error fetching HR claims:", error);
-      setLoading(false);
+    .catch((err) => {
+      console.error("Error fetching claims:", err);
+    })
+    .finally(() => {
+      setLoading(false); // ← Set loading to false after the request completes
     });
 };
     const fetchProfileInfo = (empId) => {
