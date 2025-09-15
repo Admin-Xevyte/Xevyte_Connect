@@ -556,7 +556,7 @@ const toggleContractMenu = () => {
             <div className="action-box light-green" onClick={() => navigate("/claims/status")}>
               <div className="icon">📜</div>
               <div>
-                <h3>Claim Status</h3>
+                <h3>Claims Status</h3>
                 <p>Track your current claims</p>
               </div>
               <div className="arrow">→</div>
