@@ -1,12 +1,15 @@
+
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Dashboard.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
- 
+
 function Leaves() {
   const employeeId = localStorage.getItem("employeeId");
- 
+  
   const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
   const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -26,7 +29,7 @@ function Leaves() {
     const [isContractOpen, setIsContractOpen] = useState(false);
   const [validationErrors, setValidationErrors] = React.useState({});
   const [allocationErrors, setAllocationErrors] = React.useState([]);
- 
+  
   const toggleContractMenu = () => {
     setIsContractOpen(!isContractOpen);
   };
@@ -54,17 +57,17 @@ function Leaves() {
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState("");
   const [showLOPAlert, setShowLOPAlert] = useState(false);
- 
+
    useEffect(() => {
   if (employeeId) {
-    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
+    fetch(`/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const { manager, hr } = data;  // only manager and hr
- 
+
         // Show tasks only if manager or hr
         const canView = manager || hr;
- 
+
         setCanViewTasks(canView);
       })
       .catch(err => {
@@ -73,10 +76,10 @@ function Leaves() {
       });
   }
 }, [employeeId]);
- 
- 
- 
- 
+
+  
+  
+
   const fetchHolidays = async () => {
     try {
       const res = await fetch(`/leaves/holidays`);
@@ -90,7 +93,7 @@ function Leaves() {
       console.error("Failed to fetch holidays:", err);
     }
   };
- 
+
   const fetchLeaveBalance = async () => {
     if (!employeeId) return;
     try {
@@ -111,7 +114,7 @@ function Leaves() {
       alert("Failed to fetch leave balance. Please try again later.");
     }
   };
- 
+
   const fetchLeaveHistory = async () => {
     if (!employeeId) return;
     setLoading(true);
@@ -129,7 +132,7 @@ function Leaves() {
       setLoading(false);
     }
   };
- 
+
   useEffect(() => {
     fetchLeaveHistory();
     fetchLeaveBalance();
@@ -142,7 +145,7 @@ function Leaves() {
       startDate: draft.startDate ? new Date(draft.startDate + "T00:00:00") : null,
       endDate: draft.endDate ? new Date(draft.endDate + "T00:00:00") : null,
     });
- 
+
     // ✅ If the draft has a fileName, fetch the actual file
   if (draft.fileName && draft.id) {
   try {
@@ -156,12 +159,12 @@ function Leaves() {
     console.error("❌ Failed to fetch draft file:", err);
   }
 }
- 
+
     setIsModalToOpen(true);
     navigate(location.pathname, { replace: true });
   }
 };
- 
+
     loadDraft();
     if (employeeId) {
       fetch(`/profile/${employeeId}`)
@@ -179,8 +182,8 @@ function Leaves() {
         .catch(err => console.error("Failed to fetch profile info:", err));
     }
   }, [employeeId, location.state, navigate, location.pathname]);
- 
- 
+
+  
 useEffect(() => {
   const { startDate, endDate, type } = leaveRequest;
   if (startDate && endDate) {
@@ -190,24 +193,24 @@ useEffect(() => {
       setShowLOPAlert(false);
       return;
     }
- 
+
     let count = 0;
     let currentDate = new Date(startDate);
     const holidayDateStrings = new Set(holidays.map(h => h.toISOString().split('T')[0]));
- 
+
     while (currentDate <= endDate) {
       const dayOfWeek = currentDate.getDay();
       const dateString = currentDate.toISOString().split('T')[0];
- 
+
       if (dayOfWeek !== 0 && dayOfWeek !== 6 && !holidayDateStrings.has(dateString)) {
         count++;
       }
- 
+
       currentDate.setDate(currentDate.getDate() + 1);
     }
- 
+
     setTotalDays(count);
- 
+
     if (
       count === 0 &&
       (
@@ -221,7 +224,7 @@ useEffect(() => {
     } else {
       setFormError("");
     }
- 
+
     if (
       type === 'Casual' &&
       (+leaveBalance.casualUsed + count) > +leaveBalance.casualTotal
@@ -240,8 +243,16 @@ useEffect(() => {
     setFormError("");
     setShowLOPAlert(false);
   }
+  
 }, [leaveRequest, leaveBalance, holidays]); // ✅ include leaveRequest
- 
+
+useEffect(() => {
+  // Clear the file error if the conditions for mandatory upload are no longer met
+  if (leaveRequest.type !== "Sick" || totalDays <= 2) {
+    setFileError("");
+  }
+}, [leaveRequest.type, totalDays]);
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
@@ -251,34 +262,34 @@ useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
- 
+
   const handleModalClick = (e) => {
     if (modalRef.current && e.target === modalRef.current) {
       setIsModalToOpen(false);
     }
   };
- 
+
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const toggleProfileMenu = () => setProfileOpen(!profileOpen);
- 
+
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
     navigate("/login");
   };
- 
+
   const handleEditProfile = () => {
     setProfileOpen(false);
     fileInputRef.current.click();
   };
- 
+
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const formData = new FormData();
     formData.append("name", employeeName);
     formData.append("profilePic", file);
- 
+
     try {
       const res = await fetch(`/profile/update/${employeeId}`, {
         method: "PUT",
@@ -304,7 +315,7 @@ useEffect(() => {
       alert("Error uploading profile picture. See console for details.");
     }
   };
- 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === "type" && value === "Select") {
@@ -315,15 +326,15 @@ useEffect(() => {
       setLeaveRequest({ ...leaveRequest, [name]: value });
     }
   };
- 
+
   const handleStartDateChange = (date) => {
     setLeaveRequest({ ...leaveRequest, startDate: date });
   };
- 
+
   const handleEndDateChange = (date) => {
     setLeaveRequest({ ...leaveRequest, endDate: date });
   };
- 
+
   const applyLeaveWithExistingFile = async (leaveData) => {
   const response = await fetch("/leaves/apply-with-existing-file", {
     method: "POST",
@@ -337,34 +348,34 @@ useEffect(() => {
       existingFileName: leaveData.existingFileName, // ✅ send this
     }),
   });
- 
+
   return await response.json();
 };
- 
+
 const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
- 
+
     // If no file is selected, clear states and return
     if (!selectedFile) {
         setFile(null);
         setFileError("");
         return;
     }
- 
+
     const maxSize = 5 * 1024 * 1024; // 5MB
     const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
     const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
     const isExtensionValid = allowedExtensions.includes(fileExtension);
     const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
     const isMimeTypeValid = allowedMimeTypes.includes(selectedFile.type);
- 
+
     // 1. Check file size first and foremost.
     if (selectedFile.size > maxSize) {
         setFileError("Maximum upload file size allowed is 5MB.");
         setFile(null);
         return;
     }
- 
+
     // 2. Then, check file type.
     if (isMimeTypeValid || isExtensionValid) {
         setFile(selectedFile);
@@ -390,15 +401,15 @@ const handleFileChange = (e) => {
     setFileError("");
     setShowLOPAlert(false);
   };
- 
- 
+
+  
 const fetchDraftById = async (draftId) => {
   try {
     const res = await fetch(`/leaves/drafts/single/${draftId}`);
     if (!res.ok) throw new Error("Failed to fetch draft");
- 
+
     const draft = await res.json();
- 
+
     // pre-fill form with draft details
     setLeaveRequest({
       id: draft.id,
@@ -408,23 +419,23 @@ const fetchDraftById = async (draftId) => {
       reason: draft.reason || "",
       fileName: draft.fileName || null,
     });
- 
+
     setTotalDays(draft.totalDays || 0);
- 
+
     if (draft.fileName) {
       setFile(null); // reset new upload, just show existing
     }
- 
+
     setIsModalToOpen(true);
   } catch (err) {
     console.error("❌ Failed to fetch draft:", err);
   }
 };
- 
+
 const handleSaveDraft = async () => {
     setLoading(true);
     setFormError("");
- 
+
     // Helper function to format the date to YYYY-MM-DD string
     const formatDate = (date) => {
         if (!date) return null;
@@ -433,7 +444,7 @@ const handleSaveDraft = async () => {
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
- 
+
     const dto = {
         id: leaveRequest.id || null,
         employeeId: employeeId,
@@ -444,7 +455,7 @@ const handleSaveDraft = async () => {
         totalDays: totalDays,
         fileName: file ? file.name : leaveRequest.fileName || null,
     };
- 
+
     const formData = new FormData();
     formData.append(
         "dto",
@@ -453,24 +464,24 @@ const handleSaveDraft = async () => {
     if (file) {
         formData.append("document", file);
     }
- 
+
     try {
         const url = leaveRequest.id ?
             `/leaves/drafts/${leaveRequest.id}` : // update
             "/leaves/drafts"; // create
- 
+
         const method = leaveRequest.id ? "PUT" : "POST";
- 
+
         const res = await fetch(url, {
             method,
             body: formData,
         });
- 
+
         if (!res.ok) {
             const text = await res.text();
             throw new Error(`HTTP ${res.status} - ${text}`);
         }
- 
+
         setSuccessMessage("Draft saved successfully 📝");
         setIsModalToOpen(false);
         resetForm();
@@ -482,29 +493,29 @@ const handleSaveDraft = async () => {
         setLoading(false);
     }
 };
- 
+
 // ✅ Helper function for backend date format "yyyy-MM-dd"
 // ✅ Convert Date -> dd-MM-yyyy
 const formatDateToBackend = (date) => {
     if (!date) return null;
- 
+
     if (typeof date === "string") {
         return date; // already formatted string
     }
- 
+
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
- 
+
     return `${day}-${month}-${year}`;
 };
- 
+
 const handleSubmitLeave = async (e) => {
     e.preventDefault();
- 
+
     setFormError("");
     setFileError("");
- 
+
     if (!employeeId) {
         setFormError("Employee ID not found. Cannot submit request.");
         return;
@@ -517,92 +528,64 @@ const handleSubmitLeave = async (e) => {
         setFileError("Document upload is mandatory for Sick Leave exceeding 2 days.");
         return;
     }
- 
+    // Check if the end date is before the start date
+    if (leaveRequest.startDate && leaveRequest.endDate && leaveRequest.endDate < leaveRequest.startDate) {
+        setFormError("End date cannot be before the start date.");
+        return;
+    }
+
     try {
         setLoading(true);
- 
-        // Check if this is a draft being submitted
-        if (leaveRequest.id) {
-            // Case 1: Submitting a saved draft
-            const draftDto = {
-                employeeId: leaveRequest.employeeId,
-                type: leaveRequest.type,
-                // ✅ Use helper for proper date format
-                startDate: leaveRequest.startDate instanceof Date
-                    ? formatDateToBackend(leaveRequest.startDate)
-                    : leaveRequest.startDate,
-                endDate: leaveRequest.endDate instanceof Date
-                    ? formatDateToBackend(leaveRequest.endDate)
-                    : leaveRequest.endDate,
-                totalDays: totalDays,
-                reason: leaveRequest.reason,
-                status: "Pending",
-            };
- 
-            const res = await fetch(`/leaves/submit-draft/${leaveRequest.id}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(draftDto),
-            });
- 
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
+
+        const formData = new FormData();
+        const dto = {
+            employeeId: employeeId,
+            type: leaveRequest.type,
+            startDate: formatDateToBackend(leaveRequest.startDate),
+            endDate: formatDateToBackend(leaveRequest.endDate),
+            totalDays: totalDays,
+            reason: leaveRequest.reason,
+            status: "Pending",
+        };
+
+        formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+        
+        // Handle file upload logic for new and draft submissions
+        if (file) {
+            formData.append("document", file);
+        } else if (leaveRequest.fileName) {
+            const fileBlobRes = await fetch(`/leaves/drafts/download/${leaveRequest.id}`);
+            if (!fileBlobRes.ok) {
+                throw new Error("Failed to retrieve draft file for submission.");
             }
- 
-            const data = await res.json();
-            setLeavesData((prev) => [data, ...prev]);
-            setSuccessMessage("Draft submitted successfully! 👍");
-        } else {
-            // Case 2: Submitting a new leave request
-            const formData = new FormData();
-            const dto = {
-                employeeId: employeeId,
-                type: leaveRequest.type,
-                // ✅ Use helper for proper date format
-                startDate: formatDateToBackend(leaveRequest.startDate),
-                endDate: formatDateToBackend(leaveRequest.endDate),
-                totalDays: totalDays,
-                reason: leaveRequest.reason,
-                status: "Pending",
-            };
- 
-            formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
- 
-            if (file) {
-                formData.append("document", file);
-            } else if (leaveRequest.fileName) {
-                const fileBlobRes = await fetch(`/leaves/drafts/download/${leaveRequest.id}`);
-                if (!fileBlobRes.ok) {
-                    throw new Error("Failed to retrieve draft file for submission.");
-                }
-                const blob = await fileBlobRes.blob();
-                const draftFile = new File([blob], leaveRequest.fileName, { type: blob.type });
-                formData.append("document", draftFile);
-            }
- 
-            const res = await fetch("/leaves/apply", {
-                method: "POST",
-                body: formData,
-            });
- 
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
-            }
- 
-            const data = await res.json();
-            setLeavesData((prev) => [data, ...prev]);
-            setSuccessMessage("Leave request submitted successfully! 👍");
+            const blob = await fileBlobRes.blob();
+            const draftFile = new File([blob], leaveRequest.fileName, { type: blob.type });
+            formData.append("document", draftFile);
         }
- 
+
+        const res = await fetch("/leaves/apply", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+        setLeavesData((prev) => [data, ...prev]);
+        setSuccessMessage("Leave request submitted successfully! 👍");
+
+        // ✅ Crucial fix: re-fetch leave balance and history after successful submission
+        fetchLeaveBalance();
+        fetchLeaveHistory();
+
         setIsModalToOpen(false);
         resetForm();
         setFile(null);
         setTimeout(() => setSuccessMessage(""), 3000);
- 
+
     } catch (error) {
         console.error("Error submitting leave request:", error);
         setFormError(`Failed to submit leave request: ${error.message}`);
@@ -611,15 +594,15 @@ const handleSubmitLeave = async (e) => {
         setLoading(false);
     }
 };
- 
+
 const handleMyTasksClick = () => {
   navigate('/myteam2');  // Redirect to the new page with Manager & HR cards
 };
- 
+
   const handleLeaveHistoryClick = () => {
     navigate('/leave-history');
   };
- 
+
   // Highlight weekends in red, holidays in green
   const highlightDates = (date) => {
     const formattedDate = date.toISOString().split('T')[0];
@@ -627,7 +610,7 @@ const handleMyTasksClick = () => {
       (holiday) => holiday.toISOString().split('T')[0] === formattedDate
     );
     const isWeekend = date.getDay() === 0 || date.getDay() === 6;
- 
+
     if (isHoliday) {
       return "react-datepicker__day--highlighted-holiday";
     }
@@ -636,7 +619,7 @@ const handleMyTasksClick = () => {
     }
     return null;
   };
- 
+
   return (
     <div className="dashboard-container">
       <style>
@@ -657,7 +640,7 @@ const handleMyTasksClick = () => {
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
-            box-sizing: border-box;
+            box-sizing: border-box; 
           }
         `}
       </style>
@@ -680,73 +663,73 @@ const handleMyTasksClick = () => {
                     </span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
-                  <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+                  <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
-                  <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                  <Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'white' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
                   </Link>
                 </h3>
-               
+                
                 <h3>
                   <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
@@ -759,7 +742,7 @@ const handleMyTasksClick = () => {
                                                             Contract Management {isContractOpen ? '▾' : '▸'}
                                                           </span>
                                                         </h3>
-                                                   
+                                                    
                                                         {isContractOpen && (
                                                           <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
                                                             <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
@@ -830,7 +813,7 @@ const handleMyTasksClick = () => {
                                                         )}
                                                       </>
                                                     )}
-                       
+                        
                         </>
         ) : (
           <div className="collapsed-wrapper">
@@ -856,9 +839,9 @@ const handleMyTasksClick = () => {
             </div>
           </div>
         </div>
- 
+
         <hr className="divider-line" />
- 
+
         <div style={{ flex: '1', padding: '20px', overflowY: 'auto' }}>
           {successMessage && <div style={{ textAlign: 'center', color: '#4BB543', margin: '20px', fontWeight: 'bold' }}>{successMessage}</div>}
           <h2 style={{ marginBottom: '20px', color: '#333' }}>Leaves Dashboard </h2>
@@ -901,7 +884,7 @@ const handleMyTasksClick = () => {
             <button onClick={handleLeaveHistoryClick} style={{ padding: '10px 20px', fontSize: '16px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>Leave History</button>
            {canViewTasks && (<button onClick={handleMyTasksClick} style={{ padding: '10px 20px', fontSize: '16px', backgroundColor:  "#1890ff", color: 'white', border: 'none', borderRadius: '5px',  boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>My Tasks</button>)}
           </div>
- 
+
           {isModalOpen && (
             <div ref={modalRef} onClick={handleModalClick} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000 }}>
               <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '10px', width: '90%', maxWidth: '500px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', position: 'relative' }}>
@@ -921,7 +904,7 @@ const handleMyTasksClick = () => {
                       <option value="LOP">LOP</option>
                     </select>
                   </div>
- 
+
 <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
   {/* Start Date */}
   <div style={{ flex: 1 }}>
@@ -943,7 +926,7 @@ const handleMyTasksClick = () => {
       strictParsing
     />
   </div>
- 
+
   {/* End Date */}
   <div style={{ flex: 1 }}>
     <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -969,7 +952,7 @@ const handleMyTasksClick = () => {
     )}
   </div>
 </div>
- 
+
                   <div style={{ marginBottom: '15px' }}>
                     <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                       Total Days<span style={{ color: 'red' }}> *</span>
@@ -989,9 +972,9 @@ const handleMyTasksClick = () => {
     {leaveRequest.type === "Sick" && totalDays > 2 && (
       <span style={{ color: "red" }}>*</span>
     )}
- 
+
   </label>
- 
+
   {/* Custom File Upload */}
   <div
     style={{
@@ -1012,7 +995,7 @@ const handleMyTasksClick = () => {
       onChange={handleFileChange}
       style={{ display: "none" }}
     />
- 
+
     {/* Custom button to trigger input */}
     <label
       htmlFor="fileInput"
@@ -1025,7 +1008,7 @@ const handleMyTasksClick = () => {
     >
       Choose File
     </label>
- 
+
     {/* Filename (draft or uploaded) */}
     <span
       style={{
@@ -1044,8 +1027,8 @@ const handleMyTasksClick = () => {
         ? leaveRequest.fileName
         : "No file chosen"}
     </span>
- 
-   
+
+    
   </div>
 {/* ✅ ADD THIS LINE to display the error */}
   {fileError && (
@@ -1054,8 +1037,7 @@ const handleMyTasksClick = () => {
     </p>
   )}
 </div>
- 
- 
+
 <div style={{ marginBottom: '20px' }}>
   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
     Reason<span style={{ color: 'red' }}> *</span>
@@ -1093,6 +1075,12 @@ const handleMyTasksClick = () => {
     </div>
   );
 }
- 
+
 export default Leaves;
- 
+
+
+
+
+
+  
+
