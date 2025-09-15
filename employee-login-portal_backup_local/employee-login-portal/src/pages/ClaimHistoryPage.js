@@ -61,9 +61,9 @@ const fetchClaims = useCallback(() => {
   fetch(`/claims/history/${employeeId}`)
     .then((res) => res.json())
     .then((data) => {
-      const sortedClaims = data.sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate));
-      setClaims(sortedClaims);
-      setLoading(false); // done loading
+   const sortedClaims = data.sort((a, b) => b.id - a.id);
+setClaims(sortedClaims);
+setLoading(false); // done loading // done loading
     })
     .catch((err) => {
       console.error("Error fetching history:", err);
