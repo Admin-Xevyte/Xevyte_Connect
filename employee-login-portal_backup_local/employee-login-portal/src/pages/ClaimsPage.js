@@ -544,7 +544,7 @@ const toggleContractMenu = () => {
 
           <h2 className="title" style={{ marginBottom: "40px" }}>Quick Actions</h2>
           <div className="quick-actions-grid">
-            <div className="action-box light-blue" onClick={() => navigate("/claims/new")}>
+            <div className="action-box light-blue" onClick={() => navigate("/claim/new")}>
               <div className="icon">₹</div>
               <div>
                 <h3>New Claims</h3>
