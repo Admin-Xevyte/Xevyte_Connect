@@ -69,7 +69,7 @@ const handleFilterChange = (event) => {
 
  useEffect(() => {
   if (employeeId) {
-    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
+    fetch(`/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const { manager, admin } = data; // Only care about manager and admin
@@ -796,7 +796,7 @@ const filteredPendingRequests = pendingRequests.filter(req =>
     value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   )
 );
-  const thStyle = { backgroundColor: '#131212ff' };
+  const thStyle = { backgroundColor: '#4169E1' };
 
   // Add this function to your component
 const handleRemoveFile = (requestId, fileIndexToRemove) => {
