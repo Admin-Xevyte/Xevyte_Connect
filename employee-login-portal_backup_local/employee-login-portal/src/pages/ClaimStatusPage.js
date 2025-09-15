@@ -84,11 +84,18 @@ const truncateFileName = (fileName, length = 10) => {
           claim => claim.status !== "Rejected" && claim.status !== "Paid"
         );
 
-        const sortedClaims = filteredClaims.sort((a, b) => {
-          const dateA = new Date(a.submittedDate);
-          const dateB = new Date(b.submittedDate);
-          return dateB - dateA;
-        });
+       const sortedClaims = filteredClaims.sort((a, b) => {
+    const dateA = new Date(a.submittedDate);
+    const dateB = new Date(b.submittedDate);
+ 
+    // Primary sort by submittedDate (most recent first)
+    if (dateB - dateA !== 0) {
+        return dateB - dateA;
+    }
+ 
+    // Secondary sort by claim ID if dates are the same (newest ID first)
+    return b.id - a.id;
+});
 
         setClaims(sortedClaims);
         setLoading(false); // done loading after data set
