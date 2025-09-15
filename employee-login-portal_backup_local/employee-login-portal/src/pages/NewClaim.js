@@ -62,7 +62,7 @@ const [formData, setFormData] = useState({
     setFormData((prev) => ({ ...prev, employeeId: id, name }));
  
     if (id) {
-      fetch(`http://3.7.139.212:8080/profile/${id}`)
+      fetch(`/profile/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -80,7 +80,7 @@ const [formData, setFormData] = useState({
       const draftId = location.state.draftId;
       setOriginalDraftId(draftId);
  
-      axios.get(`http://3.7.139.212:8080/claims/draft/${draftId}`)
+      axios.get(`/claims/draft/${draftId}`)
         .then(draftRes => {
           const draft = draftRes.data;
           setFormData({
@@ -96,7 +96,7 @@ const [formData, setFormData] = useState({
           setDraftLoaded(true);
  
           if (draft.receiptName) {
-            axios.get(`http://3.7.139.212:8080/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
+            axios.get(`/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
               .then(receiptRes => {
                 const fileBlob = receiptRes.data;
                 const fileName = draft.receiptName;
@@ -151,7 +151,7 @@ const [formData, setFormData] = useState({
     formData.append("profilePic", file);
  
     try {
-      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -279,8 +279,68 @@ const validateRequired = () => {
   return true;
 };
  
+// const handleSubmit = async () => {
+//     // Validate that all required fields are filled.
+//     if (!validateRequired()) return;
+ 
+//     // Create a data object with property names that EXACTLY match
+//     // the field names of your 'Claim' entity on the backend.
+//     const claimData = {
+//         employeeId: formData.employeeId,
+//         name: formData.name,
+//         expenseDescription: formData.expenseDescription,
+//         category: formData.category,
+//         amount: formData.amount,
+//         expenseDate: formData.expenseDate,
+//         businessPurpose: formData.businessPurpose,
+//         additionalNotes: formData.additionalNotes,
+//     };
+ 
+//     const data = new FormData();
+//     data.append("claim", JSON.stringify(claimData));
+ 
+//     // Attach the receipt file to the FormData object if it exists.
+//     if (receiptFile) {
+//         data.append("receiptFile", receiptFile);
+//     }
+ 
+//     try {
+//         if (originalDraftId) {
+//             // Case 1: Submitting an updated draft
+//             await axios.put(
+//                 `/claims/submit-draft/${originalDraftId}`,
+//                 data,
+//                 { headers: { "Content-Type": "multipart/form-data" } }
+//             );
+//             setMessage("Expense claim submitted successfully from draft!");
+//         } else {
+//             // Case 2: Submitting a brand new claim
+//             await axios.post(
+//                 "/claims/submit",
+//                 data,
+//                 { headers: { "Content-Type": "multipart/form-data" } }
+//             );
+//             setMessage("Expense claim submitted successfully!");
+//         }
+       
+//         // ✅ Call the reset function to clear all form and draft state.
+//         resetFormState();
+       
+//         // Clear success/error messages after a delay.
+//         setTimeout(() => setMessage(""), 2000);
+//         setError("");
+       
+//     } catch (err) {
+//         console.error("Submission error:", err);
+//         setError("Submission failed. Try again.");
+//         setMessage("");
+//     }
+// };
+ 
+// ✅ Create a new function to consolidate all state reset logic.
+ 
 const handleSubmit = async () => {
-    // Validate that all required fields are filled.
+    // Validate all required fields.
     if (!validateRequired()) return;
  
     // Create a data object with property names that EXACTLY match
@@ -288,8 +348,6 @@ const handleSubmit = async () => {
     const claimData = {
         employeeId: formData.employeeId,
         name: formData.name,
-        // The backend expects expenseDescription and expenseDate,
-        // but the 'submitUpdatedDraft' method will correctly map these from the Claim entity.
         expenseDescription: formData.expenseDescription,
         category: formData.category,
         amount: formData.amount,
@@ -299,9 +357,8 @@ const handleSubmit = async () => {
     };
  
     const data = new FormData();
-    // Append the correctly structured data object as a JSON string.
     data.append("claim", JSON.stringify(claimData));
-   
+ 
     // Attach the receipt file to the FormData object if it exists.
     if (receiptFile) {
         data.append("receiptFile", receiptFile);
@@ -309,59 +366,52 @@ const handleSubmit = async () => {
  
     try {
         if (originalDraftId) {
-            // ✅ CORRECTED: Use axios.put for submitting an updated draft
+            // Case 1: Submitting an updated draft
             await axios.put(
-                `http://3.7.139.212:8080/claims/submit-draft/${originalDraftId}`,
+                `/claims/submit-draft/${originalDraftId}`,
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
             setMessage("Expense claim submitted successfully from draft!");
-           
-            // Clear the draft-related state variables after successful submission.
-            setOriginalDraftId(null);
-            setDraftLoaded(false);
- 
-            // Navigate to the claims status page after a brief delay.
-            // setTimeout(() => {
-            //     navigate("/claim-status?refresh=true");
-            // }, 2000);
         } else {
-            // If it's a brand new claim, use a POST request to the main 'submit' endpoint.
+            // Case 2: Submitting a brand new claim
             await axios.post(
-                "http://3.7.139.212:8080/claims/submit",
+                "/claims/submit",
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
             setMessage("Expense claim submitted successfully!");
- 
-            // Navigate to the claims status page after a brief delay.
-            // setTimeout(() => {
-            //     navigate("/claim-status?refresh=true");
-            // }, 2000);
         }
  
-        // Reset the form regardless of whether a new claim or a draft was submitted.
-        setFormData({
-            category: "",
-            amount: "",
-            expenseDescription: "",
-            expenseDate: getTodayDate(),
-            businessPurpose: "",
-            additionalNotes: ""
-        });
-        setReceiptFile(null);
-        setReceiptPreviewUrl(null);
-        if (fileInputRef.current) fileInputRef.current.value = null;
-       
-        // Clear success/error messages after a delay.
-        setTimeout(() => setMessage(""), 2000);
-        setError("");
-       
+        // ✅ Immediate page refresh after successful submission
+        window.location.reload();
+ 
     } catch (err) {
         console.error("Submission error:", err);
         setError("Submission failed. Try again.");
         setMessage("");
     }
+};
+ 
+const resetFormState = () => {
+    // Reset the form data to its initial state.
+    setFormData({
+        category: "",
+        amount: "",
+        expenseDescription: "",
+        expenseDate: getTodayDate(),
+        businessPurpose: "",
+        additionalNotes: ""
+    });
+ 
+    // Reset all file-related state.
+    setReceiptFile(null);
+    setReceiptPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = null;
+ 
+    // Reset draft-related state variables.
+    setOriginalDraftId(null);
+    setDraftLoaded(false);
 };
  
 const handleSaveDraft = async () => {
@@ -389,7 +439,7 @@ const handleSaveDraft = async () => {
     if (originalDraftId) {
       // Update existing draft
       res = await axios.put(
-        `http://3.7.139.212:8080/claims/draft/${originalDraftId}`,
+        `/claims/draft/${originalDraftId}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -854,3 +904,5 @@ const handleSaveDraft = async () => {
 }
  
 export default NewClaim;
+ 
+ 
