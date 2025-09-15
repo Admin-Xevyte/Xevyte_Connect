@@ -64,15 +64,17 @@ function HRDashboard() {
     }, [employeeId]);
  
   const fetchHRClaims = (hrId) => {
-  setLoading(true);  // <-- Set loading true before API call
+  setLoading(true); // Start loading before API call
+
   axios
     .get(`/claims/hr/${hrId}`)
     .then((response) => {
-     const sortedClaims = res.data.sort((a, b) => {
+      const sortedClaims = response.data.sort((a, b) => {
         const dateA = new Date(a.submittedDate);
         const dateB = new Date(b.submittedDate);
-        return dateB - dateA;
+        return dateB - dateA; // Sort by newest first
       });
+
       setClaims(sortedClaims);
       setOriginalClaims(sortedClaims);
       console.log("Fetched and sorted assigned claims:", sortedClaims);
@@ -81,9 +83,10 @@ function HRDashboard() {
       console.error("Error fetching claims:", err);
     })
     .finally(() => {
-      setLoading(false); // ← Set loading to false after the request completes
+      setLoading(false); // Stop loading after request completes
     });
 };
+
     const fetchProfileInfo = (empId) => {
         fetch(`/profile/${empId}`)
             .then(res => res.json())
