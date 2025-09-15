@@ -65,7 +65,7 @@ const cardStyle = {
 
 useEffect(() => {
   if (employeeId) {
-    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
+    fetch(`/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         setRoles(data);
@@ -73,9 +73,10 @@ useEffect(() => {
       .catch(err => console.error("Failed to fetch roles:", err));
   }
 }, [employeeId]);
-   useEffect(() => {
+  
+ useEffect(() => {
   if (employeeId) {
-    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
+    fetch(`/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const { manager, hr } = data;  // only manager and hr
@@ -97,7 +98,7 @@ useEffect(() => {
 
     const fetchFrozenDates = async () => {
       try {
-        const response = await fetch(`http://3.7.139.212:8080/daily-entry/frozen-dates/${employeeId}`);
+        const response = await fetch(`/daily-entry/frozen-dates/${employeeId}`);
         if (!response.ok) throw new Error("Failed to fetch frozen dates");
         const data = await response.json();
         setFrozenDates(data); // backend returns list of LocalDate like ["2025-08-01", "2025-08-15"]
@@ -113,7 +114,7 @@ useEffect(() => {
   // Fetch employee profile info
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
+      fetch(`/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -135,7 +136,7 @@ useEffect(() => {
 
     const fetchApprovedLeaves = async () => {
       try {
-        const response = await fetch(`http://3.7.139.212:8080/leaves/approved-dates/${employeeId}`);
+        const response = await fetch(`/leaves/approved-dates/${employeeId}`);
         if (!response.ok) throw new Error("Failed to fetch approved leaves");
         const data = await response.json();
         setApprovedLeaveDates(data);
@@ -152,7 +153,7 @@ useEffect(() => {
   const fetchSubmittedEntries = async () => {
     if (!employeeId) return;
     try {
-      const response = await fetch(`http://3.7.139.212:8080/daily-entry/employee/${employeeId}`);
+      const response = await fetch(`/daily-entry/employee/${employeeId}`);
       if (!response.ok) {
         console.error("Backend response not ok:", response.status);
         throw new Error("Failed to fetch submitted entries");
@@ -189,7 +190,7 @@ useEffect(() => {
 
   // Fetch holidays for the current month/year
   useEffect(() => {
-    const url = `http://3.7.139.212:8080/api/holidays/${year}/${month + 1}`;
+    const url = `/api/holidays/${year}/${month + 1}`;
     fetch(url)
       .then((r) => {
         if (!r.ok) throw new Error("Failed to fetch holidays");
@@ -226,7 +227,7 @@ useEffect(() => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
