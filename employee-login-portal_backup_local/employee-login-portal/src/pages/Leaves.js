@@ -57,8 +57,7 @@ function Leaves() {
 
    useEffect(() => {
   if (employeeId) {
-  fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
-
+    fetch(`/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const { manager, hr } = data;  // only manager and hr
@@ -1008,6 +1007,7 @@ const handleMyTasksClick = () => {
       borderRadius: "4px",
       overflow: "hidden",
       width: "100%",
+       height: "40px",
     }}
   >
     {/* Hidden actual file input */}
@@ -1024,7 +1024,7 @@ const handleMyTasksClick = () => {
       htmlFor="fileInput"
       style={{
         backgroundColor: "#f0f0f0",
-        padding: "5px 10px",
+      padding: "6px 12px",
         cursor: "pointer",
         borderRight: "1px solid #ccc",
       }}
@@ -1052,16 +1052,6 @@ const handleMyTasksClick = () => {
     </span>
   </div>
 
-  {/* Keep your existing messages */}
-  {file ? (
-    <p style={{ fontSize: "13px", color: "#333" }}>Attached: {file.name}</p>
-  ) : leaveRequest.existingFileName ? (
-  <p style={{ fontSize: "13px", color: "#333" }}>Attached: {leaveRequest.existingFileName}</p>
-) : fileError ? (
-    <p style={{ fontSize: "13px", color: "red" }}>{fileError}</p>
-  ) : (
-    <p style={{ fontSize: "13px", color: "gray" }}>No file uploaded</p>
-  )}
 </div>
 
 
