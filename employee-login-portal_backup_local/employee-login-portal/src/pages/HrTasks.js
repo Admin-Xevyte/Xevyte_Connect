@@ -17,7 +17,13 @@ function HRDashboard() {
   const [hrAssignedLeaves, setHrAssignedLeaves] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-
+const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+  const [isContractOpen, setIsContractOpen] = useState(false);
+ const [canViewTasks, setCanViewTasks] = useState(false);
+   const employeeId = localStorage.getItem("employeeId");
+const toggleContractMenu = () => {
+  setIsContractOpen(!isContractOpen);
+};
   // Fetch leaves and profile information on initial load
   useEffect(() => {
     if (!hrId || !token) {
@@ -58,7 +64,7 @@ function HRDashboard() {
   setLoading(true);
   setApiError("");
   try {
-    const res = await fetch(`/leaves/hr/${hrId}`, {
+    const res = await fetch(`http://localhost:8082/leaves/hr/${hrId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
@@ -182,8 +188,10 @@ const filteredLeaves = useMemo(() => {
       String(leave.status).toLowerCase().includes(lowercasedSearchTerm)
     );
   }, [hrAssignedLeaves, searchTerm]);
+
+  
   const renderTable = (leaves, showActions = false) => (
-    <div style={{ overflowX: 'auto', backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+    <div style={{ overflowX: 'auto', backgroundColor: '#fff', padding: '0px',height: 'calc(100vh - 300px)', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
@@ -202,25 +210,45 @@ const filteredLeaves = useMemo(() => {
           {leaves.map((leave) => (
             <tr key={leave.id} style={{ borderBottom: '1px solid #eee' }}>
               <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.employeeId}</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.id}</td>
+              <td style={{ padding: '12px', border: '1px solid #ddd',textAlign:'center' }}>{leave.id}</td>
               <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.type}</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.startDate}</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.endDate}</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.totalDays}</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.reason}</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                {leave.fileName ? (
-                  <a
-                    href={`/leaves/download/${leave.id}`}
-                    download={leave.fileName}
-                    style={{ color: '#007bff', textDecoration: 'underline' }}
-                  >
-                    {leave.fileName}
-                  </a>
-                ) : (
-                  <span>No File</span>
-                )}
-              </td>
+            <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+  {new Date(leave.startDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+</td>
+<td style={{ padding: '12px', border: '1px solid #ddd' }}>
+  {new Date(leave.endDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+</td>
+
+              <td style={{ padding: '12px', border: '1px solid #ddd' ,textAlign:'center'}}>{leave.totalDays}</td>
+  <td style={{
+  padding: '12px',
+  border: '1px solid #ddd',
+  maxWidth: '300px',
+  height: '40px',            // fixed height for all cells
+  overflowY: 'auto',         // vertical scroll if content overflows
+  overflowX: 'hidden',       // hide horizontal scroll
+  whiteSpace: 'normal',      // allow wrapping text
+  wordWrap: 'break-word',    // break long words if needed
+}}>
+  {leave.reason}
+</td>
+             <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+  {leave.fileName ? (
+    <a
+      href={`/leaves/download/${leave.id}`}
+      download={leave.fileName}
+      style={{ color: '#007bff', textDecoration: 'underline' }}
+      title={leave.fileName} // Full name on hover
+    >
+      {leave.fileName.length > 10
+        ? leave.fileName.substring(0, 10) + '...'
+        : leave.fileName}
+    </a>
+  ) : (
+    <span>No File</span>
+  )}
+</td>
+
               <td style={{ padding: '12px', border: '1px solid #ddd' }}>
                 <span style={{
                   fontWeight: 'normal',
@@ -256,27 +284,171 @@ const filteredLeaves = useMemo(() => {
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
          <h3>
-                                <Link to="/dashboard" className="side" style={{ textDecoration: 'none',color:'#00b4c6'}}>
-                                  <span style={{ display: 'flex', alignItems: 'center', gap: '10px',color:'#00b4c6'}}>
-                                    Home
-                                   
-                                  </span>
-                                </Link>
-                              </h3>
-                              <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Claims</Link></h3>
-                              <h3><Link to="/home1" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Time Sheet</Link></h3>
-                              <h3><Link to="/home2" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Handbook</Link></h3>
-                              <h3><Link to="/home3" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Directory</Link></h3>
-                              <h3><Link to="/home4" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Exit Management</Link></h3>
-                              <h3><Link to="/home5" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Holiday Calendar</Link></h3>
-                              <h3><Link to="/home6" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Helpdesk</Link></h3>
-                              <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'white' }}>Leaves</Link></h3>
-                            
-                              <h3><Link to="/home9" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Pay slips</Link></h3>
-                              <h3><Link to="/home10" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Performance</Link></h3>
-                              <h3><Link to="/home11" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Training</Link></h3>
-                              <h3><Link to="/home12" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Travel</Link></h3>
-          </>
+            <Link
+              to="/dashboard"
+              className="side"
+              style={{
+                textDecoration: 'none',
+                color:'#00b4c6',
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                Home
+              </span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+            </Link>
+          </h3>
+          
+          <h3>
+            <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+            </Link>
+          </h3>
+          {allowedUsers.includes(employeeId) && (
+                                                <>
+                                                  <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                                    <span className="side" style={{  color:'#00b4c6' }}>
+                                                      Contract Management {isContractOpen ? '▾' : '▸'}
+                                                    </span>
+                                                  </h3>
+                                              
+                                                  {isContractOpen && (
+                                                    <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                      <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                        <Link
+                                                          to="/customers"
+                                                          style={{
+                                                            textDecoration: 'none',
+                                                           color:'#00b4c6',
+                                                            fontSize: '14px',
+                                                            display: 'block',
+                                                            padding: '4px 0',
+                                                          }}
+                                                          onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                          onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                        >
+                                                          Customers
+                                                        </Link>
+                                                      </li>
+                                                      <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                        <Link
+                                                          to="/sows"
+                                                          style={{
+                                                            textDecoration: 'none',
+                                                           color:'#00b4c6',
+                                                            fontSize: '14px',
+                                                            display: 'block',
+                                                            padding: '4px 0',
+                                                          }}
+                                                          onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                          onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                        >
+                                                          SOWs
+                                                        </Link>
+                                                      </li>
+                                                      <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                        <Link
+                                                          to="/projects"
+                                                          style={{
+                                                            textDecoration: 'none',
+                                                           color:'#00b4c6',
+                                                            fontSize: '14px',
+                                                            display: 'block',
+                                                            padding: '4px 0',
+                                                          }}
+                                                          onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                          onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                        >
+                                                          Projects
+                                                        </Link>
+                                                      </li>
+                                                      <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                        <Link
+                                                          to="/allocation"
+                                                          style={{
+                                                            textDecoration: 'none',
+                                                           color:'#00b4c6',
+                                                            fontSize: '14px',
+                                                            display: 'block',
+                                                            padding: '4px 0',
+                                                          }}
+                                                          onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                          onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                        >
+                                                          Allocation
+                                                        </Link>
+                                                      </li>
+                                                    </ul>
+                                                  )}
+                                                </>
+                                              )}
+                  
+                  </>
         ) : (
           <div className="collapsed-wrapper">
             <img
@@ -392,6 +564,25 @@ const filteredLeaves = useMemo(() => {
         <hr className="divider-line" />
 
         <div style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
+          <button
+    onClick={() => navigate(-1)}
+    style={{
+        padding: "8px 16px", // Slightly reduced padding
+         backgroundColor: "#f0f0f0",
+       color: "#333",
+       fontSize: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      cursor: "pointer",
+      margin: "20px 0 20px 0", // Top and bottom margins only
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        transition: "background-color 0.3s ease",
+        width: "fit-content", // Make width only as big as content
+        display: "block", // Ensure it respects margin auto if needed
+    }}
+>
+    ⬅ Back
+</button>
           <h2 style={{ marginBottom: '20px' }}>Team Leave Data</h2>
           {loading ? (
             <div>Loading...</div>
