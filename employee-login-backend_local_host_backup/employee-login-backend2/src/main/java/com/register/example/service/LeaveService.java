@@ -189,7 +189,7 @@ public LeaveRequest takeAction(LeaveActionDTO dto) {
         case "APPROVE":
             if (isManager) {
                 // If manager approves, change status for HR review
-                status = "Manager Approved";
+                status = "Approved";
             } else if (isHr) {
                 // If HR approves, finalize the leave
                 status = "Approved";
