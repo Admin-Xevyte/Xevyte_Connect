@@ -136,11 +136,12 @@ const fetchClaims = (financeId) => {
   axios
     .get(`/claims/finance/${financeId}`)
     .then((response) => {
-      const sortedClaims = res.data.sort((a, b) => {
+      const sortedClaims = response.data.sort((a, b) => {
         const dateA = new Date(a.submittedDate);
         const dateB = new Date(b.submittedDate);
-        return dateB - dateA;
+        return dateB - dateA; // Sort by newest first
       });
+
       setClaims(sortedClaims);
       setOriginalClaims(sortedClaims);
       console.log("Fetched and sorted assigned claims:", sortedClaims);
@@ -149,7 +150,7 @@ const fetchClaims = (financeId) => {
       console.error("Error fetching claims:", err);
     })
     .finally(() => {
-      setLoading(false); // ← Set loading to false after the request completes
+      setLoading(false); // Stop loading after request completes
     });
 };
 
