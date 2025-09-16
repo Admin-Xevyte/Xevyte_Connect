@@ -89,7 +89,7 @@ const EmployeeGoals = () => {
   const fetchGoals = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetch(`/api/goals/employee/${selectedEmployeeId}`)
+    fetch(`http://3.7.139.212:8080/api/goals/employee/${selectedEmployeeId}`)
       .then(async (res) => {
         const ct = res.headers.get('content-type') || '';
         if (!res.ok) {
@@ -121,7 +121,7 @@ const EmployeeGoals = () => {
 useEffect(() => {
   if (selectedEmployeeId) {
     // Corrected fetch URL
-    fetch(`/api/goals/${selectedEmployeeId}`)
+    fetch(`http://3.7.139.212:8080/api/goals/${selectedEmployeeId}`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
@@ -167,7 +167,7 @@ useEffect(() => {
   // Fetch updated profile info on mount
   useEffect(() => {
     if (loggedInEmployeeId) {
-      fetch(`/profile/${loggedInEmployeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${loggedInEmployeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -219,7 +219,7 @@ useEffect(() => {
     formData.append("profilePic", file);
  
     try {
-      const res = await fetch(`/profile/update/${loggedInEmployeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${loggedInEmployeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -255,7 +255,7 @@ useEffect(() => {
  
     if (!comments[goalId]) {
       try {
-        const res = await fetch(`/api/goals/${goalId}/comments`);
+        const res = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/comments`);
         if (!res.ok) throw new Error("Failed to fetch comments");
         const data = await res.json();
         setComments((prev) => ({ ...prev, [goalId]: data }));
@@ -269,7 +269,7 @@ useEffect(() => {
   const handleReview = async () => {
     try {
       const goalIds = goals.map(goal => goal.goalId);
-      const response = await fetch('/api/goals/review', {
+      const response = await fetch('http://3.7.139.212:8080/api/goals/review', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ goalIds, status: 'reviewed' }),
