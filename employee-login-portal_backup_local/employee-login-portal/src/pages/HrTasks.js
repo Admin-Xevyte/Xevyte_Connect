@@ -143,7 +143,7 @@ const toggleContractMenu = () => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${hrId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${hrId}`, {
         method: "PUT",
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
