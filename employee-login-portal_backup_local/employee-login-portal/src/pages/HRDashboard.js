@@ -167,12 +167,28 @@ function HRDashboard() {
         navigate("/login");
     };
  
-    const updateStatus = (claimId, status) => {
-        axios
-            .put(`http://3.7.139.212:8080/claims/hr/update-status/${claimId}?status=${status}`)
-            .then(() => fetchHRClaims(employeeId))
-            .catch((error) => console.error(`Error updating status:`, error));
-    };
+  const updateStatus = (claimId, status) => {
+    axios
+        .put(`http://3.7.139.212:8080/claims/hr/update-status/${claimId}?status=${status}`)
+        .then(() => {
+            // Update the claims state to reflect the new status
+            setClaims(prevClaims =>
+                prevClaims.map(claim =>
+                    claim.id === claimId ? { ...claim, status: status } : claim
+                )
+            );
+            // Also update the originalClaims state for the search functionality
+            setOriginalClaims(prevClaims =>
+                prevClaims.map(claim =>
+                    claim.id === claimId ? { ...claim, status: status } : claim
+                )
+            );
+            // Optionally, show a success message to the user
+            setSuccessMessage(`Claim ${claimId} status updated to ${status}!`);
+            setTimeout(() => setSuccessMessage(""), 3000);
+        })
+        .catch((error) => console.error(`Error updating status:`, error));
+};
  
     // Modified handleViewReceipt to support both images and PDFs
     const handleViewReceipt = (id, receiptName) => {
