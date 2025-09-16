@@ -152,37 +152,68 @@ const fetchClaims = (financeId) => {
     });
 };
 
-  const handleApprove = async (claimId) => {
+ const handleApprove = async (claimId) => {
     try {
-      await axios.post(`/claims/approve/${claimId}?role=Finance`);
-      fetchClaims(employeeId);
+        await axios.post(`/claims/approve/${claimId}?role=Finance`);
+        
+        // Update state directly without re-fetching
+        setClaims(prevClaims =>
+            prevClaims.map(claim =>
+                claim.id === claimId ? { ...claim, status: "Approved by Finance" } : claim
+            )
+        );
+        setOriginalClaims(prevClaims =>
+            prevClaims.map(claim =>
+                claim.id === claimId ? { ...claim, status: "Approved by Finance" } : claim
+            )
+        );
+
+        // Optional: show a success message
+        setSuccessMessage(`Claim ${claimId} approved successfully.`);
+        setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      console.error("Error approving claim:", error);
+        console.error("Error approving claim:", error);
     }
-  };
+};
 
   const handleRejectClick = (claimId) => {
     setSelectedClaimId(claimId);
     setShowReasonBox(true);
   };
 
-  const handleRejectSubmit = async () => {
+const handleRejectSubmit = async () => {
     if (rejectionReason.trim().length < 10) {
-      alert("Rejection reason must be at least 10 characters long.");
-      return;
+        alert("Rejection reason must be at least 10 characters long.");
+        return;
     }
 
     try {
-      await axios.post(
-        `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
-      );
-      setRejectionReason("");
-      setShowReasonBox(false);
-      fetchClaims(employeeId);
+        await axios.post(
+            `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
+        );
+        
+        // Update state directly without re-fetching
+        setClaims(prevClaims =>
+            prevClaims.map(claim =>
+                claim.id === selectedClaimId ? { ...claim, status: "Rejected by Finance", rejectionReason: rejectionReason } : claim
+            )
+        );
+        setOriginalClaims(prevClaims =>
+            prevClaims.map(claim =>
+                claim.id === selectedClaimId ? { ...claim, status: "Rejected by Finance", rejectionReason: rejectionReason } : claim
+            )
+        );
+
+        setRejectionReason("");
+        setShowReasonBox(false);
+
+        // Optional: show a success message
+        setSuccessMessage(`Claim ${selectedClaimId} rejected successfully.`);
+        setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      console.error("Error rejecting claim:", error);
+        console.error("Error rejecting claim:", error);
     }
-  };
+};
 
   const handleDownloadReceipt = (id, receiptName) => {
     axios
