@@ -17,7 +17,7 @@ function EmployeeGoalDetails() {
 
   useEffect(() => {
     if (employeeIdFromStorage) {
-      fetch(`/profile/${employeeIdFromStorage}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeIdFromStorage}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -67,7 +67,7 @@ function EmployeeGoalDetails() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${employeeIdFromStorage}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeIdFromStorage}`, {
         method: "PUT",
         body: formData,
       });
@@ -125,7 +125,7 @@ function EmployeeGoalDetails() {
       }
 
       const token = `Bearer ${rawToken}`;
-      const response = await fetch(`/api/goals/${goalId}/comments`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/comments`, {
         headers: {
           Authorization: token,
           'Content-Type': 'application/json'
@@ -177,7 +177,7 @@ function EmployeeGoalDetails() {
         }
 
         const token = `Bearer ${rawToken}`;
-        const response = await fetch(`/api/goals/employee/${employeeId}`, {
+        const response = await fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`, {
           method: 'GET',
           headers: {
             Authorization: token,
