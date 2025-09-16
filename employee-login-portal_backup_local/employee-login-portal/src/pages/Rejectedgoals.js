@@ -132,7 +132,7 @@ function Rejectedgoals() {
           rawToken = rawToken.slice(1, -1);
         }
         const token = `Bearer ${rawToken}`;
-        const response = await fetch(`/api/goals/employee/${employeeId}`, {
+        const response = await fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`, {
           method: 'GET',
           headers: { Authorization: token, 'Content-Type': 'application/json' },
         });
@@ -200,7 +200,7 @@ function Rejectedgoals() {
     }
 
     try {
-      const response = await fetch(`/api/goals/delete/${goalId}`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/delete/${goalId}`, {
         method: 'DELETE',
       });
 
