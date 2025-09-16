@@ -240,7 +240,7 @@ const ModalForm = ({ onClose, onSubmit }) => {
 
 const handleDownload = async (customerId, filename) => {
   try {
-    const response = await fetch(`/api/customers/${customerId}/download`, {
+    const response = await fetch(`http://3.7.139.212:8080/api/customers/${customerId}/download`, {
       method: 'GET',
     });
 
@@ -297,7 +297,7 @@ const toggleContractMenu = () => {
 
     useEffect(() => {
         if (employeeId) {
-            fetch(`/profile/${employeeId}`)
+            fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.profilePic) {
@@ -376,7 +376,7 @@ const toggleContractMenu = () => {
         formData.append("profilePic", file);
 
         try {
-            const res = await fetch(`/profile/update/${employeeId}`, {
+            const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
                 method: "PUT",
                 body: formData,
             });
