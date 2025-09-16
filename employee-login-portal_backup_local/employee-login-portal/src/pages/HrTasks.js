@@ -37,7 +37,7 @@ const toggleContractMenu = () => {
     //   setLoading(true);
     //   setApiError("");
     //   try {
-    //     const res = await fetch(`http://localhost:8082/leaves/hr/${hrId}`, {
+    //     const res = await fetch(`http://3.7.139.212:8080/leaves/hr/${hrId}`, {
     //       headers: { 'Authorization': `Bearer ${token}` }
     //     });
     //     if (!res.ok) {
@@ -64,7 +64,7 @@ const toggleContractMenu = () => {
   setLoading(true);
   setApiError("");
   try {
-    const res = await fetch(`http://localhost:8082/leaves/hr/${hrId}`, {
+    const res = await fetch(`http://3.7.139.212:8080/leaves/hr/${hrId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
@@ -93,7 +93,7 @@ const toggleContractMenu = () => {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`/profile/${hrId}`, {
+        const res = await fetch(`http://3.7.139.212:8080/profile/${hrId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to fetch profile info");
