@@ -13,7 +13,7 @@ function ForgotPassword() {
     setError(''); // Clear old errors
  
     try {
-      const res = await axios.post('/api/auth/forgot-password', {
+      const res = await axios.post('http://3.7.139.212:8080/api/auth/forgot-password', {
         employeeId: employeeId.trim(),
       });
  
