@@ -54,7 +54,7 @@ const formatDate = (dateStr) => {
   useEffect(() => {
     setLoadingProjects(true);
     axios
-      .get("/api/projects")
+      .get("http://3.7.139.212:8080/api/projects")
       .then((res) => setProjects(res.data))
       .catch(() => setError("Failed to load projects"))
       .finally(() => setLoadingProjects(false));
@@ -68,7 +68,7 @@ const formatDate = (dateStr) => {
     }
     setLoadingAllocations(true);
     axios
-      .get(`/api/allocations/project/${selectedProjectId}`)
+      .get(`http://3.7.139.212:8080/api/allocations/project/${selectedProjectId}`)
       .then((res) => setAllocations(res.data))
       .catch(() => setError("Failed to load allocations"))
       .finally(() => setLoadingAllocations(false));
@@ -77,7 +77,7 @@ const formatDate = (dateStr) => {
   // Fetch updated profile info
   useEffect(() => {
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -130,7 +130,7 @@ const formatDate = (dateStr) => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -205,7 +205,7 @@ const handleAddAllocation = (e) => {
   };
 
   axios
-    .post("/api/allocations/bulk", payload)
+    .post("http://3.7.139.212:8080/api/allocations/bulk", payload)
     .then((res) => {
       const { successfulAllocations, failedEmployeeIds } = res.data;
 
