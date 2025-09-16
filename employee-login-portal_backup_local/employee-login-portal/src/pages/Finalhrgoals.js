@@ -8,7 +8,12 @@ function FinalHrGoalsWithLayout() {
   const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
   const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
   const [isCollapsed, setIsCollapsed] = useState(false);
-  
+  const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+    const [isContractOpen, setIsContractOpen] = useState(false);
+   const [canViewTasks, setCanViewTasks] = useState(false);
+  const toggleContractMenu = () => {
+    setIsContractOpen(!isContractOpen);
+  };
   // State for the global search bar
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -194,76 +199,77 @@ function FinalHrGoalsWithLayout() {
     setFilterTerms(prev => ({ ...prev, [key]: value.toLowerCase() }));
   };
 
-  const filterAndSortGoals = () => {
-    let filtered = [...allGoals];
+const filterAndSortGoals = () => {
+  let filtered = [...allGoals];
 
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  const lowerCaseSearchTerm = searchTerm.trim().toLowerCase();
 
-    // Step 1: Apply global search bar filter
-    if (lowerCaseSearchTerm) {
-      filtered = filtered.filter(goal => {
-        const goalValues = Object.values(goal).map(val => String(val).toLowerCase());
-        
-        // Also check within the comments if they are loaded
-        const hasMatchingComment = comments[goal.goalId]?.some(comment => 
-          comment.commentText && comment.commentText.toLowerCase().includes(lowerCaseSearchTerm)
-        );
+  // ✅ Global search across all fields and comments
+  if (lowerCaseSearchTerm) {
+    filtered = filtered.filter(goal => {
+      // Convert all goal values to lowercase strings
+      const goalValues = Object.values(goal)
+        .filter(val => val !== null && val !== undefined)
+        .map(val => String(val).toLowerCase());
 
-        return goalValues.some(val => val.includes(lowerCaseSearchTerm)) || hasMatchingComment;
-      });
-    }
+      // Match with comments (if available)
+      const hasMatchingComment = comments[goal.goalId]?.some(comment =>
+        comment.commentText?.toLowerCase().includes(lowerCaseSearchTerm)
+      );
 
-    // Step 2: Apply individual column filters
-    Object.keys(filterTerms).forEach(key => {
-      const filterValue = filterTerms[key];
-      if (filterValue) {
-        filtered = filtered.filter(goal => {
-          let goalValue = goal[key];
-
-          // Special handling for comments
-          if (key === 'employeeComments') {
-            const hasMatchingComment = comments[goal.goalId]?.some(comment => 
-              comment.commentText && comment.commentText.toLowerCase().includes(filterValue)
-            );
-            return hasMatchingComment;
-          }
-
-          if (goalValue === undefined || goalValue === null) {
-            return false;
-          }
-          goalValue = String(goalValue).toLowerCase();
-
-          return goalValue.includes(filterValue);
-        });
-      }
+      return (
+        goalValues.some(val => val.includes(lowerCaseSearchTerm)) || hasMatchingComment
+      );
     });
+  }
 
-    // Step 3: Apply sorting
-    if (sortConfig.key !== null) {
-      filtered.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-        if (aValue < bValue) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
+  // ✅ Column filters
+  Object.keys(filterTerms).forEach(key => {
+    const filterValue = filterTerms[key]?.trim().toLowerCase();
+    if (filterValue) {
+      filtered = filtered.filter(goal => {
+        if (key === 'employeeComments') {
+          const hasMatchingComment = comments[goal.goalId]?.some(comment =>
+            comment.commentText?.toLowerCase().includes(filterValue)
+          );
+          return hasMatchingComment;
         }
-        if (aValue > bValue) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
+
+        let goalValue = goal[key];
+
+        if (goalValue === undefined || goalValue === null) return false;
+        goalValue = String(goalValue).toLowerCase();
+
+        const exactMatchKeys = ['status', 'rating', 'managerRating', 'quarter'];
+        if (exactMatchKeys.includes(key)) {
+          return goalValue === filterValue;
         }
-        return 0;
+
+        return goalValue.includes(filterValue);
       });
     }
+  });
 
-    return filtered;
-  };
+  // ✅ Sorting
+  if (sortConfig.key !== null) {
+    filtered.sort((a, b) => {
+      const aValue = String(a[sortConfig.key] ?? '').toLowerCase();
+      const bValue = String(b[sortConfig.key] ?? '').toLowerCase();
 
-  const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
-  
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  } else {
+    // Default: sort by goalId ascending
+    filtered.sort((a, b) => {
+      return Number(a.goalId) - Number(b.goalId);
+    });
+  }
+
+  return filtered;
+};
+
   const filteredAndSortedGoals = filterAndSortGoals();
 
   // ====== Render ======
@@ -277,28 +283,171 @@ function FinalHrGoalsWithLayout() {
             <img src={require("../assets/gg_move-left.png")} alt="collapse" className="toggle-btn" onClick={toggleSidebar}
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }} />
     <h3>
-                           <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                             <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                               Home
-                              
-                             </span>
-                           </Link>
-                         </h3>
-                         <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
-                         <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                         <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                         <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                         <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                         <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                         <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                         <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-                       
-                         <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                         <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white' }}>Performance</Link></h3>
-                         <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                         <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
-            {/* ...other links... */}
-          </>
+       <Link
+         to="/dashboard"
+         className="side"
+         style={{
+           textDecoration: 'none',
+           color:'#00b4c6',
+         }}
+       >
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+           Home
+         </span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white'}}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+       </Link>
+     </h3>
+     {allowedUsers.includes(employeeId) && (
+                                           <>
+                                             <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                               <span className="side" style={{  color:'#00b4c6' }}>
+                                                 Contract Management {isContractOpen ? '▾' : '▸'}
+                                               </span>
+                                             </h3>
+                                         
+                                             {isContractOpen && (
+                                               <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                 <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                   <Link
+                                                     to="/customers"
+                                                     style={{
+                                                       textDecoration: 'none',
+                                                      color:'#00b4c6',
+                                                       fontSize: '14px',
+                                                       display: 'block',
+                                                       padding: '4px 0',
+                                                     }}
+                                                     onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                     onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                   >
+                                                     Customers
+                                                   </Link>
+                                                 </li>
+                                                 <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                   <Link
+                                                     to="/sows"
+                                                     style={{
+                                                       textDecoration: 'none',
+                                                      color:'#00b4c6',
+                                                       fontSize: '14px',
+                                                       display: 'block',
+                                                       padding: '4px 0',
+                                                     }}
+                                                     onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                     onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                   >
+                                                     SOWs
+                                                   </Link>
+                                                 </li>
+                                                 <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                   <Link
+                                                     to="/projects"
+                                                     style={{
+                                                       textDecoration: 'none',
+                                                      color:'#00b4c6',
+                                                       fontSize: '14px',
+                                                       display: 'block',
+                                                       padding: '4px 0',
+                                                     }}
+                                                     onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                     onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                   >
+                                                     Projects
+                                                   </Link>
+                                                 </li>
+                                                 <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                   <Link
+                                                     to="/allocation"
+                                                     style={{
+                                                       textDecoration: 'none',
+                                                      color:'#00b4c6',
+                                                       fontSize: '14px',
+                                                       display: 'block',
+                                                       padding: '4px 0',
+                                                     }}
+                                                     onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                     onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                   >
+                                                     Allocation
+                                                   </Link>
+                                                 </li>
+                                               </ul>
+                                             )}
+                                           </>
+                                         )}
+             
+             </>
         ) : (
           <div className="collapsed-wrapper">
             <img src={require("../assets/Group.png")} alt="expand" className="collapsed-toggle" onClick={toggleSidebar} />
@@ -341,18 +490,44 @@ function FinalHrGoalsWithLayout() {
         <hr className="divider-line" />
 
         {/* FinalHrGoals workflow */}
+           <button
+          onClick={() => navigate(-1)}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#f0f0f0",
+            color: "#333",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            cursor: "pointer",
+            margin: "20px 0 20px 0",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+            transition: "background-color 0.3s ease",
+            width: "fit-content",
+            display: "block",
+          }}
+        >
+          ⬅ Back
+        </button>
         <div className="approved-goals-container">
           <h2>Goals for Employee ID: {employeeId}</h2>
           {loading && <p>Loading goals...</p>}
           {error && <p className="error">{error}</p>}
-          {!loading && filteredAndSortedGoals.length === 0 && <p>No goals found.</p>}
+        {!loading && allGoals.length === 0 && (
+  <p style={{ color: 'gray', fontWeight: 'bold' }}>No assigned goals for this employee.</p>
+)}
+
+{!loading && allGoals.length > 0 && filteredAndSortedGoals.length === 0 && (
+  <p style={{ color: 'gray', fontWeight: 'bold' }}>No goals match your search criteria.</p>
+)}
+
           {!loading && filteredAndSortedGoals.length > 0 && (
             <>
             <div
               style={{
-                maxHeight: '550px',
+                  maxHeight: 'calc(100vh - 300px)', 
                 overflowY: 'auto',
-                overflowX: 'auto', 
+                overflowX: 'hidden', 
                 display: 'block',
                 width: '100%',
               }}
@@ -369,15 +544,17 @@ function FinalHrGoalsWithLayout() {
               >
                 <thead
                   style={{
-                    backgroundColor: 'darkblue',
+                    backgroundColor: ' #00b4c6',
                     color: 'white',
                     position: 'sticky',
                     top: 0,
                     zIndex: 2,
+                    lineheight:1.2
+                   
                   }}
                 >
                   <tr>
-                    <th style={{ ...thStyle, minWidth: '100px', backgroundColor: 'black' }}>
+                    {/* <th style={{ ...thStyle, minWidth: '100px', backgroundColor: 'black' }}>
                       Quarter
                       <select value={filterTerms.quarter} onChange={(e) => handleFilterChange('quarter', e.target.value)} style={{ width: '100%', padding: '5px' }}>
                         <option value="">All</option>
@@ -390,53 +567,68 @@ function FinalHrGoalsWithLayout() {
                     <th style={{ ...thStyle, minWidth: '100px', cursor: 'pointer', backgroundColor: 'black' }} onClick={() => handleSort('goalId')}>
                       Goal ID {sortConfig.key === 'goalId' ? (sortConfig.direction === 'asc' ? '⬆️' : '⬇️') : '↕️'}
                       <input type="text" placeholder="Search..." value={filterTerms.goalId} onChange={(e) => handleFilterChange('goalId', e.target.value)} style={{ width: '100%', padding: '5px' }} />
-                    </th>
-                    <th style={{ ...thStyle, minWidth: '150px', backgroundColor: 'black' }}>
-                      Title
+                    </th> */}
+                    <th style={{ ...thStyle, minWidth: '150px', backgroundColor:  'darkblue' , lineHeight: '2.0'  }}>
+                       Title
                       <input type="text" placeholder="Search..." value={filterTerms.goalTitle} onChange={(e) => handleFilterChange('goalTitle', e.target.value)} style={{ width: '100%', padding: '5px' }} />
                     </th>
-                    <th style={{ ...thStyle, minWidth: '200px', backgroundColor: 'black' }}>
-                      Description
+                    <th style={{ ...thStyle, minWidth: '200px', backgroundColor: 'darkblue' , lineHeight: '2.0' }}>
+                     Description
                       <input type="text" placeholder="Search..." value={filterTerms.goalDescription} onChange={(e) => handleFilterChange('goalDescription', e.target.value)} style={{ width: '100%', padding: '5px' }} />
                     </th>
-                    <th style={{ ...thStyle, minWidth: '100px', backgroundColor: 'black' }}>
+                    <th style={{ ...thStyle, minWidth: '100px', backgroundColor: 'darkblue' , lineHeight: '2.0'}}>
                       Weightage
                       <input type="text" placeholder="Search..." value={filterTerms.metric} onChange={(e) => handleFilterChange('metric', e.target.value)} style={{ width: '100%', padding: '5px' }} />
                     </th>
-                    <th style={{ ...thStyle, minWidth: '100px', backgroundColor: 'black' }}>
+                    <th style={{ ...thStyle, minWidth: '100px', backgroundColor:'darkblue' , lineHeight: '2.0' }}>
                       Target
                       <input type="text" placeholder="Search..." value={filterTerms.target} onChange={(e) => handleFilterChange('target', e.target.value)} style={{ width: '100%', padding: '5px' }} />
                     </th>
-                    <th style={{ ...thStyle, minWidth: '120px' , backgroundColor: 'black'}}>
-                      EMP Rating
-                      <select value={filterTerms.rating} onChange={(e) => handleFilterChange('rating', e.target.value)} style={{ width: '100%', padding: '5px' }}>
-                        <option value="">All</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                      </select>
-                    </th>
-                    <th style={{ ...thStyle, minWidth: '200px', backgroundColor: 'black' }}>
-                      EMP Self Assessment
+                    <th style={{ ...thStyle, minWidth: '120px', backgroundColor: 'darkblue', color: 'white' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <span style={{ fontWeight: 'bold' }}>Self Rating</span>
+    <select
+      value={filterTerms.rating}
+      onChange={(e) => handleFilterChange('rating', e.target.value)}
+      style={{
+        width: '100%',
+        padding: '4px',
+        boxSizing: 'border-box',
+      }}
+    >
+      <option value="">All</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+</th>
+
+
+                    <th style={{ ...thStyle, minWidth: '200px', backgroundColor:'darkblue'  }}>
+                     Self Assessment
                       <input type="text" placeholder="Search..." value={filterTerms.selfAssessment} onChange={(e) => handleFilterChange('selfAssessment', e.target.value)} style={{ width: '100%', padding: '5px' }} />
                     </th>
-                    <th style={{ ...thStyle, minWidth: '200px' , backgroundColor: 'black'}}>
+                    {/* <th style={{ ...thStyle, minWidth: '200px' , backgroundColor: 'black'}}>
                       EMP Additional Notes
                       <input type="text" placeholder="Search..." value={filterTerms.additionalNotes} onChange={(e) => handleFilterChange('additionalNotes', e.target.value)} style={{ width: '100%', padding: '5px' }} />
-                    </th>
-                    <th style={{ ...thStyle, minWidth: '200px' , backgroundColor: 'black'}}>
+                    </th> */}
+                    {/* <th style={{ ...thStyle, minWidth: '200px' , backgroundColor: 'black'}}>
                       MNG Achieved Target
                       <input type="text" placeholder="Search..." value={filterTerms.achievedTarget} onChange={(e) => handleFilterChange('achievedTarget', e.target.value)} style={{ width: '100%', padding: '5px' }} />
-                    </th>
-                    <th style={{ ...thStyle, minWidth: '200px' , backgroundColor: 'black'}}>
+                    </th> */}
+                    
+                    <th style={{ ...thStyle, minWidth: '200px' , backgroundColor: 'darkblue' }}>
                       MNG Comments
                       <input type="text" placeholder="Search..." value={filterTerms.managerComments} onChange={(e) => handleFilterChange('managerComments', e.target.value)} style={{ width: '100%', padding: '5px' }} />
                     </th>
-                    <th style={{ ...thStyle, minWidth: '120px' , backgroundColor: 'black'}}>
+                  
+                    <th style={{ ...thStyle, minWidth: '120px' , backgroundColor: 'darkblue' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       MNG Rating
-                      <select value={filterTerms.managerRating} onChange={(e) => handleFilterChange('managerRating', e.target.value)} style={{ width: '100%', padding: '5px' }}>
+                      <select value={filterTerms.managerRating} onChange={(e) => handleFilterChange('managerRating', e.target.value)} style={{ width: '100%', padding: '4px' }}>
                         <option value="">All</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -444,43 +636,46 @@ function FinalHrGoalsWithLayout() {
                         <option value="4">4</option>
                         <option value="5">5</option>
                       </select>
+                      </div>
                     </th>
-                    <th style={{ ...thStyle, minWidth: '200px', backgroundColor: 'black' }}>
+                    {/* <th style={{ ...thStyle, minWidth: '200px', backgroundColor: 'black' }}>
                       Comments By Employee
                       <input type="text" placeholder="Search..." value={filterTerms.employeeComments} onChange={(e) => handleFilterChange('employeeComments', e.target.value)} style={{ width: '100%', padding: '5px' }} />
-                    </th>
-                    <th style={{ ...thStyle, minWidth: '200px', backgroundColor: 'black' }}>
+                    </th> */}
+                    <th style={{ ...thStyle, minWidth: '200px', backgroundColor:'darkblue' }}>
                       Reviewer Comments
                       <input type="text" placeholder="Search..." value={filterTerms.reviewerComments} onChange={(e) => handleFilterChange('reviewerComments', e.target.value)} style={{ width: '100%', padding: '5px' }} />
                     </th>
-                    <th style={{ ...thStyle, minWidth: '150px', backgroundColor: 'black' }}>
+                    <th style={{ ...thStyle, minWidth: '150px', backgroundColor: 'darkblue' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       Status
-                      <select value={filterTerms.status} onChange={(e) => handleFilterChange('status', e.target.value)} style={{ width: '100%', padding: '5px' }}>
+                      <select value={filterTerms.status} onChange={(e) => handleFilterChange('status', e.target.value)} style={{ width: '100%', padding: '4px' }}>
                         <option value="">All</option>
                         <option value="pending">Pending</option>
-                        <option value="pending_admin_approval">Pending Admin Approval</option>
+                        <option value="pending_admin_approval">Submited</option>
                         <option value="approved">Approved</option>
-                        <option value="downloaded">Downloaded</option>
+                        <option value="downloaded">Rejected</option>
                       </select>
+                      </div>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAndSortedGoals.map(goal => (
                     <tr key={goal.goalId}>
-                      <td style={tdStyle}>{goal.quarter}</td>
-                      <td style={tdStyle}>{goal.goalId}</td>
+                      {/* <td style={tdStyle}>{goal.quarter}</td>
+                      <td style={tdStyle}>{goal.goalId}</td> */}
                       <td style={tdStyle}>{goal.goalTitle}</td>
                       <td style={tdStyle}>{goal.goalDescription}</td>
                       <td style={tdStyle}>{goal.metric}</td>
                       <td style={tdStyle}>{goal.target}</td>
                       <td style={tdStyle}>{goal.rating}</td>
                       <td style={tdStyle}>{goal.selfAssessment}</td>
-                      <td style={tdStyle}>{goal.additionalNotes}</td>
-                      <td style={tdStyle}>{goal.achievedTarget}</td>
+                      {/* <td style={tdStyle}>{goal.additionalNotes}</td>
+                      <td style={tdStyle}>{goal.achievedTarget}</td> */}
                       <td style={tdStyle}>{goal.managerComments}</td>
                       <td style={tdStyle}>{goal.managerRating}</td>
-                      <td style={tdStyle}>
+                      {/* <td style={tdStyle}>
                         <button onClick={() => toggleComments(goal.goalId)} style={{ background: 'none', border: 'none', cursor: 'pointer',color:'black' }}>
                           {expandedGoals[goal.goalId] ? '⬆️ Hide' : '⬇️ Show'}
                         </button>
@@ -495,7 +690,7 @@ function FinalHrGoalsWithLayout() {
                             )) : <p style={{ fontStyle: 'italic', color: '#666' }}>No comments.</p>}
                           </div>
                         )}
-                      </td>
+                      </td> */}
                       <td style={tdStyle}>{goal.reviewerComments ?? '-'}</td>
                       <td style={tdStyle}>{goal.status ?? '-'}</td>
                     </tr>
