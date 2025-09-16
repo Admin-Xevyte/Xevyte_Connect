@@ -15,7 +15,12 @@ function HrGoals() {
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
-
+const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+  const [isContractOpen, setIsContractOpen] = useState(false);
+ const [canViewTasks, setCanViewTasks] = useState(false);
+const toggleContractMenu = () => {
+  setIsContractOpen(!isContractOpen);
+};
   // ===== HrGoals State =====
   const [employees, setEmployees] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
@@ -157,28 +162,172 @@ useEffect(() => {
               onClick={toggleSidebar}
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
- <h3>
-                        <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                            Home
-                           
-                          </span>
-                        </Link>
-                      </h3>
-                      <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
-                      <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                      <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                      <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                      <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                      <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                      <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                      <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-                    
-                      <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                      <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white' }}>Performance</Link></h3>
-                      <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                      <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
-          </>
+<h3>
+       <Link
+         to="/dashboard"
+         className="side"
+         style={{
+           textDecoration: 'none',
+           color:'#00b4c6',
+         }}
+       >
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+           Home
+         </span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white'}}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+       </Link>
+     </h3>
+     
+     <h3>
+       <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+         <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+       </Link>
+     </h3>
+     {allowedUsers.includes(employeeId) && (
+                                           <>
+                                             <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                               <span className="side" style={{  color:'#00b4c6' }}>
+                                                 Contract Management {isContractOpen ? '▾' : '▸'}
+                                               </span>
+                                             </h3>
+                                         
+                                             {isContractOpen && (
+                                               <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                 <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                   <Link
+                                                     to="/customers"
+                                                     style={{
+                                                       textDecoration: 'none',
+                                                      color:'#00b4c6',
+                                                       fontSize: '14px',
+                                                       display: 'block',
+                                                       padding: '4px 0',
+                                                     }}
+                                                     onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                     onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                   >
+                                                     Customers
+                                                   </Link>
+                                                 </li>
+                                                 <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                   <Link
+                                                     to="/sows"
+                                                     style={{
+                                                       textDecoration: 'none',
+                                                      color:'#00b4c6',
+                                                       fontSize: '14px',
+                                                       display: 'block',
+                                                       padding: '4px 0',
+                                                     }}
+                                                     onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                     onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                   >
+                                                     SOWs
+                                                   </Link>
+                                                 </li>
+                                                 <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                   <Link
+                                                     to="/projects"
+                                                     style={{
+                                                       textDecoration: 'none',
+                                                      color:'#00b4c6',
+                                                       fontSize: '14px',
+                                                       display: 'block',
+                                                       padding: '4px 0',
+                                                     }}
+                                                     onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                     onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                   >
+                                                     Projects
+                                                   </Link>
+                                                 </li>
+                                                 <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                   <Link
+                                                     to="/allocation"
+                                                     style={{
+                                                       textDecoration: 'none',
+                                                      color:'#00b4c6',
+                                                       fontSize: '14px',
+                                                       display: 'block',
+                                                       padding: '4px 0',
+                                                     }}
+                                                     onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                     onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                   >
+                                                     Allocation
+                                                   </Link>
+                                                 </li>
+                                               </ul>
+                                             )}
+                                           </>
+                                         )}
+             
+             </>
         ) : (
           <div className="collapsed-wrapper">
             <img
@@ -294,64 +443,91 @@ useEffect(() => {
         </div>
 
         <hr className="divider-line" />
-
+ <button
+          onClick={() => navigate(-1)}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#f0f0f0",
+            color: "#333",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            cursor: "pointer",
+            margin: "20px 0 20px 0",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+            transition: "background-color 0.3s ease",
+            width: "fit-content",
+            display: "block",
+          }}
+        >
+          ⬅ Back
+        </button>
         {/* HrGoals Content */}
         <div className="emp-container" style={{ padding: '20px' }}>
           {!isHR ? (
             <>
-              <h2 className="emp-title">Access Denied</h2>
+           
               <p className="emp-error">{errorMessage}</p>
             </>
           ) : (
             <>
-              <h2 className="emp-title">Employees under HR {employeeId}</h2>
+              <h2 className="emp-title">My Team</h2>
               {errorMessage && <p className="emp-error">{errorMessage}</p>}
-              {!errorMessage && employees.length === 0 && (
-                <p className="emp-empty">No employees found.</p>
-              )}
-              {employees.length > 0 && (
-                <div className="table-wrapper">
-                  <table className="emp-table">
-                    <thead>
-                      <tr>
-                        <th>Employee ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredEmployees.length > 0 ? (
-                        filteredEmployees.map((emp) => (
-                          <tr key={emp.id || emp.employeeId}>
-                            <td>
-                              <button
-                                type="button"
-                                style={{
-                                  color: 'blue',
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: 0,
-                                  font: 'inherit',
-                                }}
-                                onClick={() => handleEmployeeClick(emp.employeeId)}
-                              >
-                                {emp.employeeId}
-                              </button>
-                            </td>
-                            <td>{emp.name}</td>
-                            <td>{emp.email}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="3" style={{ textAlign: 'center' }}>No employees found matching your search.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+             
+             {employees.length > 0 && (
+  <div
+    className="table-wrapper"
+    style={{
+      maxHeight: 'calc(100vh - 300px)', // 👈 limit height
+      overflowY: 'auto',                // 👈 vertical scroll
+      overflowX: 'auto',                // 👈 optional: scroll horizontally if needed
+      border: '1px solid #ccc',
+    }}
+  >
+    <table className="emp-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead style={{ position: 'sticky', top: 0, background: '#f9f9f9', zIndex: 1 }}>
+        <tr>
+          <th>Employee ID</th>
+          <th>Name</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        {filteredEmployees.length > 0 ? (
+          filteredEmployees.map((emp) => (
+            <tr key={emp.id || emp.employeeId}>
+              <td>
+                <button
+                  type="button"
+                  style={{
+                    color: 'blue',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
+                    font: 'inherit',
+                  }}
+                  onClick={() => handleEmployeeClick(emp.employeeId)}
+                >
+                  {emp.employeeId}
+                </button>
+              </td>
+              <td>{emp.name}</td>
+              <td>{emp.email}</td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="3" style={{ textAlign: 'center' }}>
+              No employees found matching your search.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+)}
+
             </>
           )}
         </div>
