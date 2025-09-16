@@ -152,23 +152,14 @@ const fetchClaims = (financeId) => {
     });
 };
 
- const handleApprove = async (claimId) => {
+const handleApprove = async (claimId) => {
     try {
         await axios.post(`/claims/approve/${claimId}?role=Finance`);
         
-        // Update state directly without re-fetching
-        setClaims(prevClaims =>
-            prevClaims.map(claim =>
-                claim.id === claimId ? { ...claim, status: "Approved by Finance" } : claim
-            )
-        );
-        setOriginalClaims(prevClaims =>
-            prevClaims.map(claim =>
-                claim.id === claimId ? { ...claim, status: "Approved by Finance" } : claim
-            )
-        );
+        // Filter out the approved claim from the state arrays
+        setClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
+        setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
 
-        // Optional: show a success message
         setSuccessMessage(`Claim ${claimId} approved successfully.`);
         setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
@@ -186,6 +177,25 @@ const handleRejectSubmit = async () => {
         alert("Rejection reason must be at least 10 characters long.");
         return;
     }
+
+    try {
+        await axios.post(
+            `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
+        );
+        
+        // Filter out the rejected claim from the state arrays
+        setClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
+        setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
+
+        setRejectionReason("");
+        setShowReasonBox(false);
+
+        setSuccessMessage(`Claim ${selectedClaimId} rejected successfully.`);
+        setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+        console.error("Error rejecting claim:", error);
+    }
+};
 
     try {
         await axios.post(
