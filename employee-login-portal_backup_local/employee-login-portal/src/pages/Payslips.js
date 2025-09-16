@@ -184,7 +184,7 @@ const toggleContractMenu = () => {
                           </h3>
                           
                           <h3>
-                            <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                            <Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'white }}>
                               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
                             </Link>
                           </h3>
@@ -196,7 +196,7 @@ const toggleContractMenu = () => {
                           </h3>
                           
                           <h3>
-                            <Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+                            <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
                               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
                             </Link>
                           </h3>
