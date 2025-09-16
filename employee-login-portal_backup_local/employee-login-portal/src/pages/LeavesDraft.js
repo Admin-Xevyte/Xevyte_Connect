@@ -73,7 +73,7 @@ const toggleContractMenu = () => {
   // Fetch updated profile info on component mount
   useEffect(() => {
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -106,7 +106,7 @@ const toggleContractMenu = () => {
         await fetchHolidays();
 
         // Then, fetch drafts
-        const res = await fetch(`/leaves/drafts/${employeeId}`);
+        const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/${employeeId}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
 
@@ -165,7 +165,7 @@ const toggleContractMenu = () => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -200,7 +200,7 @@ const toggleContractMenu = () => {
 
   const fetchHolidays = async () => {
     try {
-      const res = await fetch(`/leaves/holidays`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/holidays`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -215,7 +215,7 @@ const toggleContractMenu = () => {
   // ✅ Delete draft from backend and update list with message
   const handleDeleteDraft = async (draftId) => {
     try {
-      const res = await fetch(`/leaves/drafts/${draftId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/${draftId}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -235,7 +235,7 @@ const toggleContractMenu = () => {
   // ✅ Improved download (forces browser to download)
   const handleDownloadDraft = async (draft) => {
     try {
-      const res = await fetch(`/leaves/drafts/download/${draft.id}`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/download/${draft.id}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
