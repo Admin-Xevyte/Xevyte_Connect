@@ -90,7 +90,7 @@ const handleFreezeTimesheets = async () => {
     }
  
     try {
-       const response = await axios.put(`/daily-entry/freeze`, {
+       const response = await axios.put(`http://3.7.139.212:8080/daily-entry/freeze`, {
     managerId: managerId,
     employeeId: timesheetEmployeeId, // ✅
     startDate: startDate,
@@ -115,7 +115,7 @@ const handleFreezeTimesheets = async () => {
     // Fetch updated profile info on mount
     useEffect(() => {
         if (employeeId) {
-            fetch(`/profile/${employeeId}`)
+            fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.profilePic) {
@@ -151,7 +151,7 @@ const handleFreezeTimesheets = async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(`/daily-entry/employee/${timesheetEmployeeId}`);
+            const response = await axios.get(`http://3.7.139.212:8080/daily-entry/employee/${timesheetEmployeeId}`);
             setAllTimesheets(response.data);
         } catch (err) {
             setError(err.response?.data || 'Failed to fetch timesheet entries.');
@@ -235,7 +235,7 @@ const filteredEntries = useMemo(() => {
         formData.append("profilePic", file);
  
         try {
-            const res = await fetch(`/profile/update/${employeeId}`, {
+            const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
                 method: "PUT",
                 body: formData,
             });
