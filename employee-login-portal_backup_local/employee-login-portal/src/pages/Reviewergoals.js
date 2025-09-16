@@ -196,7 +196,7 @@ function ReviewerApprovedGoalsWithLayout() {
       if (rawToken.startsWith('"') && rawToken.endsWith('"')) rawToken = rawToken.slice(1, -1);
       const token = `Bearer ${rawToken}`;
       const goalIds = approvedGoals.map(goal => goal.goalId);
-      const response = await fetch(`/api/goals/review`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/review`, {
         method: 'PATCH',
         headers: { Authorization: token, 'Content-Type': 'application/json' },
         body: JSON.stringify({ goalIds, status: newStatus }),
