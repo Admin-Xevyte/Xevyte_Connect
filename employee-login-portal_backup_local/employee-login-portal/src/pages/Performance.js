@@ -24,7 +24,7 @@ function Performance() {
  
   useEffect(() => {
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -75,7 +75,7 @@ function Performance() {
     formData.append("profilePic", file);
  
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
