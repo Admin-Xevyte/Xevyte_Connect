@@ -25,7 +25,7 @@ function FinanceDashboard() {
   const [previewFile, setPreviewFile] = useState(null);
   const [fileType, setFileType] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(useState(false));
   const [searchTerm, setSearchTerm] = useState("");
   const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require("../assets/SKKKK.JPG.jpg"));
   const [profileOpen, setProfileOpen] = useState(false);
@@ -35,16 +35,16 @@ function FinanceDashboard() {
   const navigate = useNavigate();
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [isContractOpen, setIsContractOpen] = useState(false);
+  const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
+
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const toggleProfileMenu = () => setProfileOpen(!profileOpen);
-  const [isContractOpen, setIsContractOpen] = useState(false);
-const [validationErrors, setValidationErrors] = React.useState({});
-const [allocationErrors, setAllocationErrors] = React.useState([]);
-  const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
-const toggleContractMenu = () => {
-  setIsContractOpen(!isContractOpen);
-};
+  const toggleContractMenu = () => {
+    setIsContractOpen(!isContractOpen);
+  };
+  
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -52,35 +52,35 @@ const toggleContractMenu = () => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
-};
+  };
 
- useEffect(() => {
-  const storedId = localStorage.getItem("employeeId");
-  const storedName = localStorage.getItem("employeeName");
-  const storedRole = localStorage.getItem("role");
+  useEffect(() => {
+    const storedId = localStorage.getItem("employeeId");
+    const storedName = localStorage.getItem("employeeName");
+    const storedRole = localStorage.getItem("role");
 
-  setEmployeeId(storedId);
-  setRole(storedRole);
-  setEmployeeName(storedName);
+    setEmployeeId(storedId);
+    setRole(storedRole);
+    setEmployeeName(storedName);
 
-  if (storedId) {
-    fetchClaims(storedId); // ✅ No role restriction — fetch claims
+    if (storedId) {
+      fetchClaims(storedId);
 
-    fetch(`/profile/${storedId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.profilePic) {
-          setProfilePic(data.profilePic);
-          localStorage.setItem("employeeProfilePic", data.profilePic);
-        }
-        if (data.name) {
-          setEmployeeName(data.name);
-          localStorage.setItem("employeeName", data.name);
-        }
-      })
-      .catch(err => console.error("Failed to fetch profile info:", err)); // ✅ FIXED
-  }
-}, []);
+      fetch(`/profile/${storedId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.profilePic) {
+            setProfilePic(data.profilePic);
+            localStorage.setItem("employeeProfilePic", data.profilePic);
+          }
+          if (data.name) {
+            setEmployeeName(data.name);
+            localStorage.setItem("employeeName", data.name);
+          }
+        })
+        .catch(err => console.error("Failed to fetch profile info:", err));
+    }
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -129,101 +129,70 @@ const toggleContractMenu = () => {
       setClaims(originalClaims);
     }
   }, [searchTerm, originalClaims]);
-const fetchClaims = (financeId) => {
-  setLoading(true); // Start loading
 
-  axios
-    .get(`/claims/finance/${financeId}`)
-    .then((response) => {
-      const claims = response.data;
+  const fetchClaims = (financeId) => {
+    setLoading(true); // Start loading
+    axios
+      .get(`/claims/finance/${financeId}`)
+      .then((response) => {
+        const claims = response.data;
+        const sortedClaims = claims.sort((a, b) => b.id - a.id);
+        setClaims(sortedClaims);
+        setOriginalClaims(sortedClaims);
+        console.log("Fetched and sorted assigned claims:", sortedClaims);
+      })
+      .catch((err) => {
+        console.error("Error fetching claims:", err);
+      })
+      .finally(() => {
+        setLoading(false); // Stop loading after request completes
+      });
+  };
 
-      // Sort claims by ID in descending order
-      const sortedClaims = claims.sort((a, b) => b.id - a.id);
-
-      setClaims(sortedClaims);
-      setOriginalClaims(sortedClaims);
-      console.log("Fetched and sorted assigned claims:", sortedClaims);
-    })
-    .catch((err) => {
-      console.error("Error fetching claims:", err);
-    })
-    .finally(() => {
-      setLoading(false); // Stop loading after request completes
-    });
-};
-
-const handleApprove = async (claimId) => {
+  const handleApprove = async (claimId) => {
     try {
-        await axios.post(`/claims/approve/${claimId}?role=Finance`);
-        
-        // Filter out the approved claim from the state arrays
-        setClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
-        setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
+      await axios.post(`/claims/approve/${claimId}?role=Finance`);
+      
+      // Filter out the approved claim from the state arrays
+      setClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
+      setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
 
-        setSuccessMessage(`Claim ${claimId} approved successfully.`);
-        setTimeout(() => setSuccessMessage(""), 3000);
+      setSuccessMessage(`Claim ${claimId} approved successfully.`);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-        console.error("Error approving claim:", error);
+      console.error("Error approving claim:", error);
     }
-};
+  };
 
   const handleRejectClick = (claimId) => {
     setSelectedClaimId(claimId);
     setShowReasonBox(true);
   };
 
-const handleRejectSubmit = async () => {
-  if (rejectionReason.trim().length < 10) {
-    alert("Rejection reason must be at least 10 characters long.");
-    return;
-  }
-
-  try {
-    await axios.post(
-      `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
-    );
-
-    // Filter out the rejected claim from the state arrays
-    setClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
-    setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
-
-    setRejectionReason("");
-    setShowReasonBox(false);
-    
-    setSuccessMessage(`Claim ${selectedClaimId} rejected successfully.`);
-    setTimeout(() => setSuccessMessage(""), 3000);
-  } catch (error) {
-    console.error("Error rejecting claim:", error);
-  }
-};
+  const handleRejectSubmit = async () => {
+    if (rejectionReason.trim().length < 10) {
+      alert("Rejection reason must be at least 10 characters long.");
+      return;
+    }
 
     try {
-        await axios.post(
-            `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
-        );
-        
-        // Update state directly without re-fetching
-        setClaims(prevClaims =>
-            prevClaims.map(claim =>
-                claim.id === selectedClaimId ? { ...claim, status: "Rejected by Finance", rejectionReason: rejectionReason } : claim
-            )
-        );
-        setOriginalClaims(prevClaims =>
-            prevClaims.map(claim =>
-                claim.id === selectedClaimId ? { ...claim, status: "Rejected by Finance", rejectionReason: rejectionReason } : claim
-            )
-        );
+      await axios.post(
+        `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
+      );
 
-        setRejectionReason("");
-        setShowReasonBox(false);
+      // Filter out the rejected claim from the state arrays
+      setClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
+      setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
 
-        // Optional: show a success message
-        setSuccessMessage(`Claim ${selectedClaimId} rejected successfully.`);
-        setTimeout(() => setSuccessMessage(""), 3000);
+      setRejectionReason("");
+      setShowReasonBox(false);
+      
+      setSuccessMessage(`Claim ${selectedClaimId} rejected successfully.`);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-        console.error("Error rejecting claim:", error);
+      console.error("Error rejecting claim:", error);
     }
-};
+  };
 
   const handleDownloadReceipt = (id, receiptName) => {
     axios
@@ -337,171 +306,171 @@ const handleRejectSubmit = async () => {
               onClick={toggleSidebar}
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
-<h3>
-    <Link
-      to="/dashboard"
-      className="side"
-      style={{
-        textDecoration: 'none',
-        color:'#00b4c6',
-      }}
-    >
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        Home
-      </span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
-    </Link>
-  </h3>
-  
-  <h3>
-    <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
-    </Link>
-  </h3>
-  {allowedUsers.includes(employeeId) && (
-                                        <>
-                                          <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
-                                            <span className="side" style={{  color:'#00b4c6' }}>
-                                              Contract Management {isContractOpen ? '▾' : '▸'}
-                                            </span>
-                                          </h3>
-                                      
-                                          {isContractOpen && (
-                                            <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                                              <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                <Link
-                                                  to="/customers"
-                                                  style={{
-                                                    textDecoration: 'none',
-                                                   color:'#00b4c6',
-                                                    fontSize: '14px',
-                                                    display: 'block',
-                                                    padding: '4px 0',
-                                                  }}
-                                                  onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                  onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                >
-                                                  Customers
-                                                </Link>
-                                              </li>
-                                              <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                <Link
-                                                  to="/sows"
-                                                  style={{
-                                                    textDecoration: 'none',
-                                                   color:'#00b4c6',
-                                                    fontSize: '14px',
-                                                    display: 'block',
-                                                    padding: '4px 0',
-                                                  }}
-                                                  onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                  onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                >
-                                                  SOWs
-                                                </Link>
-                                              </li>
-                                              <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                <Link
-                                                  to="/projects"
-                                                  style={{
-                                                    textDecoration: 'none',
-                                                   color:'#00b4c6',
-                                                    fontSize: '14px',
-                                                    display: 'block',
-                                                    padding: '4px 0',
-                                                  }}
-                                                  onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                  onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                >
-                                                  Projects
-                                                </Link>
-                                              </li>
-                                              <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                <Link
-                                                  to="/allocation"
-                                                  style={{
-                                                    textDecoration: 'none',
-                                                   color:'#00b4c6',
-                                                    fontSize: '14px',
-                                                    display: 'block',
-                                                    padding: '4px 0',
-                                                  }}
-                                                  onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                  onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                >
-                                                  Allocation
-                                                </Link>
-                                              </li>
-                                            </ul>
-                                          )}
-                                        </>
-                                      )}
-          
+            <h3>
+              <Link
+                to="/dashboard"
+                className="side"
+                style={{
+                  textDecoration: 'none',
+                  color:'#00b4c6',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  Home
+                </span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+              </Link>
+            </h3>
+            
+            <h3>
+              <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+              </Link>
+            </h3>
+            {allowedUsers.includes(employeeId) && (
+              <>
+                <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                  <span className="side" style={{  color:'#00b4c6' }}>
+                    Contract Management {isContractOpen ? '▾' : '▸'}
+                  </span>
+                </h3>
+                
+                {isContractOpen && (
+                  <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                    <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                      <Link
+                        to="/customers"
+                        style={{
+                          textDecoration: 'none',
+                          color:'#00b4c6',
+                          fontSize: '14px',
+                          display: 'block',
+                          padding: '4px 0',
+                        }}
+                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                        onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                      >
+                        Customers
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                      <Link
+                        to="/sows"
+                        style={{
+                          textDecoration: 'none',
+                          color:'#00b4c6',
+                          fontSize: '14px',
+                          display: 'block',
+                          padding: '4px 0',
+                        }}
+                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                        onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                      >
+                        SOWs
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                      <Link
+                        to="/projects"
+                        style={{
+                          textDecoration: 'none',
+                          color:'#00b4c6',
+                          fontSize: '14px',
+                          display: 'block',
+                          padding: '4px 0',
+                        }}
+                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                        onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                      >
+                        Projects
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                      <Link
+                        to="/allocation"
+                        style={{
+                          textDecoration: 'none',
+                          color:'#00b4c6',
+                          fontSize: '14px',
+                          display: 'block',
+                          padding: '4px 0',
+                        }}
+                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                        onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                      >
+                        Allocation
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </>
+            )}
+            
           </>
         ) : (
           <div className="collapsed-wrapper">
@@ -591,33 +560,32 @@ const handleRejectSubmit = async () => {
           </div>
           <hr className="divider-line" />
         </div>
-<button
-    onClick={() => navigate(-1)}
-    style={{
-        padding: "8px 16px", // Slightly reduced padding
-         backgroundColor: "#f0f0f0",
-       color: "#333",
-       fontSize: "16px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      cursor: "pointer",
-      margin: "20px 0 20px 0", // Top and bottom margins only
-        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-        transition: "background-color 0.3s ease",
-        width: "fit-content", // Make width only as big as content
-        display: "block", // Ensure it respects margin auto if needed
-    }}
->
-    ⬅ Back
-</button>
-                 {loading ? null : !employeeId ? (
-  <p>Please login or provide an employee ID.</p>
-) : originalClaims.length === 0 ? (
-  <p>You do not have any assigned claims at the moment.</p>
-) : claims.length === 0 ? (
-  <p>No claims found matching your search criteria.</p>
-) : (
-
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            padding: "8px 16px", // Slightly reduced padding
+            backgroundColor: "#f0f0f0",
+            color: "#333",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            cursor: "pointer",
+            margin: "20px 0 20px 0", // Top and bottom margins only
+            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+            transition: "background-color 0.3s ease",
+            width: "fit-content", // Make width only as big as content
+            display: "block", // Ensure it respects margin auto if needed
+          }}
+        >
+          ⬅ Back
+        </button>
+        {loading ? null : !employeeId ? (
+          <p>Please login or provide an employee ID.</p>
+        ) : originalClaims.length === 0 ? (
+          <p>You do not have any assigned claims at the moment.</p>
+        ) : claims.length === 0 ? (
+          <p>No claims found matching your search criteria.</p>
+        ) : (
           <div className="table-wrapper">
             <table className="status-table">
               <thead>
@@ -626,7 +594,7 @@ const handleRejectSubmit = async () => {
                   <th>Employee ID</th>
                   <th>Employee Name</th>
                   <th>Category</th>
-             
+                  
                   <th>Amount</th>
                   <th>Description</th>
                   <th>Expense Date</th>
@@ -645,32 +613,32 @@ const handleRejectSubmit = async () => {
                     
                     <td>{claim.amount}</td>
                     <td>{claim.expenseDescription}</td>
-                   <td>{new Date(claim.expenseDate).toLocaleDateString('en-GB').replaceAll('/', '-')}</td>
+                    <td>{new Date(claim.expenseDate).toLocaleDateString('en-GB').replaceAll('/', '-')}</td>
 
                     <td>
-                  {claim.receiptName ? (
-                    <button
-                      onClick={() => handleViewReceipt(claim.id, claim.receiptName)}
-                      style={{
-                        cursor: "pointer",
-                        color: "blue",
-                        textDecoration: "underline",
-                        backgroundColor: "transparent",
-                        border: "none",
-                        padding: 0,
-                      }}
-                    >
-                      <span title={claim.receiptName}>
-                        {claim.receiptName.length > 10
-                          ? `${claim.receiptName.substring(0, 10)}...`
-                          : claim.receiptName}
-                      </span>
-                    </button>
-                  ) : (
-                    "No Receipt"
-                  )}
-                </td>
-                  <td>{formatDate(claim.submittedDate)}</td>
+                      {claim.receiptName ? (
+                        <button
+                          onClick={() => handleViewReceipt(claim.id, claim.receiptName)}
+                          style={{
+                            cursor: "pointer",
+                            color: "blue",
+                            textDecoration: "underline",
+                            backgroundColor: "transparent",
+                            border: "none",
+                            padding: 0,
+                          }}
+                        >
+                          <span title={claim.receiptName}>
+                            {claim.receiptName.length > 10
+                              ? `${claim.receiptName.substring(0, 10)}...`
+                              : claim.receiptName}
+                          </span>
+                        </button>
+                      ) : (
+                        "No Receipt"
+                      )}
+                    </td>
+                    <td>{formatDate(claim.submittedDate)}</td>
                     <td>
                       <div className="action-buttons">
                         <button className="approve-btn" onClick={() => handleApprove(claim.id)}>Approve</button>
