@@ -14,7 +14,7 @@ const handleLogin = async (e) => {
   setError("");
 
   try {
-    const res = await axios.post("/api/auth/login", {
+    const res = await axios.post("http://3.7.139.212:8080/api/auth/login", {
       employeeId,
       password,
     });
