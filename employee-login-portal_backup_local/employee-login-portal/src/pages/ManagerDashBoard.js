@@ -649,11 +649,37 @@ useEffect(() => {
                     </td>
                     <td>{formatDate(claim.submittedDate)}</td>
                     <td>
-                     <div className="action-buttons">
-                      <button type="button" className="approve-btn" onClick={() => handleApprove(claim.id)}>Approve</button>
-                      <button type="button" className="reject-btn" onClick={() => handleRejectClick(claim.id)}>Reject</button>
-                      {/* Corrected line below */}
-                      <button type="button" className="download-btn" onClick={() => handleDownloadReceipt(claim.id, claim.receiptName)}>Download</button>
+                        <div className="action-buttons">
+                      <button
+                        type="button"
+                        className="approve-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleApprove(claim.id);
+                        }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        className="reject-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleRejectClick(claim.id);
+                        }}
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="button"
+                        className="download-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDownloadReceipt(claim.id, claim.receiptName);
+                        }}
+                      >
+                        Download
+                      </button>
                     </div>
                     </td>
                   </tr>
