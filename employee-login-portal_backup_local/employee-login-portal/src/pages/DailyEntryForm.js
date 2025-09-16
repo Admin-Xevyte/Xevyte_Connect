@@ -27,7 +27,7 @@ const [projects, setProjects] = useState([]);
 
   useEffect(() => {
   // Fetch clients on component mount
-  fetch('/api/customers')
+  fetch('http://3.7.139.212:8080/api/customers')
     .then((res) => res.json())
     .then((data) => setClients(data))
     .catch((err) => console.error('Error fetching clients:', err));
