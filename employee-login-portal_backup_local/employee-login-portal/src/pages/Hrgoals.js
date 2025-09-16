@@ -30,7 +30,7 @@ const toggleContractMenu = () => {
   // ===== Performance useEffect =====
   useEffect(() => {
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -79,7 +79,7 @@ const toggleContractMenu = () => {
     formData.append("name", employeeName);
     formData.append("profilePic", file);
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -113,7 +113,7 @@ useEffect(() => {
 
   setIsHR(true);
 
-  fetch(`/api/goals/hr/${employeeId}/employees`)
+  fetch(`http://3.7.139.212:8080/api/goals/hr/${employeeId}/employees`)
     .then((response) => {
       if (!response.ok) throw new Error('Network response was not ok');
       return response.json();
