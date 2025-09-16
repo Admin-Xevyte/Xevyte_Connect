@@ -1,5 +1,5 @@
 package com.register.example.controller;
-
+ 
 import com.register.example.entity.Employee;
 import com.register.example.entity.PerformanceGoal;
 import com.register.example.entity.GoalComment;
@@ -14,34 +14,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+ 
 import java.time.LocalDate;
 import java.util.*;
 import java.sql.Date;
-
+ 
 @RestController
 @RequestMapping("/api/goals")
-
+ 
 public class PerformanceGoalController {
-
+ 
     private final PerformanceGoalService performanceGoalService;
-
+ 
     public PerformanceGoalController(PerformanceGoalService performanceGoalService) {
         this.performanceGoalService = performanceGoalService;
     }
-
+ 
     @Autowired
     private PerformanceGoalService goalService;
-
+ 
     @Autowired
     private EmployeeRepository employeeRepository;
-
+ 
     @Autowired
     private PerformanceGoalRepository goalRepository;
-
+ 
     @Autowired
     private GoalCommentRepository goalCommentRepository;
-
+ 
     @PostMapping("/assign")
     public ResponseEntity<?> assignGoal(@RequestBody PerformanceGoal goal) {
         try {
@@ -69,7 +69,7 @@ public class PerformanceGoalController {
                     .body("Error assigning goal: " + e.getMessage());
         }
     }
-
+ 
     @GetMapping("/employee/{empId}")
     public ResponseEntity<?> getGoalsForEmployee(@PathVariable String empId) {
         try {
@@ -101,7 +101,7 @@ public class PerformanceGoalController {
             return new ResponseEntity<>("Error fetching goals: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+ 
     @GetMapping("/rejected/{managerId}")
     public ResponseEntity<?> getRejectedGoalsByManager(@PathVariable String managerId) {
         try {
@@ -111,7 +111,7 @@ public class PerformanceGoalController {
             return new ResponseEntity<>("Error fetching rejected goals: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+ 
     @PutMapping("/reassign/{goalId}")
     public ResponseEntity<?> reassignGoal(@PathVariable Long goalId, @RequestBody PerformanceGoal updatedGoal) {
         try {
@@ -121,7 +121,7 @@ public class PerformanceGoalController {
             return new ResponseEntity<>("Failed to reassign goal: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+ 
     @GetMapping("/manager/{managerId}/employees")
     public ResponseEntity<?> getEmployeesAssignedByManager(@PathVariable String managerId) {
         try {
@@ -131,7 +131,7 @@ public class PerformanceGoalController {
             return new ResponseEntity<>("Error fetching employees: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+ 
     @GetMapping("/submitted/{managerId}")
     public ResponseEntity<?> getSubmittedGoalsForManager(@PathVariable String managerId) {
         try {
@@ -141,7 +141,7 @@ public class PerformanceGoalController {
             return new ResponseEntity<>("Error fetching submitted goals: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+ 
     @GetMapping("/manager/{managerId}/employee-goals")
     public ResponseEntity<?> getGoalsUnderManager(@PathVariable String managerId) {
         try {
@@ -151,7 +151,7 @@ public class PerformanceGoalController {
             return new ResponseEntity<>("Error fetching employee goals: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+ 
     @GetMapping("/manager/{managerId}/employee/{employeeId}")
     public ResponseEntity<?> getEmployeeGoalDetailsUnderManager(@PathVariable String managerId, @PathVariable String employeeId) {
         try {
@@ -161,7 +161,7 @@ public class PerformanceGoalController {
             return new ResponseEntity<>("Error fetching employee goal details: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+ 
     @PutMapping("/{goalId}/status")
     public ResponseEntity<?> updateGoalStatus(@PathVariable Long goalId, @RequestBody GoalStatusUpdateDTO updateDTO) {
         try {
@@ -171,7 +171,7 @@ public class PerformanceGoalController {
             return new ResponseEntity<>("Failed to update goal status: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+ 
     @GetMapping("/reviewer/{reviewerId}/employees")
     public ResponseEntity<?> getEmployees(@PathVariable String reviewerId) {
         try {
@@ -182,12 +182,12 @@ public class PerformanceGoalController {
                     .body("Error fetching employees under reviewer: " + e.getMessage());
         }
     }
-
+ 
     @GetMapping("/hr/{hrId}/employees")
     public List<Employee> getEmployeesByHrId(@PathVariable String hrId) {
         return goalService.getEmployeesByHrId(hrId);
     }
-
+ 
     @PatchMapping("/review")
     public ResponseEntity<?> reviewGoals(@RequestBody ReviewRequest reviewRequest) {
         try {
@@ -200,7 +200,7 @@ public class PerformanceGoalController {
                     .body("Failed to review goals: " + e.getMessage());
         }
     }
-
+ 
     @PutMapping("/{goalId}/employee-feedback")
     public ResponseEntity<?> updateEmployeeFeedback(@PathVariable Long goalId,
                                                     @RequestBody EmployeeGoalStatusDTO.GoalStatusUpdateDTO request) {
@@ -219,7 +219,7 @@ public class PerformanceGoalController {
         goalRepository.save(goal);
         return ResponseEntity.ok("Employee feedback saved successfully");
     }
-
+ 
     @GetMapping("/{goalId}/feedback")
     public ResponseEntity<?> getFeedback(@PathVariable Long goalId) {
         Optional<PerformanceGoal> optionalGoal = goalRepository.findById(goalId);
@@ -235,7 +235,7 @@ public class PerformanceGoalController {
         feedbackData.put("status", goal.getStatus());
         return ResponseEntity.ok(feedbackData);
     }
-
+ 
     @PutMapping("/{goalId}/manager-feedback")
     public ResponseEntity<?> updateManagerFeedback(
             @PathVariable Long goalId,
@@ -251,7 +251,7 @@ public class PerformanceGoalController {
         goalRepository.save(goal);
         return ResponseEntity.ok("Manager feedback updated successfully");
     }
-
+ 
     @PutMapping("/manager-feedback")
     public ResponseEntity<?> submitBulkFeedback(@RequestBody List<EmployeeGoalStatusDTO> feedbackList) {
         try {
@@ -280,7 +280,7 @@ public class PerformanceGoalController {
                     .body("Failed to submit bulk feedback: " + e.getMessage());
         }
     }
-
+ 
     @GetMapping("/{goalId}/manager-feedback")
     public ResponseEntity<?> getManagerFeedback(@PathVariable Long goalId) {
         Optional<PerformanceGoal> optionalGoal = goalRepository.findById(goalId);
@@ -296,11 +296,11 @@ public class PerformanceGoalController {
         response.put("managerComments", goal.getManagerComments());
         return ResponseEntity.ok(response);
     }
-
+ 
     // ======================
     // 📌 Goal Comments APIs
     // ======================
-
+ 
     @PostMapping("/{goalId}/comments")
     public ResponseEntity<?> addCommentToGoal(@PathVariable Long goalId, @RequestBody GoalComment comment) {
         Optional<PerformanceGoal> goalOpt = goalRepository.findById(goalId);
@@ -311,7 +311,7 @@ public class PerformanceGoalController {
         GoalComment savedComment = goalCommentRepository.save(comment);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
     }
-
+ 
     @GetMapping("/{goalId}/comments")
     public ResponseEntity<?> getCommentsForGoal(@PathVariable Long goalId) {
         List<GoalComment> comments = goalCommentRepository.findByGoal_GoalId(goalId);
@@ -354,6 +354,15 @@ public class PerformanceGoalController {
         return ResponseEntity.ok(response);
     }
      
-     
+    @GetMapping("/{employeeId}")
+    public ResponseEntity<?> getEmployeeById(@PathVariable String employeeId) {
+        Optional<Employee> optionalEmployee = employeeRepository.findByEmployeeId(employeeId);
+        if (optionalEmployee.isPresent()) {
+            return ResponseEntity.ok(optionalEmployee.get()); // Return the full Employee object
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found.");
+        }
+    }
      
 }
+ 
