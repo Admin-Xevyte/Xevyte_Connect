@@ -47,7 +47,7 @@ const EmployeeGoalDetails = () => {
         const token = `Bearer ${rawToken}`;
         console.log('Using token:', token);
 
-        const response = await fetch(`/api/goals/employee/${employeeId}`, {
+        const response = await fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`, {
           method: 'GET',
           headers: {
             Authorization: token,
