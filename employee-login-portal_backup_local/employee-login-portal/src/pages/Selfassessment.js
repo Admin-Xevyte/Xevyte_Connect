@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import './Dashboard.css';
-
+ 
 // Style constants
 const thStyle = {
   border: "1px solid #ddd",
@@ -14,7 +14,7 @@ const tdStyle = {
   border: "1px solid #ddd",
   padding: "8px"
 };
-
+ 
 const MyGoals = () => {
   // Profile/Sidebar states
   const employeeId = localStorage.getItem("employeeId");
@@ -27,16 +27,25 @@ const MyGoals = () => {
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
-
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+const [selfAssessments, setSelfAssessments] = useState([]);
+  const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+    const [isContractOpen, setIsContractOpen] = useState(false);
+  
+  const toggleContractMenu = () => {
+    setIsContractOpen(!isContractOpen);
+  };
   // MyGoals logic
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
   const [goalInputs, setGoalInputs] = useState({});
-
+  const [assessmentIds, setAssessmentIds] = useState({});
+ 
   const [filteredGoals, setFilteredGoals] = useState([]); // State for filtered goals
-
+ 
   const fetchGoals = () => {
     if (!employeeId) {
       setError("No employee logged in.");
@@ -59,36 +68,32 @@ const MyGoals = () => {
         setLoading(false);
       });
   };
-
-  useEffect(() => {
-    fetchGoals();
-  }, [employeeId]);
-
-  const inProgressGoals = goals.filter(goal => goal.status.toLowerCase() === "in progress");
-  const activeGoals = goals.filter(goal =>
-    goal.status.toLowerCase() === "pending" || goal.status.toLowerCase() === "new"
-  );
-  
-  // **NEW FILTER LOGIC**
+ 
+ 
+ 
+  const inProgressGoals = React.useMemo(() => {
+  return goals.filter(goal => goal.status?.toLowerCase() === "in progress");
+}, [goals]);
+  // The 'activeGoals' state is not used in the render or logic, so it's commented out for clarity.
+  // const activeGoals = goals.filter(goal =>
+  //   goal.status?.toLowerCase() === "pending" || goal.status?.toLowerCase() === "new"
+  // );
+ 
   useEffect(() => {
     const lowercasedSearchTerm = searchTerm.toLowerCase();
-
-    // Filter goals based on the search term
     const tempFilteredGoals = inProgressGoals.filter(goal => {
-      // Check if the search term exists in any of the following fields
       return (
         (goal.goalTitle && goal.goalTitle.toLowerCase().includes(lowercasedSearchTerm)) ||
         (goal.goalDescription && goal.goalDescription.toLowerCase().includes(lowercasedSearchTerm)) ||
         (goal.quarter && goal.quarter.toLowerCase().includes(lowercasedSearchTerm)) ||
-        (goal.metric && goal.metric.toLowerCase().includes(lowercasedSearchTerm)) ||
+        (goal.metric && String(goal.metric).toLowerCase().includes(lowercasedSearchTerm)) || // Ensure metric is a string for search
         (goal.target && String(goal.target).toLowerCase().includes(lowercasedSearchTerm)) ||
         (goal.goalId && String(goal.goalId).toLowerCase().includes(lowercasedSearchTerm))
       );
     });
-
     setFilteredGoals(tempFilteredGoals);
   }, [searchTerm, inProgressGoals]);
-
+ 
   useEffect(() => {
     if (inProgressGoals.length > 0) {
       setGoalInputs(prevInputs => {
@@ -106,11 +111,9 @@ const MyGoals = () => {
       });
     }
   }, [inProgressGoals]);
-
-  // **NEW VALIDATION LOGIC**
+ 
   const handleRatingChange = (e, goalId) => {
     const val = e.target.value;
-    // Check if the value is a single digit, a number, and between 1 and 5
     if (val === "" || (/^[1-5]$/).test(val)) {
       setGoalInputs((prev) => ({
         ...prev,
@@ -118,7 +121,61 @@ const MyGoals = () => {
       }));
     }
   };
-
+ 
+  const handleSaveAll = async () => {
+  setIsSaving(true);
+  let rawToken = localStorage.getItem("token");
+  if (rawToken?.startsWith('"')) rawToken = rawToken.slice(1, -1);
+  const token = `Bearer ${rawToken}`;
+ 
+  try {
+    for (const goal of inProgressGoals) {
+      const data = goalInputs[goal.goalId];
+      const existingId = assessmentIds[goal.goalId]; // Get existing ID
+ 
+      const dto = {
+  id: existingId || null,
+  employeeId: employeeId,
+   goalId: goal.goalId,// 👈 Add this
+  title: goal.goalTitle,
+  description: goal.goalDescription,
+  weightage: goal.metric,
+  target: goal.target,
+  selfRating: data?.rating || "",
+  selfAssessment: data?.selfAssessment || "",
+};
+ 
+      const response = await fetch("/api/self-assessments/save", {
+        method: "POST", // POST is fine if backend handles upsert
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify(dto),
+      });
+ 
+      if (!response.ok) {
+        throw new Error(`Failed to save self-assessment for goal ID ${goal.goalId}`);
+      }
+ 
+      // If a new assessment was created, get its ID and store it
+      const savedData = await response.json();
+      if (!existingId && savedData.id) {
+        setAssessmentIds(prevIds => ({
+          ...prevIds,
+          [goal.goalId]: savedData.id
+        }));
+      }
+    }
+    setSaveMessage("Self-assessment saved successfully!");
+   
+  } catch (err) {
+    setSaveMessage("Error saving goals: " + err.message);
+  } finally {
+    setIsSaving(false);
+  }
+};
+ 
   const handleSubmitAll = async () => {
     setUpdating(true);
     let rawToken = localStorage.getItem("token");
@@ -127,15 +184,14 @@ const MyGoals = () => {
     try {
       for (const goal of inProgressGoals) {
         const data = goalInputs[goal.goalId];
-
-        // **UPDATED VALIDATION FOR SUBMISSION**
-        const ratingAsNumber = Number(data.rating);
-        if (!data || !data.rating || isNaN(ratingAsNumber) || ratingAsNumber < 1 || ratingAsNumber > 5 || !data.selfAssessment.trim()) {
+ 
+        const ratingAsNumber = Number(data?.rating); // Add optional chaining for safety
+        if (!data || !data.rating || isNaN(ratingAsNumber) || ratingAsNumber < 1 || ratingAsNumber > 5 || !data.selfAssessment?.trim()) { // Add optional chaining
           alert(`Please enter a valid rating (1-5) and a self-assessment for goal ID ${goal.goalId}`);
           setUpdating(false);
           return;
         }
-
+ 
         const response = await fetch(`/api/goals/${goal.goalId}/employee-feedback`, {
           method: "PUT",
           headers: {
@@ -162,8 +218,12 @@ const MyGoals = () => {
       setUpdating(false);
     }
   };
-
-  // Profile/Sidebar logic (unchanged)
+ 
+  const handleBack = () => {
+    // There is no 'navigationType' defined. A simple navigate(-1) is a safer bet.
+    navigate(-1);
+  };
+ 
   useEffect(() => {
     if (employeeId) {
       fetch(`/profile/${employeeId}`)
@@ -181,7 +241,7 @@ const MyGoals = () => {
         .catch(err => console.error("Failed to fetch profile info:", err));
     }
   }, [employeeId]);
-
+ 
   useEffect(() => {
     function handleClickOutside(event) {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
@@ -193,7 +253,7 @@ const MyGoals = () => {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileOpen]);
-
+ 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const toggleProfileMenu = () => setProfileOpen(!profileOpen);
   const handleLogout = () => {
@@ -234,7 +294,53 @@ const MyGoals = () => {
       alert("Error uploading profile picture. See console for details.");
     }
   };
-
+useEffect(() => {
+  if (!employeeId) return;
+ 
+  const fetchGoalsAndAssessments = async () => {
+    try {
+      setLoading(true);
+ 
+      // 1. Fetch Goals
+      const goalsRes = await fetch(`/api/goals/employee/${employeeId}`);
+      if (!goalsRes.ok) throw new Error("Failed to fetch goals");
+      const fetchedGoals = await goalsRes.json();
+ 
+      // 2. Fetch Self-Assessments
+      const assessmentRes = await fetch(`/api/self-assessments/employee/${employeeId}`);
+      if (!assessmentRes.ok) throw new Error("Failed to fetch self-assessments");
+      const fetchedAssessments = await assessmentRes.json();
+ 
+      // 3. Set state
+      setGoals(fetchedGoals);
+ 
+      // 4. Map assessment data into goalInputs
+      const inputs = {};
+      const ids = {};
+ 
+      fetchedAssessments.forEach((a) => {
+        inputs[a.goalId] = {
+          rating: a.selfRating || "",
+          selfAssessment: a.selfAssessment || "",
+          additionalInfo: a.additionalNotes || "",
+        };
+        ids[a.goalId] = a.id; // for future updates
+      });
+ 
+      setGoalInputs(inputs);
+      setAssessmentIds(ids);
+ 
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+ 
+  fetchGoalsAndAssessments();
+}, [employeeId]);
+ 
+ 
   return (
     <div className="dashboard-container" style={{ display: "flex" }}>
       {/* Sidebar */}
@@ -244,34 +350,178 @@ const MyGoals = () => {
             <img src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")} alt="office" className="office-vng" />
             <img src={require("../assets/gg_move-left.png")} alt="collapse" className="toggle-btn" onClick={toggleSidebar} style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }} />
             <h3>
-                                   <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                       Home
-                                      
-                                     </span>
-                                   </Link>
-                                 </h3>
-                                 <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
-                                 <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                                 <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                                 <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                                 <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                                 <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                                 <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                                 <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-                               
-                                 <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                                 <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white' }}>Performance</Link></h3>
-                                 <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                                 <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
-          </>
+                  <Link
+                    to="/dashboard"
+                    className="side"
+                    style={{
+                      textDecoration: 'none',
+                      color:'#00b4c6',
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      Home
+                    </span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white'}}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+                  </Link>
+                </h3>
+                {allowedUsers.includes(employeeId) && (
+                                                      <>
+                                                        <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                                          <span className="side" style={{  color:'#00b4c6' }}>
+                                                            Contract Management {isContractOpen ? '▾' : '▸'}
+                                                          </span>
+                                                        </h3>
+                                                    
+                                                        {isContractOpen && (
+                                                          <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                            <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                              <Link
+                                                                to="/customers"
+                                                                style={{
+                                                                  textDecoration: 'none',
+                                                                 color:'#00b4c6',
+                                                                  fontSize: '14px',
+                                                                  display: 'block',
+                                                                  padding: '4px 0',
+                                                                }}
+                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                              >
+                                                                Customers
+                                                              </Link>
+                                                            </li>
+                                                            <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                              <Link
+                                                                to="/sows"
+                                                                style={{
+                                                                  textDecoration: 'none',
+                                                                 color:'#00b4c6',
+                                                                  fontSize: '14px',
+                                                                  display: 'block',
+                                                                  padding: '4px 0',
+                                                                }}
+                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                              >
+                                                                SOWs
+                                                              </Link>
+                                                            </li>
+                                                            <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                              <Link
+                                                                to="/projects"
+                                                                style={{
+                                                                  textDecoration: 'none',
+                                                                 color:'#00b4c6',
+                                                                  fontSize: '14px',
+                                                                  display: 'block',
+                                                                  padding: '4px 0',
+                                                                }}
+                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                              >
+                                                                Projects
+                                                              </Link>
+                                                            </li>
+                                                            <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                              <Link
+                                                                to="/allocation"
+                                                                style={{
+                                                                  textDecoration: 'none',
+                                                                 color:'#00b4c6',
+                                                                  fontSize: '14px',
+                                                                  display: 'block',
+                                                                  padding: '4px 0',
+                                                                }}
+                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                              >
+                                                                Allocation
+                                                              </Link>
+                                                            </li>
+                                                          </ul>
+                                                        )}
+                                                      </>
+                                                    )}
+                        
+                        </>
         ) : (
           <div className="collapsed-wrapper">
             <img src={require("../assets/Group.png")} alt="expand" className="collapsed-toggle" onClick={toggleSidebar} />
           </div>
         )}
       </div>
-
+ 
       {/* Main Content */}
       <div className="main-content" style={{ flexGrow: 1, padding: "20px" }}>
         {/* Header */}
@@ -295,9 +545,29 @@ const MyGoals = () => {
             </div>
           </div>
         </div>
-
+ 
         <hr className="divider-line" />
-
+ 
+        <button
+          onClick={handleBack}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#f0f0f0",
+            color: "#333",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            cursor: "pointer",
+            margin: "20px 0 20px 0",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+            transition: "background-color 0.3s ease",
+            width: "fit-content",
+            display: "block",
+          }}
+        >
+          ⬅ Back
+        </button>
+ 
         {/* MyGoals Table (Below Divider) */}
         <div
           className="assessment-container"
@@ -305,15 +575,19 @@ const MyGoals = () => {
             backgroundColor: "#fff",
             padding: "20px",
             borderRadius: "6px",
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)"
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
           }}
         >
-          <h3>Submit Self Assessment for In Progress Goals</h3>
-          {filteredGoals.length === 0 ? (
+          <h3 style={{ marginBottom: "16px" }}>Submit Self Assessment for In Progress Goals</h3>
+          {loading ? (
+            <p>Loading goals...</p>
+          ) : error ? (
+            <p style={{ color: "red" }}>Error: {error}</p>
+          ) : filteredGoals.length === 0 ? (
             <p>No in progress goals found.</p>
           ) : (
             <>
-              <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+              <div style={{ maxHeight: "450px", overflowY: "auto" }}>
                 <table
                   style={{
                     width: "100%",
@@ -323,20 +597,16 @@ const MyGoals = () => {
                 >
                   <thead>
                     <tr style={{ backgroundColor: "#f2f2f2" }}>
-                      <th style={thStyle}>Quarter</th>
-                      <th style={thStyle}>Goal ID</th>
-                      <th style={thStyle}>Goal Title</th>
-                      <th style={thStyle}>Goal Description</th>
-                      <th style={thStyle}>Weightage</th>
-                      <th style={thStyle}>Target</th>
-                      <th style={thStyle}>
-                        Rating <span style={{ color: "red" }}>*</span>
+                      <th style={{ ...thStyle, width: "10%", backgroundColor: "darkblue", color: "white", textAlign: "center" }}>Title</th>
+                      <th style={{ ...thStyle, backgroundColor: "darkblue", color: "white", textAlign: "center" }}>Description</th>
+                      <th style={{ ...thStyle, width: "5%", backgroundColor: "darkblue", color: "white", textAlign: "center" }}>Weightage</th>
+                      <th style={{ ...thStyle, width: "2%", backgroundColor: "darkblue", color: "white", textAlign: "center" }}>Target</th>
+                      <th style={{ ...thStyle, width: "2%", backgroundColor: "darkblue", color: "white", textAlign: "center" }}>
+                        Self <span style={{ color: "red" }}>*</span> Rating
                       </th>
-                      <th style={thStyle}>
-                        Self Assessment <span style={{ color: "red" }}>*</span>
+                      <th style={{ ...thStyle, width: "13%", backgroundColor: "darkblue", color: "white", textAlign: "center" }}>
+                        Self <span style={{ color: "red" }}>*</span> Assessment
                       </th>
-                      <th style={thStyle}>Additional Notes</th>
-                      <th style={thStyle}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -349,10 +619,21 @@ const MyGoals = () => {
                         };
                       return (
                         <tr key={g.goalId}>
-                          <td style={tdStyle}>{g.quarter}</td>
-                          <td style={tdStyle}>{g.goalId}</td>
-                          <td style={tdStyle}>{g.goalTitle}</td>
-                          <td style={tdStyle}>{g.goalDescription || "-"}</td>
+                          <td style={{
+                            ...tdStyle,
+                            maxWidth: '400px',
+                            whiteSpace: 'pre-wrap',
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            textAlign: "center"
+                          }}>{g.goalTitle}</td>
+                          <td style={{
+                            ...tdStyle,
+                            maxWidth: '500px',
+                            whiteSpace: 'pre-wrap',
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word'
+                          }}>{g.goalDescription || "-"}</td>
                           <td style={tdStyle}>{g.metric}</td>
                           <td style={tdStyle}>{g.target}</td>
                           <td style={tdStyle}>
@@ -362,7 +643,7 @@ const MyGoals = () => {
                               maxLength="1"
                               value={inputs.rating}
                               onChange={(e) => handleRatingChange(e, g.goalId)}
-                              style={{ width: "100%" }}
+                              style={{ width: "100%", fontSize: "8px" }}
                               placeholder="Rating (1-5)"
                             />
                           </td>
@@ -378,30 +659,10 @@ const MyGoals = () => {
                                   }
                                 }));
                               }}
-                              style={{ width: "100%" }}
+                              style={{ width: "100%", fontSize: "10px" }}
                               rows={3}
                               placeholder="Self Assessment"
                             />
-                          </td>
-                          <td style={tdStyle}>
-                            <textarea
-                              value={inputs.additionalInfo}
-                              onChange={(e) => {
-                                setGoalInputs((prev) => ({
-                                  ...prev,
-                                  [g.goalId]: {
-                                    ...prev[g.goalId],
-                                    additionalInfo: e.target.value
-                                  }
-                                }));
-                              }}
-                              style={{ width: "100%" }}
-                              rows={2}
-                              placeholder="Additional Notes"
-                            />
-                          </td>
-                          <td style={tdStyle}>
-                            <em>{g.status}</em>
                           </td>
                         </tr>
                       );
@@ -409,20 +670,42 @@ const MyGoals = () => {
                   </tbody>
                 </table>
               </div>
-              <button
-                onClick={handleSubmitAll}
-                disabled={updating}
-                style={{
-                  backgroundColor: "#007bff",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 16px",
-                  borderRadius: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                {updating ? "Submitting..." : "Submit Self Assessment for All"}
-              </button>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button
+                  onClick={handleSaveAll}
+                  disabled={isSaving}
+                  style={{
+                    backgroundColor: "#28a745", // A different color for 'Save'
+                    color: "#fff",
+                    border: "none",
+                    padding: "10px 16px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {isSaving ? "Saving..." : "Save All"}
+                </button>
+                <button
+                  onClick={handleSubmitAll}
+                  disabled={updating}
+                  style={{
+                    backgroundColor: "#007bff",
+                    color: "#fff",
+                    border: "none",
+                    padding: "10px 16px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {updating ? "Submitting..." : "Submit Self Assessment for All"}
+                </button>
+              </div>
+ 
+              {saveMessage && (
+                <div style={{ color: "green", textAlign: "center", marginTop: "10px" }}>
+                  {saveMessage}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -430,5 +713,6 @@ const MyGoals = () => {
     </div>
   );
 };
-
+ 
 export default MyGoals;
+ 
