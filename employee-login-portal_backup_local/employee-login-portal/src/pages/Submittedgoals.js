@@ -47,7 +47,7 @@ const EmployeeGoalDetails = () => {
       }
       const token = `Bearer ${rawToken}`;
 
-      const response = await fetch(`/api/goals/employee/${employeeId}`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`, {
         method: 'GET',
         headers: {
           Authorization: token,
@@ -85,7 +85,7 @@ const EmployeeGoalDetails = () => {
       }
       const token = `Bearer ${rawToken}`;
 
-     const response = await fetch(`/api/goals/${goalId}/status`, {
+     const response = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/status`, {
   method: 'PUT',
   headers: {
     Authorization: token,
