@@ -500,7 +500,7 @@ function Saveddrafts() {
   </div>
  
   <Link
-    to="/claims/new"
+    to="/new"
     style={{
       display: 'inline-block',
       marginTop: '15px',
