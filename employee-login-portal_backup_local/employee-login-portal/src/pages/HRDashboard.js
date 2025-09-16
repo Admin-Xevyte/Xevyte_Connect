@@ -69,11 +69,7 @@ function HRDashboard() {
   axios
     .get(`/claims/hr/${hrId}`)
     .then((response) => {
-      const sortedClaims = response.data.sort((a, b) => {
-        const dateA = new Date(a.submittedDate);
-        const dateB = new Date(b.submittedDate);
-        return dateB - dateA; // Sort by newest first
-      });
+     const sortedClaims = claims.sort((a, b) => b.id - a.id);
 
       setClaims(sortedClaims);
       setOriginalClaims(sortedClaims);
