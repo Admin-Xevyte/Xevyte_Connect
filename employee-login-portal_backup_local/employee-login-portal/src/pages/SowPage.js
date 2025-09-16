@@ -62,7 +62,7 @@ const toggleContractMenu = () => {
 
   // Fetch customers
   useEffect(() => {
-    fetch('/api/customers')
+    fetch('http://3.7.139.212:8080/api/customers')
       .then(res => res.json())
       .then(data => setCustomers(data))
       .catch(err => console.error('Failed to fetch customers:', err));
@@ -71,7 +71,7 @@ const toggleContractMenu = () => {
   // Fetch SOWs when customer changes
   useEffect(() => {
     if (selectedCustomerId) {
-      fetch(`/api/sows/customer/${selectedCustomerId}`)
+      fetch(`http://3.7.139.212:8080/api/sows/customer/${selectedCustomerId}`)
         .then(res => res.json())
         .then(data => setSows(data))
         .catch(err => console.error('Failed to fetch SOWs:', err));
@@ -81,7 +81,7 @@ const toggleContractMenu = () => {
   // Fetch updated profile info on mount (optional but recommended)
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://localhost:8082/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -238,7 +238,7 @@ const handleSubmitSow = (event) => {
   payload.append("sowDoc", formData.sowDoc); // File attachment
 
   // Send request to backend
-  fetch('/api/sows', {
+  fetch('http://3.7.139.212:8080/api/sows', {
     method: 'POST',
     body: payload,
   })
@@ -282,7 +282,7 @@ const handleSubmitSow = (event) => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`http://localhost:8082/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -318,7 +318,7 @@ const handleOpenModal = () => {
 };
 const handleDownload = async (sowId, filename) => {
   try {
-    const response = await fetch(`/api/sows/${sowId}/download`, {
+    const response = await fetch(`http://3.7.139.212:8080/api/sows/${sowId}/download`, {
       method: 'GET',
     });
 
