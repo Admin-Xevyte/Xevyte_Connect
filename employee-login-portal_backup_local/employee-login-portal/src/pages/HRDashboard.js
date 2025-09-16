@@ -63,13 +63,15 @@ function HRDashboard() {
         }
     }, [employeeId]);
  
-  const fetchHRClaims = (hrId) => {
-  setLoading(true); // Start loading before API call
+ const fetchHRClaims = (hrId) => {
+  setLoading(true);
 
   axios
     .get(`http://3.7.139.212:8080/claims/hr/${hrId}`)
     .then((response) => {
-     const sortedClaims = claims.sort((a, b) => b.id - a.id);
+      const fetchedClaims = response.data;
+
+      const sortedClaims = fetchedClaims.sort((a, b) => b.id - a.id);
 
       setClaims(sortedClaims);
       setOriginalClaims(sortedClaims);
@@ -79,9 +81,10 @@ function HRDashboard() {
       console.error("Error fetching claims:", err);
     })
     .finally(() => {
-      setLoading(false); // Stop loading after request completes
+      setLoading(false);
     });
 };
+
 
     const fetchProfileInfo = (empId) => {
         fetch(`http://3.7.139.212:8080/profile/${empId}`)
