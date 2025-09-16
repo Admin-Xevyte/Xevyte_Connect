@@ -32,7 +32,7 @@ const toggleContractMenu = () => {
 
   useEffect(() => {
   if (employeeId) {
-    fetch(`/claims/assigned-ids/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/claims/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         setCanViewTasks(data.canViewTasks === true);
@@ -47,7 +47,7 @@ const toggleContractMenu = () => {
 
   useEffect(() => {
     if (employeeId) {
-      fetch(`/claims/summary/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/claims/summary/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           setSummary({
@@ -63,7 +63,7 @@ const toggleContractMenu = () => {
 
   useEffect(() => {
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -115,7 +115,7 @@ const toggleContractMenu = () => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
