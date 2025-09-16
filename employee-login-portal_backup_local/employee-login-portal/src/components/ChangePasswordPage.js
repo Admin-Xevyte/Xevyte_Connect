@@ -50,7 +50,7 @@ const handleChangePassword = async (e) => {
   }
 
   try {
-    const res = await axios.post("/api/auth/change-password", {
+    const res = await axios.post("http://3.7.139.212:8080/api/auth/change-password", {
       employeeId,
       newPassword,
     });
