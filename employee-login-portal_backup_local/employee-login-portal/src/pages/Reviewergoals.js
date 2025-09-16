@@ -15,7 +15,13 @@ function ReviewerApprovedGoalsWithLayout() {
   const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-
+  const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
+  const [isContractOpen, setIsContractOpen] = useState(false);
+  const [canViewTasks, setCanViewTasks] = useState(false);
+  const toggleContractMenu = () => {
+    setIsContractOpen(!isContractOpen);
+  };
+  
   // ===== REVIEWER APPROVED GOALS STATE =====
   const initialEmployeeId = location.state?.employeeId || localStorage.getItem('selectedEmployeeId');
   const [employeeId, setEmployeeId] = useState(initialEmployeeId || '');
@@ -210,30 +216,36 @@ function ReviewerApprovedGoalsWithLayout() {
   };
 
   // Filter goals based on the search term
- const filteredGoals = approvedGoals.filter(goal => {
+  const filteredGoals = approvedGoals.filter(goal => {
     if (!searchTerm) {
-        return true;
+      return true;
     }
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
-
-    // Check if any of the goal properties contain the search term
     return (
-        goal.goalTitle?.toLowerCase().includes(lowerCaseSearchTerm) ||
-        goal.goalDescription?.toLowerCase().includes(lowerCaseSearchTerm) ||
-        goal.quarter?.toLowerCase().includes(lowerCaseSearchTerm) ||
-        String(goal.metric)?.toLowerCase().includes(lowerCaseSearchTerm) || // Corrected
-        String(goal.target)?.toLowerCase().includes(lowerCaseSearchTerm) || // Corrected
-        goal.status?.toLowerCase().includes(lowerCaseSearchTerm) ||
-        String(goal.rating)?.toLowerCase().includes(lowerCaseSearchTerm) || // Corrected
-        goal.selfAssessment?.toLowerCase().includes(lowerCaseSearchTerm) ||
-        goal.additionalNotes?.toLowerCase().includes(lowerCaseSearchTerm) ||
-        String(goal.achievedTarget)?.toLowerCase().includes(lowerCaseSearchTerm) || // Corrected
-        goal.managerComments?.toLowerCase().includes(lowerCaseSearchTerm) ||
-        String(goal.managerRating)?.toLowerCase().includes(lowerCaseSearchTerm) || // Corrected
-        goal.reviewerComments?.toLowerCase().includes(lowerCaseSearchTerm) ||
-        String(goal.goalId)?.toLowerCase().includes(lowerCaseSearchTerm)
+      goal.goalTitle?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      goal.goalDescription?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      goal.quarter?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      String(goal.metric)?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      String(goal.target)?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      goal.status?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      String(goal.rating)?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      goal.selfAssessment?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      goal.additionalNotes?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      String(goal.achievedTarget)?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      goal.managerComments?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      String(goal.managerRating)?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      goal.reviewerComments?.toLowerCase().includes(lowerCaseSearchTerm) ||
+      String(goal.goalId)?.toLowerCase().includes(lowerCaseSearchTerm)
     );
-});
+  });
+
+  const cellStyle = {
+    border: '1px solid #ddd',
+    padding: '8px',
+    textAlign: 'left',
+    verticalAlign: 'top',
+  };
+
   return (
     <div className="dashboard-container">
       {/* ===== SIDEBAR ===== */}
@@ -242,27 +254,104 @@ function ReviewerApprovedGoalsWithLayout() {
           <>
             <img src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")} alt="office" className="office-vng" />
             <img src={require("../assets/gg_move-left.png")} alt="collapse" className="toggle-btn" onClick={toggleSidebar} style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }} />
-          <h3>
-                                 <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                                     Home
-                                    
-                                   </span>
-                                 </Link>
-                               </h3>
-                               <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
-                               <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                               <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                               <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                               <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                               <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                               <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                               <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-                             
-                               <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                               <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white' }}>Performance</Link></h3>
-                               <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                               <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
+            <h3>
+              <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Home</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white'}}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+              </Link>
+            </h3>
+            <h3>
+              <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+              </Link>
+            </h3>
+            {allowedUsers.includes(employeeId) && (
+              <>
+                <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                  <span className="side" style={{ color:'#00b4c6' }}>
+                    Contract Management {isContractOpen ? '▾' : '▸'}
+                  </span>
+                </h3>
+                {isContractOpen && (
+                  <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                    <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                      <Link to="/customers" style={{ textDecoration: 'none', color:'#00b4c6', fontSize: '14px', display: 'block', padding: '4px 0' }} onMouseOver={(e) => (e.target.style.color = '#fff')} onMouseOut={(e) => (e.target.style.color = '#00b4c6')}>
+                        Customers
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                      <Link to="/sows" style={{ textDecoration: 'none', color:'#00b4c6', fontSize: '14px', display: 'block', padding: '4px 0' }} onMouseOver={(e) => (e.target.style.color = '#fff')} onMouseOut={(e) => (e.target.style.color = '#00b4c6')}>
+                        SOWs
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                      <Link to="/projects" style={{ textDecoration: 'none', color:'#00b4c6', fontSize: '14px', display: 'block', padding: '4px 0' }} onMouseOver={(e) => (e.target.style.color = '#fff')} onMouseOut={(e) => (e.target.style.color = '#00b4c6')}>
+                        Projects
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                      <Link to="/allocation" style={{ textDecoration: 'none', color:'#00b4c6', fontSize: '14px', display: 'block', padding: '4px 0' }} onMouseOver={(e) => (e.target.style.color = '#fff')} onMouseOut={(e) => (e.target.style.color = '#00b4c6')}>
+                        Allocation
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </>
+            )}
           </>
         ) : (
           <div className="collapsed-wrapper">
@@ -296,154 +385,153 @@ function ReviewerApprovedGoalsWithLayout() {
         </div>
 
         <hr className="divider-line" />
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#f0f0f0",
+            color: "#333",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            cursor: "pointer",
+            margin: "20px 0 20px 0",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+            transition: "background-color 0.3s ease",
+            width: "fit-content",
+            display: "block",
+          }}
+        >
+          ⬅ Back
+        </button>
 
         {/* ===== REVIEWER APPROVED GOALS CONTENT BELOW DIVIDER ===== */}
         <div style={{ padding: '20px' }}>
-          <button onClick={() => navigate(-1)} style={{ marginBottom: '20px' }}>← Back</button>
-          <h2>Goals for Employee ID: <span style={{ backgroundColor: 'yellow', padding: '2px 6px' }}>{employeeId}</span></h2>
+          <h2>Goals for Employee ID: <span style={{ padding: '2px 6px' }}>{employeeId}</span></h2>
           {loading && <p>Loading goals...</p>}
           {error && <p style={{ color: 'red' }}>{error}</p>}
-          {!loading && !error && approvedGoals.length === 0 && <p>No approved goals found for this employee.</p>}
-          {!loading && approvedGoals.length > 0 && (
-            <>
-              <div
+          {!loading && !error && (
+            <div
+              style={{
+                maxHeight: 'calc(100vh - 350px)',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                display: 'block',
+                width: '100%',
+              }}
+            >
+              <table
                 style={{
-                  maxHeight: '400px',
-                  overflowY: 'auto',
-                  overflowX: 'hidden',
-                  display: 'block',
+                  borderCollapse: 'collapse',
                   width: '100%',
+                  tableLayout: 'fixed',
+                  wordWrap: 'break-word',
+                  marginTop: 0,
+                  border: '1px solid #ddd',
                 }}
               >
-                <table
+                <thead
                   style={{
-                    borderCollapse: 'collapse',
-                    width: '100%',
-                    tableLayout: 'fixed',
-                    wordWrap: 'break-word',
-                    marginTop: 0,
-                    border: '1px solid #ddd',
+                    backgroundColor: 'darkblue',
+                    color: 'white',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2,
                   }}
                 >
-                  <thead
-                    style={{
-                      backgroundColor: 'darkblue',
-                      color: 'white',
-                      position: 'sticky',
-                      top: 0,
-                      zIndex: 2,
-                    }}
-                  >
-                    <tr>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>Quarter</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>Goal Id</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>Title</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>Description</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>Weightage</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>Target</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>EMP Rating</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>EMP Self Assessment</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>EMP Additional Notes</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>MNG Achieved Target</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>MNG Comments</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'white' }}>MNG Rating</th>
-                      <th style={{ ...tdStyle, backgroundColor: 'darkblue', color: 'white' }}>Comments By Employee</th>
-                      <th style={{ ...cellStyle, backgroundColor: 'darkblue', color: 'red' }}>
-                        * <span style={{ color: 'white' }}>Reviewer Comments</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredGoals.length > 0 ? (
-                      filteredGoals.map((goal) => (
-                        <tr key={goal.goalId}>
-                          <td style={cellStyle}>{goal.quarter}</td>
-                          <td style={cellStyle}>{goal.goalId}</td>
-                          <td style={cellStyle}>{goal.goalTitle}</td>
-                          <td style={cellStyle}>{goal.goalDescription}</td>
-                          <td style={cellStyle}>{goal.metric}</td>
-                          <td style={cellStyle}>{goal.target}</td>
-                          <td style={cellStyle}>{goal.rating}</td>
-                          <td style={cellStyle}>{goal.selfAssessment}</td>
-                          <td style={cellStyle}>{goal.additionalNotes}</td>
-                          <td style={cellStyle}>{goal.achievedTarget}</td>
-                          <td style={cellStyle}>{goal.managerComments}</td>
-                          <td style={cellStyle}>{goal.managerRating}</td>
-                          <td style={tdStyle}>
-                            <button
-                              onClick={() => toggleComments(goal.goalId)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color:'black',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              {expandedGoals[goal.goalId] ? '⬆️ Hide' : '⬇️ Show'}
-                            </button>
-                            {expandedGoals[goal.goalId] && (
-                              <div
-                                style={{
-                                  marginTop: '0.5rem',
-                                  padding: '0.5rem',
-                                  backgroundColor: '#f9f9f9',
-                                  color:'black',
-                                  border: '1px solid #ddd',
-                                }}
-                              >
-                                {comments[goal.goalId]?.length ? (
-                                  comments[goal.goalId].map((c, index) => (
-                                    <div key={index}>
-                                      <strong>{index + 1}.</strong> {c.commentText}
-                                      <br />
-                                      <small>
-                                        {new Date(c.commentedAt).toLocaleString()}
-                                      </small>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <p>No comments.</p>
-                                )}
-                              </div>
-                            )}
-                          </td>
-                          <td style={cellStyle}>
-                            <textarea
-                              value={reviewerCommentsMap[goal.goalId] || ''}
-                              onChange={(e) =>
-                                handleCommentChange(goal.goalId, e.target.value)
-                              }
-                              rows={3}
-                              style={{ width: '100%' }}
-                            />
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="14" style={{ textAlign: 'center' }}>No goals found matching your search.</td>
+                  <tr>
+                    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Title</th>
+                    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Description</th>
+                    <th style={{ backgroundColor: 'darkblue', color: 'white', width: '110px' }}>Weightage</th>
+                    <th style={{ backgroundColor: 'darkblue', color: 'white', width: '80px' }}>Target</th>
+                    <th style={{ backgroundColor: 'darkblue', color: 'white', width: '80px' }}>Self Rating</th>
+                    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Self Assessment</th>
+                    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>MNG Comments</th>
+                    <th style={{ backgroundColor: 'darkblue', color: 'white', width: '80px' }}>MNG Rating</th>
+                    <th style={{ backgroundColor: 'darkblue' }}>Reviewer Comments <span style={{ color: "red" }}>*</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredGoals.length > 0 ? (
+                    filteredGoals.map((goal) => (
+                      <tr key={goal.goalId}>
+                        <td style={cellStyle}>{goal.goalTitle}</td>
+                        <td style={cellStyle}>{goal.goalDescription}</td>
+                        <td style={cellStyle}>{goal.metric}</td>
+                        <td style={cellStyle}>{goal.target}</td>
+                        <td style={cellStyle}>{goal.rating}</td>
+                        <td style={cellStyle}>{goal.selfAssessment}</td>
+                        <td style={cellStyle}>{goal.managerComments}</td>
+                        <td style={cellStyle}>{goal.managerRating}</td>
+                        <td style={cellStyle}>
+                          <textarea
+                            value={reviewerCommentsMap[goal.goalId] || ''}
+                            onChange={(e) => handleCommentChange(goal.goalId, e.target.value)}
+                            rows={3}
+                            style={{
+                              width: '100%',
+                              resize: 'none',
+                              overflowY: 'auto',
+                              overflowX: 'hidden',
+                              whiteSpace: 'pre-wrap',
+                              wordWrap: 'break-word',
+                              lineHeight: '1.4',
+                              fontFamily: 'inherit',
+                            }}
+                            maxLength={200}
+                          />
+                        </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
-                <button onClick={() => updateAllGoalsStatus('approved')} disabled={batchUpdating}>Approve All Goals</button>
-                <button onClick={() => updateAllGoalsStatus('rejected')} disabled={batchUpdating}>Reject All Goals</button>
-              </div>
-            </>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="9" style={{ textAlign: 'center', border: '1px solid #ddd', padding: '10px' }}>
+                        No goals found matching your search.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {!loading && approvedGoals.length > 0 && (
+            <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => updateAllGoalsStatus('approved')}
+                disabled={batchUpdating}
+                style={{
+                  backgroundColor: 'green',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  cursor: batchUpdating ? 'not-allowed' : 'pointer',
+                  opacity: batchUpdating ? 0.6 : 1,
+                  borderRadius: '4px',
+                }}
+              >
+                Approve All Goals
+              </button>
+              <button
+                onClick={() => updateAllGoalsStatus('rejected')}
+                disabled={batchUpdating}
+                style={{
+                  backgroundColor: "#dc3545",
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  cursor: batchUpdating ? 'not-allowed' : 'pointer',
+                  opacity: batchUpdating ? 0.6 : 1,
+                  borderRadius: '4px',
+                }}
+              >
+                Reject All Goals
+              </button>
+            </div>
           )}
         </div>
       </div>
     </div>
   );
 }
-
-const cellStyle = {
-  border: '1px solid #ddd',
-  padding: '8px',
-  textAlign: 'left',
-  verticalAlign: 'top',
-};
 
 export default ReviewerApprovedGoalsWithLayout;
