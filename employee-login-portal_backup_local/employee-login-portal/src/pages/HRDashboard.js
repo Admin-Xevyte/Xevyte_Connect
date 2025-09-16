@@ -67,7 +67,7 @@ function HRDashboard() {
   setLoading(true); // Start loading before API call
 
   axios
-    .get(`/claims/hr/${hrId}`)
+    .get(`http://3.7.139.212:8080/claims/hr/${hrId}`)
     .then((response) => {
      const sortedClaims = claims.sort((a, b) => b.id - a.id);
 
@@ -84,7 +84,7 @@ function HRDashboard() {
 };
 
     const fetchProfileInfo = (empId) => {
-        fetch(`/profile/${empId}`)
+        fetch(`http://3.7.139.212:8080/profile/${empId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.profilePic) {
@@ -132,7 +132,7 @@ function HRDashboard() {
         formData.append("profilePic", file);
  
         try {
-            const res = await fetch(`/profile/update/${employeeId}`, {
+            const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
                 method: "PUT",
                 body: formData,
             });
@@ -166,7 +166,7 @@ function HRDashboard() {
  
     const updateStatus = (claimId, status) => {
         axios
-            .put(`/claims/hr/update-status/${claimId}?status=${status}`)
+            .put(`http://3.7.139.212:8080/claims/hr/update-status/${claimId}?status=${status}`)
             .then(() => fetchHRClaims(employeeId))
             .catch((error) => console.error(`Error updating status:`, error));
     };
@@ -174,7 +174,7 @@ function HRDashboard() {
     // Modified handleViewReceipt to support both images and PDFs
     const handleViewReceipt = (id, receiptName) => {
         axios
-            .get(`/claims/receipt/${id}`, { responseType: "blob" })
+            .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
             .then((res) => {
                 const fileExtension = receiptName.split('.').pop().toLowerCase();
                 const fileUrl = URL.createObjectURL(res.data);
