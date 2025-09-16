@@ -93,7 +93,7 @@ function Saveddrafts() {
  
  
   const handleEdit = (draftId) => {
-    navigate('/claims/new', { state: { draftId: draftId } });
+    navigate('/new', { state: { draftId: draftId } });
   };
  
   const handleProfileClick = () => {
