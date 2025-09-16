@@ -630,9 +630,10 @@ function HRDashboard() {
                                         <td>
                                             {claim.status !== "Paid" && (
                                                 <div className="action-buttons">
-                                                    <button className="approve-btn" onClick={() => updateStatus(claim.id, "Initiated")}>Initiated</button>
-                                                    <button className="reject-btn" onClick={() => updateStatus(claim.id, "Payment Under Process")}>Payment Under Process</button>
-                                                    <button className="download-btn" onClick={() => updateStatus(claim.id, "Paid")}>Paid</button>
+                                                    <button type="button" className="approve-btn" onClick={() => updateStatus(claim.id, "Initiated")}>Initiated</button>
+<button type="button" className="reject-btn" onClick={() => updateStatus(claim.id, "Payment Under Process")}>Payment Under Process</button>
+<button type="button" className="download-btn" onClick={() => updateStatus(claim.id, "Paid")}>Paid</button>
+
                                                 </div>
                                             )}
                                         </td>
