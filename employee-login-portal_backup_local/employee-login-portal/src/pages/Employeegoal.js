@@ -1,10 +1,21 @@
-
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Dashboard.css';
-
-
+ 
+// Move the ClickableCard component outside the main component
+const ClickableCard = () => {
+  const navigate = useNavigate();
+ 
+  return (
+    // Your ClickableCard JSX here
+    // It's not clear from your original code what this component should render
+    // but its definition needs to be at the top level.
+    <div>
+      {/* ... */}
+    </div>
+  );
+};
+ 
 const SummaryCard = ({ title, count, color, text, onClick }) => (
   <div
     onClick={onClick}
@@ -32,23 +43,23 @@ const SummaryCard = ({ title, count, color, text, onClick }) => (
     <p>{title.includes('Goals') ? 'Goals' : 'Items'}</p>
   </div>
 );
-
+ 
 const EmployeeGoals = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-    // ✅ Logged-in employee (from localStorage)
-    const loggedInEmployeeId = localStorage.getItem("employeeId");
-    const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName") || 'User');
-    const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
-  
-    // ✅ Selected employee (from navigation or localStorage)
-    const initialSelectedEmployeeId = location.state?.employeeId || localStorage.getItem('selectedEmployeeId') || '';
-    const initialSelectedEmployeeName = location.state?.employeeName || localStorage.getItem('selectedEmployeeName') || '';
-  
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState(initialSelectedEmployeeId);
-    const [selectedEmployeeName, setSelectedEmployeeName] = useState(initialSelectedEmployeeName);
-
+   const employeeId = localStorage.getItem("employeeId");
+  // ✅ Logged-in employee (from localStorage)
+  const loggedInEmployeeId = localStorage.getItem("employeeId");
+  const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName") || 'User');
+  const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
+ 
+  // ✅ Selected employee (from navigation or localStorage)
+  const initialSelectedEmployeeId = location.state?.employeeId || localStorage.getItem('selectedEmployeeId') || '';
+  const initialSelectedEmployeeName = location.state?.employeeName || localStorage.getItem('selectedEmployeeName') || '';
+ 
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(initialSelectedEmployeeId);
+  const [selectedEmployeeName, setSelectedEmployeeName] = useState(initialSelectedEmployeeName);
+ 
   const reviewerId = location.state?.reviewerId;
   const [expandedGoals, setExpandedGoals] = useState({});
   const [comments, setComments] = useState({});
@@ -56,20 +67,25 @@ const EmployeeGoals = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reviewed, setReviewed] = useState(false);
-
+ 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
-
+ const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+   const [isContractOpen, setIsContractOpen] = useState(false);
+ 
+ const toggleContractMenu = () => {
+   setIsContractOpen(!isContractOpen);
+ };
   const getCurrentQuarter = () => {
     const m = new Date().getMonth() + 1;
     return m <= 3 ? 'Q1' : m <= 6 ? 'Q2' : m <= 9 ? 'Q3' : 'Q4';
   };
   const currentQuarter = getCurrentQuarter();
-
+ 
   const fetchGoals = useCallback(() => {
     setLoading(true);
     setError(null);
@@ -100,7 +116,44 @@ const EmployeeGoals = () => {
         setLoading(false);
       });
   }, [selectedEmployeeId, currentQuarter]);
-
+ 
+ 
+useEffect(() => {
+  if (selectedEmployeeId) {
+    // Corrected fetch URL
+    fetch(`/api/goals/${selectedEmployeeId}`)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("Employee fetch response:", data);
+       
+        // Correctly access the name property from the returned object
+        const name = data?.name;
+       
+        if (name) {
+          setSelectedEmployeeName(name);
+          localStorage.setItem('selectedEmployeeName', name);
+        } else {
+          console.error('Employee name not found in API response:', data);
+          setSelectedEmployeeName('Unknown Employee');
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch employee name:', err);
+        setError('Failed to load employee details.');
+        setSelectedEmployeeName('Unknown Employee');
+      });
+  } else {
+    console.warn('No selectedEmployeeId found');
+  }
+}, [selectedEmployeeId]);
+ 
+ 
+ 
   // Fetch goals on mount
   useEffect(() => {
     if (selectedEmployeeId) {
@@ -110,7 +163,7 @@ const EmployeeGoals = () => {
       setLoading(false);
     }
   }, [selectedEmployeeId, fetchGoals]);
-
+ 
   // Fetch updated profile info on mount
   useEffect(() => {
     if (loggedInEmployeeId) {
@@ -129,7 +182,7 @@ const EmployeeGoals = () => {
         .catch(err => console.error("Failed to fetch profile info:", err));
     }
   }, [loggedInEmployeeId]);
-
+ 
   // Close profile dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -142,41 +195,41 @@ const EmployeeGoals = () => {
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileOpen]);
-
+ 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const toggleProfileMenu = () => setProfileOpen(!profileOpen);
-
+ 
   const handleLogout = () => {
     localStorage.clear();
     sessionStorage.clear();
     navigate("/login");
   };
-
+ 
   const handleEditProfile = () => {
     setProfileOpen(false);
     fileInputRef.current.click();
   };
-
+ 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+ 
     const formData = new FormData();
     formData.append("name", employeeName);
     formData.append("profilePic", file);
-
+ 
     try {
       const res = await fetch(`/profile/update/${loggedInEmployeeId}`, {
         method: "PUT",
         body: formData,
       });
-
+ 
       const data = await res.json();
-
+ 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
-
+ 
       if (data.profilePic) {
         setProfilePic(data.profilePic);
         localStorage.setItem("employeeProfilePic", data.profilePic);
@@ -193,13 +246,13 @@ const EmployeeGoals = () => {
       alert("Error uploading profile picture. See console for details.");
     }
   };
-
+ 
   const toggleComments = async (goalId) => {
     setExpandedGoals((prev) => ({
       ...prev,
       [goalId]: !prev[goalId],
     }));
-
+ 
     if (!comments[goalId]) {
       try {
         const res = await fetch(`/api/goals/${goalId}/comments`);
@@ -212,7 +265,7 @@ const EmployeeGoals = () => {
       }
     }
   };
-
+ 
   const handleReview = async () => {
     try {
       const goalIds = goals.map(goal => goal.goalId);
@@ -221,11 +274,11 @@ const EmployeeGoals = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ goalIds, status: 'reviewed' }),
       });
-
+ 
       if (!response.ok) {
         throw new Error('Failed to review goals');
       }
-
+ 
       const data = await response.json();
       console.log('Goals reviewed:', data);
       // Re-fetch goals to update the UI
@@ -234,7 +287,7 @@ const EmployeeGoals = () => {
       console.error(error);
     }
   };
-
+ 
   const handleSubmitFeedback = () => {
     navigate('/submitfeedback', {
       state: {
@@ -244,9 +297,9 @@ const EmployeeGoals = () => {
       },
     });
   };
-  
-
-  const validStatuses = ['submitted'];
+ 
+ 
+const validStatuses = ['submitted', 'rejected'];
   const submitFeedbackCount = goals.filter((g) => g.status?.toLowerCase() === 'submitted').length;
   const inProgressCount = goals.filter((g) =>
     ['inprogress', 'in progress'].includes(g.status?.toLowerCase())
@@ -254,19 +307,20 @@ const EmployeeGoals = () => {
   const rejectedCount = goals.filter((g) => g.status?.toLowerCase() === 'rejected').length;
   const pendingCount = goals.filter((g) => g.status?.toLowerCase() === 'pending').length;
   const filteredGoals = goals.filter((g) => validStatuses.includes(g.status?.toLowerCase()));
-
+ 
   const thStyle = {
     textAlign: 'left',
-    padding: '8px',
-    borderBottom: '2px solid #007bff',
+    padding: '3px',
+    borderBottom: '2px solid darkblue',
     color: 'white',
-    backgroundColor:'darkblue'
+    backgroundColor: 'darkblue',
+    fontSize:"15px"
   };
-
+ 
   const tdStyle = {
     padding: '8px',
   };
-
+ 
   const buttonStyle = {
     padding: '0.4rem 1rem',
     backgroundColor: '#000',
@@ -275,7 +329,7 @@ const EmployeeGoals = () => {
     borderRadius: '5px',
     cursor: 'pointer',
   };
-
+ 
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -294,28 +348,172 @@ const EmployeeGoals = () => {
               onClick={toggleSidebar}
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
+    <h3>
+          <Link
+            to="/dashboard"
+            className="side"
+            style={{
+              textDecoration: 'none',
+              color:'#00b4c6',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              Home
+            </span>
+          </Link>
+        </h3>
+        
         <h3>
-                               <Link to="/dashboard" className="side" style={{ textDecoration: 'none',color:'#00b4c6'}}>
-                                 <span style={{ display: 'flex', alignItems: 'center', gap: '10px',color:'#00b4c6'}}>
-                                   Home
-                                  
-                                 </span>
-                               </Link>
-                             </h3>
-                             <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Claims</Link></h3>
-                             <h3><Link to="/home1" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Time Sheet</Link></h3>
-                             <h3><Link to="/home2" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Handbook</Link></h3>
-                             <h3><Link to="/home3" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Directory</Link></h3>
-                             <h3><Link to="/home4" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Exit Management</Link></h3>
-                             <h3><Link to="/home5" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Holiday Calendar</Link></h3>
-                             <h3><Link to="/home6" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Helpdesk</Link></h3>
-                             <h3><Link to="/home7" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Leaves</Link></h3>
-                           
-                             <h3><Link to="/home9" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Pay slips</Link></h3>
-                             <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white' }}>Performance</Link></h3>
-                             <h3><Link to="/home11" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Training</Link></h3>
-                             <h3><Link to="/home12" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Travel</Link></h3>
-          </>
+          <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white'}}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+          </Link>
+        </h3>
+        
+        <h3>
+          <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+          </Link>
+        </h3>
+        {allowedUsers.includes(employeeId) && (
+                                              <>
+                                                <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                                  <span className="side" style={{  color:'#00b4c6' }}>
+                                                    Contract Management {isContractOpen ? '▾' : '▸'}
+                                                  </span>
+                                                </h3>
+                                            
+                                                {isContractOpen && (
+                                                  <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                    <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                      <Link
+                                                        to="/customers"
+                                                        style={{
+                                                          textDecoration: 'none',
+                                                         color:'#00b4c6',
+                                                          fontSize: '14px',
+                                                          display: 'block',
+                                                          padding: '4px 0',
+                                                        }}
+                                                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                        onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                      >
+                                                        Customers
+                                                      </Link>
+                                                    </li>
+                                                    <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                      <Link
+                                                        to="/sows"
+                                                        style={{
+                                                          textDecoration: 'none',
+                                                         color:'#00b4c6',
+                                                          fontSize: '14px',
+                                                          display: 'block',
+                                                          padding: '4px 0',
+                                                        }}
+                                                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                        onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                      >
+                                                        SOWs
+                                                      </Link>
+                                                    </li>
+                                                    <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                      <Link
+                                                        to="/projects"
+                                                        style={{
+                                                          textDecoration: 'none',
+                                                         color:'#00b4c6',
+                                                          fontSize: '14px',
+                                                          display: 'block',
+                                                          padding: '4px 0',
+                                                        }}
+                                                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                        onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                      >
+                                                        Projects
+                                                      </Link>
+                                                    </li>
+                                                    <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                      <Link
+                                                        to="/allocation"
+                                                        style={{
+                                                          textDecoration: 'none',
+                                                         color:'#00b4c6',
+                                                          fontSize: '14px',
+                                                          display: 'block',
+                                                          padding: '4px 0',
+                                                        }}
+                                                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                        onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                      >
+                                                        Allocation
+                                                      </Link>
+                                                    </li>
+                                                  </ul>
+                                                )}
+                                              </>
+                                            )}
+                
+                </>
         ) : (
           <div className="collapsed-wrapper">
             <img
@@ -327,11 +525,11 @@ const EmployeeGoals = () => {
           </div>
         )}
       </div>
-
+ 
       <div className="main-content">
         <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Welcome, {employeeName} ({loggedInEmployeeId})</h2>
-
+ 
           <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
             <input
               type="text"
@@ -346,7 +544,7 @@ const EmployeeGoals = () => {
               className="icon"
               style={{ cursor: 'pointer' }}
             />
-
+ 
             {/* Profile picture with dropdown */}
             <div className="profile-wrapper" style={{ position: 'relative' }}>
               <img
@@ -402,7 +600,7 @@ const EmployeeGoals = () => {
                   </button>
                 </div>
               )}
-
+ 
               {/* Success message */}
               {successMessage && (
                 <div style={{
@@ -422,7 +620,7 @@ const EmployeeGoals = () => {
                   {successMessage}
                 </div>
               )}
-
+ 
               {/* Hidden file input */}
               <input
                 type="file"
@@ -434,11 +632,12 @@ const EmployeeGoals = () => {
             </div>
           </div>
         </div>
-
+ 
         <hr className="divider-line" />
-
-        <h2>Goals for , {selectedEmployeeId}</h2>
-
+ 
+       <h2 style={{textAlign:"Center"}}>Goals for {selectedEmployeeName} ({selectedEmployeeId})</h2>
+ 
+ 
         <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <main
             style={{
@@ -448,42 +647,96 @@ const EmployeeGoals = () => {
               backgroundColor: '#f4f4f4',
             }}
           >
-            <div
-              style={{
-                backgroundColor: '#fff',
-                border: '1px dashed #007bff',
-                borderRadius: '8px',
-                padding: '1rem',
-                marginBottom: '1.5rem',
-                textAlign: 'center',
-              }}
-            >
-              <h3>🎯 Set a New Team Goal</h3>
-              <p style={{ color: '#555' }}>Define a new goal for your team</p>
-              <button
-                onClick={() => navigate('/myteam/newgoal')}
-                style={{
-                  marginTop: '1rem',
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#007bff',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                + Add Goal
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-              {/* <SummaryCard title="Submit Feedback" count={submitFeedbackCount} color="#e3f2fd" text="#2196f3" /> */}
-              <SummaryCard title="In Progress Goals" count={inProgressCount} color="#fff3e0" text="#fb8c00" onClick={() => navigate('/inprogressgoals')} />
-              <SummaryCard title="Rejected Goals" count={rejectedCount} color="#ffebee" text="#e53935" onClick={() => navigate('/rejectedgoals')} />
-              <SummaryCard title="Pending Goals" count={pendingCount} color="#fffde7" text="#fbc02d" />
-              {/* <SummaryCard title="Submitted Goals" count={submitFeedbackCount} color="#e8f5e9" text="#388e3c" /> */}
-            </div>
-
+           <div
+  style={{
+    display: 'flex',
+    gap: '1rem',
+    marginBottom: '2rem',
+    flexWrap: 'wrap',
+  }}
+>
+  {/* 1. The "New Goal" Card */}
+  <div
+    onClick={() => navigate('/myteam/newgoal')}
+    style={{
+      flex: '1 1 200px',
+      backgroundColor: '#b4e7f5ff',
+      border: '1px dashed #007bff',
+      borderRadius: '8px',
+      padding: '1rem',
+      textAlign: 'center',
+      minHeight: '150px',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      transition: 'box-shadow 0.2s ease-in-out',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.boxShadow = 'none';
+    }}
+  >
+    <h3>🎯 Set a New Team Goal</h3>
+    <p style={{ marginTop: '0.5rem', color: '#007bff', fontWeight: 'bold' }}>
+      + Add Goal
+    </p>
+  </div>
+ 
+  {/* 2. "In Progress Goals" Card */}
+  <div
+    style={{
+      flex: '1 1 200px',
+      minHeight: '150px',
+      display: 'flex',
+    }}
+  >
+    <SummaryCard
+      title="In Progress Goals"
+      count={inProgressCount}
+      color="#fff3e0"
+      text="#e2a55aff"
+      onClick={() => navigate('/inprogressgoals')}
+    />
+  </div>
+ 
+  {/* 3. "Pending Goals" Card */}
+  <div
+    style={{
+      flex: '1 1 200px',
+      minHeight: '150px',
+      display: 'flex',
+    }}
+  >
+    <SummaryCard
+      title="Pending Goals"
+      count={pendingCount}
+      color="#fffde7"
+      text="#fbc02d"
+    />
+  </div>
+ 
+  {/* 4. "Rejected Goals" Card */}
+  <div
+    style={{
+      flex: '1 1 200px',
+      minHeight: '150px',
+      display: 'flex',
+    }}
+  >
+    <SummaryCard
+      title="Rejected Goals"
+      count={rejectedCount}
+      color="#ffebee"
+      text="#e53935"
+      onClick={() => navigate('/rejectedgoals')}
+    />
+  </div>
+</div>
+ 
+ 
             {loading ? (
               <p style={{ textAlign: 'center' }}>Loading goals...</p>
             ) : (
@@ -495,94 +748,112 @@ const EmployeeGoals = () => {
                   boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
                 }}
               >
-                <h3>Goals</h3>
-                   <div
-    style={{
-      maxHeight: '200px',       // Adjust to fit that white space
-      overflowY: 'auto',        // Vertical scroll
-      
-      border: '1px solid #ddd', // Optional border
-    }}
-  >
-  
-                <table style={{ width: '100%', borderCollapse: 'collapse', margin: '0' }}>
-                
-                  <thead>
-                    <tr>
-                      <th style={thStyle}>Goal Title</th>
-                      <th style={thStyle}>Status</th>
-                      <th style={thStyle}>Goal ID</th>
-                      <th style={thStyle}>Goal Description</th>
-                      <th style={thStyle}>Quarter</th>
-                      <th style={thStyle}>Target</th>
-                      <th style={thStyle}>Metric</th>
-                      <th style={thStyle}>Rating</th>
-                      <th style={thStyle}>Self Assessment</th>
-                      <th style={thStyle}>Additional Notes</th>
-                      <th style={thStyle}>Comments By Employee</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredGoals.map((g) => (
-                      <tr key={g.goalId} style={{ borderBottom: '1px solid #ddd' }}>
-                        <td style={tdStyle}>{g.goalTitle}</td>
-                        <td style={tdStyle}><em>{g.status}</em></td>
-                        <td style={tdStyle}>{g.goalId}</td>
-                        <td style={tdStyle}>{g.goalDescription}</td>
-                        <td style={tdStyle}>{g.quarter}</td>
-                        <td style={tdStyle}>{g.target}</td>
-                        <td style={tdStyle}>{g.metric}</td>
-                        <td style={tdStyle}>{g.rating ?? '-'}</td>
-                        <td style={tdStyle}>{g.selfAssessment ?? '-'}</td>
-                        <td style={tdStyle}>{g.additionalNotes ?? '-'}</td>
-                        <td style={tdStyle}>
-                          <button
-                            onClick={() => toggleComments(g.goalId)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' ,color:'black'}}
-                            title="Toggle Comments"
-                          >
-                            {expandedGoals[g.goalId] ? '⬆️ Hide' : '⬇️ Show'}
-                          </button>
-
-                          {expandedGoals[g.goalId] && (
-                            <div
-                              style={{
-                                marginTop: '0.5rem',
-                                padding: '0.5rem',
-                                backgroundColor: '#f9f9f9',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                maxHeight: '150px',
-                                overflowY: 'auto',
-                              }}
-                            >
-                              {comments[g.goalId]?.length ? (
-                                comments[g.goalId].map((c, index) => (
-                                  <div
-                                    key={index}
-                                    style={{
-                                      padding: '0.3rem 0',
-                                      borderBottom: '1px solid #eee',
-                                      fontSize: '0.9rem',
-                                      color: '#333',
-                                    }}
-                                  >
-                                    <strong>{index + 1}.</strong> {c.commentText}
-                                    <br />
-                                    <small style={{ color: '#777' }}>{new Date(c.commentedAt).toLocaleString()}</small>
-                                  </div>
-                                ))
-                              ) : (
-                                <p style={{ fontStyle: 'italic', color: '#666' }}>No comments.</p>
-                              )}
-                            </div>
-                          )}
-                        </td>
+                <h3  style={{ marginBottom: "16px" }}>Goals</h3>
+                 <div
+                      style={{
+                        maxHeight: '300px', // Set a specific max height for vertical scrolling
+                        overflowY: 'auto', // Enables vertical scroll
+                        overflowX: 'auto', // Enables horizontal scroll
+                        border: '1px solid #ddd',
+                      }}
+                    >
+                  <table style={{ width: '100%', borderCollapse: 'collapse', margin: '0' }}>
+                   
+                    <thead>
+                      <tr>
+                        <th style={{ ...thStyle, width: "10%",backgroundColor: "darkblue", color: "white", textAlign:"Center" }}>Title</th>
+                        {/* <th style={thStyle}>Goal ID</th> */}
+                        <th style={{...thStyle, textAlign:"Center"}}>Description</th>
+                        {/* <th style={thStyle}>Quarter</th> */}
+                        <th style={{ ...thStyle, width: "2%",backgroundColor: "darkblue", color: "white", textAlign:"Center" }}>Weightage</th>
+                        <th style={{ ...thStyle, width: "2%",backgroundColor: "darkblue", color: "white", textAlign:"Center" }}>Target</th>
+                        <th style={{ ...thStyle, width: "5%",backgroundColor: "darkblue", color: "white", textAlign:"Center" }}>Self Rating</th>
+                        <th style={{ ...thStyle, width: "15%",backgroundColor: "darkblue", color: "white", textAlign:"Center" }}>Self Assessment</th>
+                        {/* <th style={thStyle}>Additional Notes</th>
+                        <th style={thStyle}>Comments By Employee</th> */}
+                        <th style={{ ...thStyle, width: "2%",backgroundColor: "darkblue", color: "white", textAlign:"Center" }}>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-</div>
+                    </thead>
+                    <tbody>
+                      {filteredGoals.map((g) => (
+                        <tr key={g.goalId} style={{ borderBottom: '1px solid #ddd' }}>
+                          <td style={{
+                            maxWidth: '400px',
+                            whiteSpace: 'pre-wrap',
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            textAlign:"center"
+                          }}>{g.goalTitle}</td>
+                         
+                          {/* <td style={tdStyle}>{g.goalId}</td> */}
+                          <td style={{
+                          maxWidth: '500px',
+                          whiteSpace: 'pre-wrap',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
+                        }}>
+                          {g.goalDescription}
+                        </td>
+                          {/* <td style={tdStyle}>{g.quarter}</td> */}
+                           <td style={{tdStyle, textAlign:"center"}}>{g.metric}</td>
+                          <td style={{tdStyle, textAlign:"center"}}>{g.target}</td>
+                         
+                          <td style={{tdStyle, textAlign:"center"}}>{g.rating ?? '-'}</td>
+                         <td style={{ ...tdStyle, width: '200px', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+        {g.selfAssessment ?? '-'}
+      </td>
+                          {/* <td style={tdStyle}>{g.additionalNotes ?? '-'}</td> */}
+                          {/* <td style={tdStyle}>
+                            <button
+                              onClick={() => toggleComments(g.goalId)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem', color: 'black' }}
+                              title="Toggle Comments"
+                            >
+                              {expandedGoals[g.goalId] ? '⬆️ Hide' : '⬇️ Show'}
+                            </button>
+ 
+                            {expandedGoals[g.goalId] && (
+                              <div
+                                style={{
+                                  marginTop: '0.5rem',
+                                  padding: '0.5rem',
+                                  backgroundColor: '#f9f9f9',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '4px',
+                                  maxHeight: '150px',
+                                  overflowY: 'auto',
+                                }}
+                              >
+                                {comments[g.goalId]?.length ? (
+                                  comments[g.goalId].map((c, index) => (
+                                    <div
+                                      key={index}
+                                      style={{
+                                        padding: '0.3rem 0',
+                                        borderBottom: '1px solid #eee',
+                                        fontSize: '0.9rem',
+                                        color: '#333',
+                                      }}
+                                    >
+                                      <strong>{index + 1}.</strong> {c.commentText}
+                                      <br />
+                                      <small style={{ color: '#777' }}>{new Date(c.commentedAt).toLocaleString()}</small>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <p style={{ fontStyle: 'italic', color: '#666' }}>No comments.</p>
+                                )}
+                              </div>
+                            )}
+                          </td> */}
+                        <td style={tdStyle}>
+                          <em>{g.status}</em>
+                        </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
                 {!reviewed && (
                   <div
                     style={{
@@ -592,7 +863,6 @@ const EmployeeGoals = () => {
                       justifyContent: 'flex-end',
                     }}
                   >
-                    
                     <button onClick={handleSubmitFeedback} style={buttonStyle}>
                       Review
                     </button>
@@ -606,5 +876,6 @@ const EmployeeGoals = () => {
     </div>
   );
 };
-
+ 
 export default EmployeeGoals;
+ 
