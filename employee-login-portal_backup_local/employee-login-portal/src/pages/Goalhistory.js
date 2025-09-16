@@ -49,7 +49,7 @@ function Performance() {
   // Fetch updated profile info on mount (optional but recommended)
   useEffect(() => {
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -101,7 +101,7 @@ function Performance() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -143,7 +143,7 @@ function Performance() {
     }
 
     setLoading(true);
-    fetch(`/api/goals/employee/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`)
       .then((res) => {
         if (!res.ok) throw new Error(`Failed to fetch goals (${res.status})`);
         return res.json();
@@ -190,7 +190,7 @@ function Performance() {
     };
 
     try {
-      const res = await fetch(`/api/goals/${goalId}/comments`, {
+      const res = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -207,7 +207,7 @@ function Performance() {
   };
 
   const fetchComments = (goalId) => {
-    fetch(`/api/goals/${goalId}/comments`)
+    fetch(`http://3.7.139.212:8080/api/goals/${goalId}/comments`)
       .then(res => {
         if (!res.ok) throw new Error(`Failed to fetch comments (${res.status})`);
         return res.json();
@@ -243,7 +243,7 @@ function Performance() {
 
       console.log("Sending update:", goalId, payload);
 
-      const response = await fetch(`/api/goals/${goalId}/status`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/status`, {
         method: "PUT",
         headers,
         body: JSON.stringify(payload),
