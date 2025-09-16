@@ -40,7 +40,7 @@ function ReviewerApprovedGoalsWithLayout() {
   // ===== PERFORMANCE: Fetch profile info =====
   useEffect(() => {
     if (employeeIdStored) {
-      fetch(`/profile/${employeeIdStored}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeIdStored}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -87,7 +87,7 @@ function ReviewerApprovedGoalsWithLayout() {
     formData.append("name", employeeName);
     formData.append("profilePic", file);
     try {
-      const res = await fetch(`/profile/update/${employeeIdStored}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeIdStored}`, {
         method: "PUT",
         body: formData,
       });
@@ -128,7 +128,7 @@ function ReviewerApprovedGoalsWithLayout() {
       if (!rawToken) throw new Error('No token found, please login.');
       if (rawToken.startsWith('"') && rawToken.endsWith('"')) rawToken = rawToken.slice(1, -1);
       const token = `Bearer ${rawToken}`;
-      const response = await fetch(`/api/goals/employee/${employeeId}`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`, {
         headers: { Authorization: token, 'Content-Type': 'application/json' },
       });
       if (!response.ok) throw new Error(`Failed to fetch goals: ${await response.text()}`);
@@ -154,7 +154,7 @@ function ReviewerApprovedGoalsWithLayout() {
       if (!rawToken) throw new Error('No token found');
       if (rawToken.startsWith('"') && rawToken.endsWith('"')) rawToken = rawToken.slice(1, -1);
       const token = `Bearer ${rawToken}`;
-      const response = await fetch(`/api/goals/${goalId}/comments`, {
+      const response = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/comments`, {
         headers: { Authorization: token, 'Content-Type': 'application/json' }
       });
       if (!response.ok) throw new Error(`Failed to fetch comments: ${await response.text()}`);
@@ -173,7 +173,7 @@ function ReviewerApprovedGoalsWithLayout() {
       if (rawToken.startsWith('"') && rawToken.endsWith('"')) rawToken = rawToken.slice(1, -1);
       const token = `Bearer ${rawToken}`;
       for (const [goalId, reviewerComments] of Object.entries(reviewerCommentsMap)) {
-        const response = await fetch(`/api/goals/${goalId}/reviewer-comments`, {
+        const response = await fetch(`http://3.7.139.212:8080/api/goals/${goalId}/reviewer-comments`, {
           method: 'PUT',
           headers: { Authorization: token, 'Content-Type': 'application/json' },
           body: JSON.stringify({ reviewerComments }),
