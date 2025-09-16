@@ -129,18 +129,16 @@ const toggleContractMenu = () => {
       setClaims(originalClaims);
     }
   }, [searchTerm, originalClaims]);
-
 const fetchClaims = (financeId) => {
   setLoading(true); // Start loading
 
   axios
     .get(`/claims/finance/${financeId}`)
     .then((response) => {
-      const sortedClaims = response.data.sort((a, b) => {
-        const dateA = new Date(a.submittedDate);
-        const dateB = new Date(b.submittedDate);
-        return dateB - dateA; // Sort by newest first
-      });
+      const claims = response.data;
+
+      // Sort claims by ID in descending order
+      const sortedClaims = claims.sort((a, b) => b.id - a.id);
 
       setClaims(sortedClaims);
       setOriginalClaims(sortedClaims);
