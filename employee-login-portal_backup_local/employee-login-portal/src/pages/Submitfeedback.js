@@ -47,7 +47,7 @@ const EmployeeGoals = () => {
   // ====== PERFORMANCE HEADER DATA FETCH ======
   useEffect(() => {
     if (loggedInEmployeeId) {
-      fetch(`/profile/${loggedInEmployeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${loggedInEmployeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -98,7 +98,7 @@ const EmployeeGoals = () => {
     formData.append("profilePic", file);
  
     try {
-      const res = await fetch(`/profile/update/${loggedInEmployeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${loggedInEmployeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -133,7 +133,7 @@ const EmployeeGoals = () => {
   const fetchGoals = () => {
     setLoading(true);
     setError(null);
-    fetch(`/api/goals/employee/${selectedEmployeeId}`)
+    fetch(`http://3.7.139.212:8080/api/goals/employee/${selectedEmployeeId}`)
       .then(async (res) => {
         const ct = res.headers.get('content-type') || '';
         if (!res.ok) {
@@ -229,7 +229,7 @@ const EmployeeGoals = () => {
         }
       }
  
-      const feedbackResponse = await fetch('/api/goals/manager-feedback', {
+      const feedbackResponse = await fetch('http://3.7.139.212:8080/api/goals/manager-feedback', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(feedbackArray),
