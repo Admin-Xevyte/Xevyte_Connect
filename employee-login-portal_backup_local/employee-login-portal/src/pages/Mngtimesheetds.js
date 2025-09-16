@@ -35,7 +35,7 @@ function ManagerGoals() {
 
   useEffect(() => {
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -89,7 +89,7 @@ function ManagerGoals() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -121,7 +121,7 @@ useEffect(() => {
   }
   
   // No role check anymore, always fetch subordinates for this employeeId as managerId
-  fetch(`/api/goals/manager/${employeeId}/employees`)
+  fetch(`http://3.7.139.212:8080/api/goals/manager/${employeeId}/employees`)
     .then((response) => {
       if (!response.ok) throw new Error('Network response was not ok');
       return response.json();
@@ -194,7 +194,7 @@ useEffect(() => {
           endDate: freezeDates.endDate
         };
 
-        const res = await fetch('/daily-entry/freeze', {
+        const res = await fetch('http://3.7.139.212:8080/daily-entry/freeze', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
