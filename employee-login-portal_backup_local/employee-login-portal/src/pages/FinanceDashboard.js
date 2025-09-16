@@ -66,7 +66,7 @@ function FinanceDashboard() {
     if (storedId) {
       fetchClaims(storedId);
 
-      fetch(`/profile/${storedId}`)
+      fetch(`http://3.7.139.212:8080/profile/${storedId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -133,7 +133,7 @@ function FinanceDashboard() {
   const fetchClaims = (financeId) => {
     setLoading(true); // Start loading
     axios
-      .get(`/claims/finance/${financeId}`)
+      .get(`http://3.7.139.212:8080/claims/finance/${financeId}`)
       .then((response) => {
         const claims = response.data;
         const sortedClaims = claims.sort((a, b) => b.id - a.id);
@@ -151,7 +151,7 @@ function FinanceDashboard() {
 
   const handleApprove = async (claimId) => {
     try {
-      await axios.post(`/claims/approve/${claimId}?role=Finance`);
+      await axios.post(`http://3.7.139.212:8080/claims/approve/${claimId}?role=Finance`);
       
       // Filter out the approved claim from the state arrays
       setClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
@@ -177,7 +177,7 @@ function FinanceDashboard() {
 
     try {
       await axios.post(
-        `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
+        `http://3.7.139.212:8080/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
       );
 
       // Filter out the rejected claim from the state arrays
@@ -196,7 +196,7 @@ function FinanceDashboard() {
 
   const handleDownloadReceipt = (id, receiptName) => {
     axios
-      .get(`/claims/receipt/${id}`, { responseType: "blob" })
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
       .then((res) => {
         const url = window.URL.createObjectURL(new Blob([res.data]));
         const link = document.createElement("a");
@@ -211,7 +211,7 @@ function FinanceDashboard() {
 
   const handleViewReceipt = (id, receiptName) => {
     axios
-      .get(`/claims/receipt/${id}`, { responseType: "blob" })
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
       .then((res) => {
         const fileExtension = receiptName.split('.').pop().toLowerCase();
         const fileUrl = URL.createObjectURL(res.data);
@@ -267,7 +267,7 @@ function FinanceDashboard() {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
