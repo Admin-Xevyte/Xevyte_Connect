@@ -62,7 +62,7 @@ const [formData, setFormData] = useState({
     setFormData((prev) => ({ ...prev, employeeId: id, name }));
  
     if (id) {
-      fetch(`/profile/${id}`)
+      fetch(`http://3.7.139.212:8080/profile/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -80,7 +80,7 @@ const [formData, setFormData] = useState({
       const draftId = location.state.draftId;
       setOriginalDraftId(draftId);
  
-      axios.get(`/claims/draft/${draftId}`)
+      axios.get(`http://3.7.139.212:8080/claims/draft/${draftId}`)
         .then(draftRes => {
           const draft = draftRes.data;
           setFormData({
@@ -96,7 +96,7 @@ const [formData, setFormData] = useState({
           setDraftLoaded(true);
  
           if (draft.receiptName) {
-            axios.get(`/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
+            axios.get(`http://3.7.139.212:8080/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
               .then(receiptRes => {
                 const fileBlob = receiptRes.data;
                 const fileName = draft.receiptName;
@@ -151,7 +151,7 @@ const [formData, setFormData] = useState({
     formData.append("profilePic", file);
  
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -311,7 +311,7 @@ const handleSubmit = async () => {
         if (originalDraftId) {
             // ✅ CORRECTED: Use axios.put for submitting an updated draft
             await axios.put(
-                `/claims/submit-draft/${originalDraftId}`,
+                `http://3.7.139.212:8080/claims/submit-draft/${originalDraftId}`,
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -328,7 +328,7 @@ const handleSubmit = async () => {
         } else {
             // If it's a brand new claim, use a POST request to the main 'submit' endpoint.
             await axios.post(
-                "/claims/submit",
+                "http://3.7.139.212:8080/claims/submit",
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -389,7 +389,7 @@ const handleSaveDraft = async () => {
     if (originalDraftId) {
       // Update existing draft
       res = await axios.put(
-        `/claims/draft/${originalDraftId}`,
+        `http://3.7.139.212:8080/claims/draft/${originalDraftId}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -397,7 +397,7 @@ const handleSaveDraft = async () => {
     } else {
       // Create a new draft
       res = await axios.post(
-        "/claims/draft",
+        "http://3.7.139.212:8080/claims/draft",
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
