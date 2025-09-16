@@ -54,7 +54,7 @@ const [selfAssessments, setSelfAssessments] = useState([]);
     }
     setLoading(true);
     setError(null);
-    fetch(`/api/goals/employee/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch goals");
         return res.json();
@@ -145,7 +145,7 @@ const [selfAssessments, setSelfAssessments] = useState([]);
   selfAssessment: data?.selfAssessment || "",
 };
  
-      const response = await fetch("/api/self-assessments/save", {
+      const response = await fetch("http://3.7.139.212:8080/api/self-assessments/save", {
         method: "POST", // POST is fine if backend handles upsert
         headers: {
           "Content-Type": "application/json",
@@ -192,7 +192,7 @@ const [selfAssessments, setSelfAssessments] = useState([]);
           return;
         }
  
-        const response = await fetch(`/api/goals/${goal.goalId}/employee-feedback`, {
+        const response = await fetch(`http://3.7.139.212:8080/api/goals/${goal.goalId}/employee-feedback`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -226,7 +226,7 @@ const [selfAssessments, setSelfAssessments] = useState([]);
  
   useEffect(() => {
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -272,7 +272,7 @@ const [selfAssessments, setSelfAssessments] = useState([]);
     formData.append("name", employeeName);
     formData.append("profilePic", file);
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -302,12 +302,12 @@ useEffect(() => {
       setLoading(true);
  
       // 1. Fetch Goals
-      const goalsRes = await fetch(`/api/goals/employee/${employeeId}`);
+      const goalsRes = await fetch(`http://3.7.139.212:8080/api/goals/employee/${employeeId}`);
       if (!goalsRes.ok) throw new Error("Failed to fetch goals");
       const fetchedGoals = await goalsRes.json();
  
       // 2. Fetch Self-Assessments
-      const assessmentRes = await fetch(`/api/self-assessments/employee/${employeeId}`);
+      const assessmentRes = await fetch(`http://3.7.139.212:8080/api/self-assessments/employee/${employeeId}`);
       if (!assessmentRes.ok) throw new Error("Failed to fetch self-assessments");
       const fetchedAssessments = await assessmentRes.json();
  
