@@ -17,7 +17,7 @@ function Rejectedgoals() {
 
   useEffect(() => {
     if (employeeIdLocal) {
-      fetch(`/profile/${employeeIdLocal}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeIdLocal}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -63,7 +63,7 @@ function Rejectedgoals() {
     formData.append("name", employeeName);
     formData.append("profilePic", file);
     try {
-      const res = await fetch(`/profile/update/${employeeIdLocal}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeIdLocal}`, {
         method: "PUT",
         body: formData,
       });
