@@ -173,28 +173,28 @@ const handleApprove = async (claimId) => {
   };
 
 const handleRejectSubmit = async () => {
-    if (rejectionReason.trim().length < 10) {
-        alert("Rejection reason must be at least 10 characters long.");
-        return;
-    }
+  if (rejectionReason.trim().length < 10) {
+    alert("Rejection reason must be at least 10 characters long.");
+    return;
+  }
 
-    try {
-        await axios.post(
-            `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
-        );
-        
-        // Filter out the rejected claim from the state arrays
-        setClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
-        setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
+  try {
+    await axios.post(
+      `/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
+    );
 
-        setRejectionReason("");
-        setShowReasonBox(false);
+    // Filter out the rejected claim from the state arrays
+    setClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
+    setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
 
-        setSuccessMessage(`Claim ${selectedClaimId} rejected successfully.`);
-        setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (error) {
-        console.error("Error rejecting claim:", error);
-    }
+    setRejectionReason("");
+    setShowReasonBox(false);
+    
+    setSuccessMessage(`Claim ${selectedClaimId} rejected successfully.`);
+    setTimeout(() => setSuccessMessage(""), 3000);
+  } catch (error) {
+    console.error("Error rejecting claim:", error);
+  }
 };
 
     try {
