@@ -6,12 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
- 
-// Correct way for mjs worker
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = `./pdf.worker.min.js`;
  
 function ClaimStatusPage() {
   const [claims, setClaims] = useState([]);
