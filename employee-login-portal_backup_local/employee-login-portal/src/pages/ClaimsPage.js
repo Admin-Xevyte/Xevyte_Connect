@@ -15,7 +15,7 @@ const [canViewTasks, setCanViewTasks] = useState(false);
   const employeeId = localStorage.getItem("employeeId");
   useEffect(() => {
   if (employeeId) {
-    fetch(`/claims/assigned-ids/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/claims/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         setCanViewTasks(data.canViewTasks === true);
@@ -28,7 +28,7 @@ const [canViewTasks, setCanViewTasks] = useState(false);
 }, [employeeId]);
   useEffect(() => {
     if (employeeId) {
-      fetch(`/claims/summary/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/claims/summary/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           setSummary({
