@@ -9,8 +9,11 @@ function Saveddrafts() {
   const [message, setMessage] = useState('');
   const [employeeId, setEmployeeId] = useState(null);
   const [employeeName, setEmployeeName] = useState(null);
-   const [searchTerm, setSearchTerm] = useState("");
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [role, setRole] = useState(null);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [profilePic, setProfilePic] = useState(null);
+
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -19,10 +22,14 @@ function Saveddrafts() {
   const [year, month, day] = dateString.split('-');
   return `${day}-${month}-${year}`;
 };
+ 
+ 
+
+ 
   const fetchDrafts = () => {
     const empId = localStorage.getItem("employeeId");
     if (empId) {
-      axios.get(`http://3.7.139.212:8080/claims/drafts/${empId}`)
+      axios.get(`/claims/drafts/${empId}`)
         .then(res => {
           const sortedDrafts = res.data.sort((a, b) => b.expenseId - a.expenseId);
           setDrafts(sortedDrafts);
@@ -44,10 +51,28 @@ function Saveddrafts() {
     }
     return fileName;
 };
+ 
+  useEffect(() => {
+    const empId = localStorage.getItem("employeeId");
+    setEmployeeId(empId);
+    setEmployeeName(localStorage.getItem("employeeName"));
+    setRole(localStorage.getItem("role"));
+ 
+    fetchDrafts();
+ 
+    fetch(`/profile/${empId}`)
+      .then(res => res.json())
+      .then(data => {
+        setProfilePic(data.profilePic);
+        setEmployeeName(data.name);
+      })
+      .catch(err => console.error("Profile fetch failed:", err));
+  }, []);
+ 
   const handleDelete = (draftId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this draft?");
     if (confirmDelete) {
-        axios.delete(`http://3.7.139.212:8080/claims/draft/delete/${draftId}`)
+        axios.delete(`/claims/draft/delete/${draftId}`)
             .then(res => {
                 // Remove the draft from the frontend state
                 const updatedDrafts = drafts.filter((draft) => draft.expenseId !== draftId);
@@ -61,10 +86,12 @@ function Saveddrafts() {
     }
 };
  
+ 
   const handleEdit = (draftId) => {
     navigate('/new', { state: { draftId: draftId } });
   };
 
+ 
   const filteredDrafts = drafts.filter(draft => {
     const lowercasedSearchTerm = searchTerm.toLowerCase();
     return (
@@ -79,8 +106,11 @@ function Saveddrafts() {
   });
  
   return (
+ 
    <Sidebar>
       <div className="manager-dashboard">
+       
+ 
       <div className="form-container">
       <button
     onClick={() => navigate(-1)}
@@ -205,7 +235,7 @@ function Saveddrafts() {
 </div>
  
       </div>
-  </Sidebar>
+ </Sidebar>
   );
 }
  
