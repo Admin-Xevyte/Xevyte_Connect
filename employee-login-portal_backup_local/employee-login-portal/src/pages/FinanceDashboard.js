@@ -25,7 +25,7 @@ function FinanceDashboard() {
   const [previewFile, setPreviewFile] = useState(null);
   const [fileType, setFileType] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(useState(false));
+  const [isCollapsed, setIsCollapsed] =useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require("../assets/SKKKK.JPG.jpg"));
   const [profileOpen, setProfileOpen] = useState(false);
