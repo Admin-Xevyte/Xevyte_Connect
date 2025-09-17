@@ -6,7 +6,7 @@ import './Dashboard.css';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
- 
+ import Sidebar from './Sidebar.js';
 pdfjs.GlobalWorkerOptions.workerSrc = `./pdf.worker.min.js`;
  
 function HRDashboard() {
@@ -15,7 +15,7 @@ function HRDashboard() {
     const [loading, setLoading] = useState(true);
     const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName") || "");
     const [searchTerm, setSearchTerm] = useState("");
-    const [isCollapsed, setIsCollapsed] = useState(false);
+
  
     const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
     const [profileOpen, setProfileOpen] = useState(false);
@@ -25,13 +25,10 @@ function HRDashboard() {
     
  const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
    const navigate = useNavigate();
-   const [isContractOpen, setIsContractOpen] = useState(false);
+
  const [validationErrors, setValidationErrors] = React.useState({});
  const [allocationErrors, setAllocationErrors] = React.useState([]);
- 
- const toggleContractMenu = () => {
-   setIsContractOpen(!isContractOpen);
- };
+
     const employeeId = localStorage.getItem("employeeId");
  
     // New state for PDF preview
@@ -100,68 +97,10 @@ function HRDashboard() {
             });
     };
  
-    const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-    const toggleProfileMenu = () => setProfileOpen(!profileOpen);
+  
  
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-                setProfileOpen(false);
-            }
-        }
-        if (profileOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [profileOpen]);
  
-    const handleEditProfile = () => {
-        setProfileOpen(false);
-        fileInputRef.current.click();
-    };
- 
-    const handleImageChange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
- 
-        const formData = new FormData();
-        formData.append("name", employeeName);
-        formData.append("profilePic", file);
- 
-        try {
-            const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
-                method: "PUT",
-                body: formData,
-            });
- 
-            const data = await res.json();
- 
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
- 
-            if (data.profilePic) {
-                setProfilePic(data.profilePic);
-                localStorage.setItem("employeeProfilePic", data.profilePic);
-                setSuccessMessage("Profile picture updated successfully!");
-                setTimeout(() => {
-                    setSuccessMessage("");
-                    setProfileOpen(false);
-                }, 2000);
-            } else {
-                alert("Failed to update profile picture: no profilePic returned.");
-            }
-        } catch (error) {
-            console.error("Error updating profile picture:", error);
-            alert("Error uploading profile picture. See console for details.");
-        }
-    };
- 
-    const handleLogout = () => {
-        localStorage.clear();
-        sessionStorage.clear();
-        navigate("/login");
-    };
+   
  
   const updateStatus = (claimId, status) => {
     axios
@@ -270,296 +209,13 @@ function HRDashboard() {
     }, [searchTerm, originalClaims]);
  
     return (
-        <div className="dashboard-container">
-            {/* Sidebar */}
-            <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-                {!isCollapsed ? (
-                    <>
-                        <img src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")} alt="office" className="office-vng" />
-                        <img
-                            src={require("../assets/gg_move-left.png")}
-                            alt="collapse"
-                            className="toggle-btn"
-                            onClick={toggleSidebar}
-                            style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
-                        />
-         <h3>
-             <Link
-               to="/dashboard"
-               className="side"
-               style={{
-                 textDecoration: 'none',
-                 color:'#00b4c6',
-               }}
-             >
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                 Home
-               </span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
-             </Link>
-           </h3>
-           
-           <h3>
-             <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-               <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
-             </Link>
-           </h3>
-           {allowedUsers.includes(employeeId) && (
-                                                 <>
-                                                   <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
-                                                     <span className="side" style={{  color:'#00b4c6' }}>
-                                                       Contract Management {isContractOpen ? '▾' : '▸'}
-                                                     </span>
-                                                   </h3>
-                                               
-                                                   {isContractOpen && (
-                                                     <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                                                       <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                         <Link
-                                                           to="/customers"
-                                                           style={{
-                                                             textDecoration: 'none',
-                                                            color:'#00b4c6',
-                                                             fontSize: '14px',
-                                                             display: 'block',
-                                                             padding: '4px 0',
-                                                           }}
-                                                           onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                           onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                         >
-                                                           Customers
-                                                         </Link>
-                                                       </li>
-                                                       <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                         <Link
-                                                           to="/sows"
-                                                           style={{
-                                                             textDecoration: 'none',
-                                                            color:'#00b4c6',
-                                                             fontSize: '14px',
-                                                             display: 'block',
-                                                             padding: '4px 0',
-                                                           }}
-                                                           onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                           onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                         >
-                                                           SOWs
-                                                         </Link>
-                                                       </li>
-                                                       <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                         <Link
-                                                           to="/projects"
-                                                           style={{
-                                                             textDecoration: 'none',
-                                                            color:'#00b4c6',
-                                                             fontSize: '14px',
-                                                             display: 'block',
-                                                             padding: '4px 0',
-                                                           }}
-                                                           onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                           onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                         >
-                                                           Projects
-                                                         </Link>
-                                                       </li>
-                                                       <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                         <Link
-                                                           to="/allocation"
-                                                           style={{
-                                                             textDecoration: 'none',
-                                                            color:'#00b4c6',
-                                                             fontSize: '14px',
-                                                             display: 'block',
-                                                             padding: '4px 0',
-                                                           }}
-                                                           onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                           onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                         >
-                                                           Allocation
-                                                         </Link>
-                                                       </li>
-                                                     </ul>
-                                                   )}
-                                                 </>
-                                               )}
-                   
-                   </>
-                ) : (
-                    <div className="collapsed-wrapper">
-                        <img
-                            src={require("../assets/Group.png")}
-                            alt="expand"
-                            className="collapsed-toggle"
-                            onClick={toggleSidebar}
-                        />
-                    </div>
-                )}
-            </div>
+   <Sidebar>
+      
+       
  
-            {/* Main Dashboard */}
+           
             <div className="manager-dashboard">
-                <div className="dashboard-header">
-                    <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h2>Welcome, {employeeName} ({employeeId})</h2>
-                        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
-                            <input
-                                type="text"
-                                className="search-input"
-                                placeholder="Search..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <img src={require('../assets/Vector.png')} alt="Notifications" className="icon" />
- 
-                            <div className="profile-wrapper" style={{ position: 'relative' }}>
-                                <img
-                                    src={profilePic}
-                                    alt="Profile"
-                                    className="profile-pic"
-                                    onClick={toggleProfileMenu}
-                                    style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                                />
-                                {profileOpen && (
-                                    <div
-                                        ref={profileDropdownRef}
-                                        className="profile-dropdown"
-                                        style={{
-                                            position: 'absolute',
-                                            top: '50px',
-                                            right: '0',
-                                            backgroundColor: '#fff',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                                            borderRadius: '4px',
-                                            zIndex: 1000,
-                                            width: '150px',
-                                        }}
-                                    >
-                                        <button
-                                            onClick={handleEditProfile}
-                                            style={{
-                                                display: 'block',
-                                                width: '100%',
-                                                padding: '10px',
-                                                background: 'none',
-                                                border: 'none',
-                                                textAlign: 'left',
-                                                cursor: 'pointer',
-                                                borderBottom: '1px solid #eee',
-                                            }}
-                                        >
-                                            Edit Profile
-                                        </button>
-                                        <button
-                                            onClick={handleLogout}
-                                            style={{
-                                                display: 'block',
-                                                width: '100%',
-                                                padding: '10px',
-                                                background: 'none',
-                                                border: 'none',
-                                                textAlign: 'left',
-                                                cursor: 'pointer',
-                                            }}
-                                        >
-                                            Logout
-                                        </button>
-                                    </div>
-                                )}
-                                {successMessage && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '100%',
-                                        right: '0',
-                                        marginTop: '5px',
-                                        backgroundColor: '#4BB543',
-                                        color: 'white',
-                                        padding: '8px 12px',
-                                        borderRadius: '4px',
-                                        fontSize: '14px',
-                                        whiteSpace: 'nowrap',
-                                        zIndex: 1100,
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                                    }}>
-                                        {successMessage}
-                                    </div>
-                                )}
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    accept="image/*"
-                                    style={{ display: 'none' }}
-                                    onChange={handleImageChange}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <hr className="divider-line" />
-                </div>
+              
 <button
     onClick={() => navigate(-1)}
     style={{
@@ -701,7 +357,7 @@ function HRDashboard() {
                     </div>
                 )}
             </div>
-        </div>
+    </Sidebar>
     );
 }
  
