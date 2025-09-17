@@ -9,7 +9,7 @@ import ResetLinkSent from './components/ResetLinkSent';
 import PasswordReset from './components/PasswordReset';
 import SessionTimeoutHandler from "./components/SessionTimeoutHandler";
 import Home1 from "./pages/Home1";
-
+import Sidebar from './pages/Sidebar.js';
 import AttendancePage from './pages/AttendancePage';
 import ClaimsPage from './pages/ClaimsPage';
 import EmployeeDirectory from './pages/EmployeeDirectory';
