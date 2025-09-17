@@ -299,7 +299,7 @@ useEffect(() => {
   };
  
  
-const validStatuses = ['submitted', 'rejected'];
+  const validStatuses = ['submitted', 'rejected by reviewer'];
   const submitFeedbackCount = goals.filter((g) => g.status?.toLowerCase() === 'submitted').length;
   const inProgressCount = goals.filter((g) =>
     ['inprogress', 'in progress'].includes(g.status?.toLowerCase())
