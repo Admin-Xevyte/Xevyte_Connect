@@ -533,7 +533,7 @@ const validStatuses = ['submitted', 'rejected by reviewer'];
           ) : (
             <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
               <h3  style={{ marginBottom: "16px" }}>Goals</h3>
-              <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '0' }}>
                   <thead>
                     <tr>
