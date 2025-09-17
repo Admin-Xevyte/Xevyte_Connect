@@ -1,659 +1,461 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import './Dashboard.css';
-import './Newgoal.css';
- 
-const NewGoals = () => {
+import "./Newclaim.css";
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from "axios";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+ import Sidebar from './Sidebar.js';
+function NewClaim() {
   const location = useLocation();
   const navigate = useNavigate();
-const tbodyRef = useRef(null);
- 
-  // ✅ Logged-in employee (from localStorage)
-  const loggedInEmployeeId = localStorage.getItem("employeeId");
-  const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName") || 'User');
-  const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
- 
-  // ✅ Selected employee (from navigation or localStorage)
-  const initialSelectedEmployeeId = location.state?.employeeId || localStorage.getItem('selectedEmployeeId') || '';
-  const initialSelectedEmployeeName = location.state?.employeeName || localStorage.getItem('selectedEmployeeName') || '';
- 
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState(initialSelectedEmployeeId);
-  const [selectedEmployeeName, setSelectedEmployeeName] = useState(initialSelectedEmployeeName);
-  const employeeId = localStorage.getItem("employeeId");
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+
+  const [receiptPreviewUrl, setReceiptPreviewUrl] = useState(null);
+
   const fileInputRef = useRef(null);
-  const profileDropdownRef = useRef(null);
-  const [goals, setGoals] = useState([]);
-const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
-  const [isContractOpen, setIsContractOpen] = useState(false);
- const [canViewTasks, setCanViewTasks] = useState(false);
-const toggleContractMenu = () => {
-  setIsContractOpen(!isContractOpen);
-};
-  // ✅ Fetch logged-in employee profile
-  useEffect(() => {
-    if (loggedInEmployeeId) {
-      fetch(`http://3.7.139.212:8080/profile/${loggedInEmployeeId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.profilePic) {
-            setProfilePic(data.profilePic);
-            localStorage.setItem("employeeProfilePic", data.profilePic);
-          }
-          if (data.name) {
-            setEmployeeName(data.name);
-            localStorage.setItem("employeeName", data.name);
-          }
-        })
-        .catch(err => console.error("Failed to fetch profile info:", err));
-    }
-  }, [loggedInEmployeeId]);
+
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [originalDraftId, setOriginalDraftId] = useState(null);
  
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-    }
-    if (profileOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [profileOpen]);
  
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-  const toggleProfileMenu = () => setProfileOpen(!profileOpen);
- 
-  const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login");
+  const employeeId = localStorage.getItem("employeeId");
+  const employeeName = localStorage.getItem("employeeName");
+  const allowedCategories = ["Food", "Accomodation", "Travel", "Medical", "Mobile", "Office", "Others"];
+  const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+  const maxFileSize = 5 * 1024 * 1024;
+  const getTodayDate = () => new Date().toISOString().split("T")[0];
+const [formData, setFormData] = useState({
+  employeeId: "",
+  name: "",
+  expenseDescription: "",  // 🔁 instead of description
+  category: "",
+  amount: "",
+  expenseDate: getTodayDate(),  // 🔁 instead of date
+  businessPurpose: "",
+  additionalNotes: ""
+})
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const getMaxDate = () => new Date().toISOString().split("T")[0];
+  const getMinDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() - 90);
+    return date.toISOString().split("T")[0];
   };
  
-  const handleEditProfile = () => {
-    setProfileOpen(false);
-    fileInputRef.current.click();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
   };
  
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+ const handleFileChange = (e) => {
+  const file = e.target.files[0];
  
-    const formData = new FormData();
-    formData.append("name", employeeName);
-    formData.append("profilePic", file);
+  if (file) {
+    // 1. Define allowed file types and max size
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
  
-    try {
-      const res = await fetch(`http://3.7.139.212:8080/profile/update/${loggedInEmployeeId}`, {
-        method: "PUT",
-        body: formData,
-      });
- 
-      const data = await res.json();
- 
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
- 
-      if (data.profilePic) {
-        setProfilePic(data.profilePic);
-        localStorage.setItem("employeeProfilePic", data.profilePic);
-        setSuccessMessage("Profile picture updated successfully!");
-        setTimeout(() => {
-          setSuccessMessage("");
-          setProfileOpen(false);
-        }, 2000);
-      } else {
-        alert("Failed to update profile picture.");
-      }
-    } catch (error) {
-      console.error("Error updating profile picture:", error);
-      alert("Error uploading profile picture.");
-    }
-  };
- 
-  const getCurrentQuarter = () => {
-    const month = new Date().getMonth() + 1;
-    if (month <= 3) return 'Q1';
-    if (month <= 6) return 'Q2';
-    if (month <= 9) return 'Q3';
-    return 'Q4';
-  };
- 
-  // ✅ Goals setup for selected employee
-  useEffect(() => {
-    if (selectedEmployeeId) {
-      localStorage.setItem('selectedEmployeeId', selectedEmployeeId);
-      localStorage.setItem('selectedEmployeeName', selectedEmployeeName);
- 
-      const quarter = location.state?.quarter || getCurrentQuarter();
- 
-      setGoals([
-        {
-          goalId: '',
-          employeeId: selectedEmployeeId,
-          employeeName: selectedEmployeeName,
-          quarter,
-          goalTitle: location.state?.goalTitle || '',
-          goalDescription: location.state?.goalDescription || '',
-          target: location.state?.target || '',
-          metric: location.state?.metric || '',
-          acknowledgedBy: '',
-          acknowledgedAt: '',
-          startDate: location.state?.startDate || '',
-          endDate: location.state?.endDate || '',
-          targetDate: location.state?.targetDate || '',
-          previousGoalId: location.state?.previousGoalId || null,
-        },
-      ]);
-    }
-  }, [selectedEmployeeId, selectedEmployeeName, location.state]);
- 
-const handleChange = (index, field, value) => {
-  const trimmedValue = value.slice(0, 255); // limit to 255 chars
-  const updatedGoals = [...goals];
-  updatedGoals[index][field] = trimmedValue;
-  setGoals(updatedGoals);
-};
- 
-const addGoal = () => {
-  setGoals(prevGoals => [
-    ...prevGoals,
-    {
-      goalId: '',
-      employeeId: selectedEmployeeId,
-      employeeName: selectedEmployeeName,
-      quarter: getCurrentQuarter(),
-      goalTitle: '',
-      goalDescription: '',
-      target: '',
-      metric: '',
-      acknowledgedBy: '',
-      acknowledgedAt: '',
-    },
-  ]);
- 
-  setTimeout(() => {
-    if (tbodyRef.current) {
-      tbodyRef.current.scrollTop = tbodyRef.current.scrollHeight;
-    }
-  }, 100);  // slight delay to let React update the DOM
-};
- 
- 
-  const removeGoal = (index) => {
-    const updatedGoals = goals.filter((_, i) => i !== index);
-    setGoals(updatedGoals);
-  };
- 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
- 
-    if (!selectedEmployeeId) {
-      alert('Selected Employee ID is missing. Cannot submit goals.');
+    // 2. Perform File Type Validation
+    if (!allowedTypes.includes(file.type)) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        receiptFile: "Unsupported file type. Only JPG, PNG, and PDF are allowed."
+      }));
+      setReceiptFile(null);
+      setReceiptPreviewUrl(null);
       return;
     }
  
-    try {
-      const previousGoalId = goals[0]?.previousGoalId;
- 
-      // Submit all new goals
-      for (const goal of goals) {
-        goal.employeeId = selectedEmployeeId;
-        const response = await fetch('http://3.7.139.212:8080/api/goals/assign', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(goal),
-        });
- 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Failed to save goal: ${errorText}`);
-        }
-      }
- 
-      // Delete previous goal if reassign
-      if (previousGoalId) {
-        await fetch(`http://3.7.139.212:8080/api/goals/delete/${previousGoalId}`, { method: 'DELETE' });
-      }
- 
-      alert('Goals submitted successfully!');
-      navigate(-1);
- 
-    } catch (error) {
-      alert('Error submitting goals: ' + error.message);
-      console.error('Detailed error:', error);
+    // 3. Perform File Size Validation
+    if (file.size > maxSize) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        receiptFile: "Maximum upload file size allowed is 5MB."
+      }));
+      setReceiptFile(null);
+      setReceiptPreviewUrl(null);
+      return;
     }
+ 
+    // 4. If both validations pass, update state
+    setFieldErrors((prev) => ({
+      ...prev,
+      receiptFile: null,
+    }));
+    setReceiptFile(file);
+    const url = URL.createObjectURL(file);
+    setReceiptPreviewUrl(url);
+ 
+  } else {
+    // No file selected
+    setReceiptFile(null);
+    setReceiptPreviewUrl(null);
+    setFieldErrors((prev) => ({
+      ...prev,
+      receiptFile: "No file selected",
+    }));
+  }
+};
+ 
+const validateRequired = () => {
+  const missingFields = [];
+ 
+  if (!formData.expenseDescription.trim()) missingFields.push("expense description");
+  if (!formData.category || formData.category === "Select category") missingFields.push("category");
+  if (!formData.amount || Number(formData.amount) <= 0) missingFields.push("amount");
+  if (!formData.expenseDate) missingFields.push("expense date");
+  if (!receiptFile) missingFields.push("receipt");
+ 
+  // Additional date validation
+  if (formData.expenseDate) {
+    const selectedDate = new Date(formData.expenseDate);
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const ninetyDaysAgoStart = new Date(todayStart);
+    ninetyDaysAgoStart.setDate(todayStart.getDate() - 90);
+    const selectedDateStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+ 
+    if (selectedDateStart > todayStart || selectedDateStart < ninetyDaysAgoStart) {
+      missingFields.push("valid expense date");
+    }
+  }
+ 
+  if (missingFields.length > 0) {
+    const formatted = missingFields.join(", ");
+    setError(`Please fill the required fields: ${formatted}`);
+    return false;
+  }
+ 
+  setError("");
+  return true;
+};
+ 
+const handleSubmit = async () => {
+    // Validate that all required fields are filled.
+    if (!validateRequired()) return;
+ 
+    // Create a data object with property names that EXACTLY match
+    // the field names of your 'Claim' entity on the backend.
+    const claimData = {
+        employeeId: formData.employeeId,
+        name: formData.name,
+        // The backend expects expenseDescription and expenseDate,
+        // but the 'submitUpdatedDraft' method will correctly map these from the Claim entity.
+        expenseDescription: formData.expenseDescription,
+        category: formData.category,
+        amount: formData.amount,
+        expenseDate: formData.expenseDate,
+        businessPurpose: formData.businessPurpose,
+        additionalNotes: formData.additionalNotes,
+    };
+ 
+    const data = new FormData();
+    // Append the correctly structured data object as a JSON string.
+    data.append("claim", JSON.stringify(claimData));
+   
+    // Attach the receipt file to the FormData object if it exists.
+    if (receiptFile) {
+        data.append("receiptFile", receiptFile);
+    }
+ 
+    try {
+        if (originalDraftId) {
+            // ✅ CORRECTED: Use axios.put for submitting an updated draft
+            await axios.put(
+                `http://3.7.139.212:8080/claims/submit-draft/${originalDraftId}`,
+                data,
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
+            setMessage("Expense claim submitted successfully from draft!");
+           
+            // Clear the draft-related state variables after successful submission.
+            setOriginalDraftId(null);
+            setDraftLoaded(false);
+ 
+            // Navigate to the claims status page after a brief delay.
+            // setTimeout(() => {
+            //     navigate("/claim-status?refresh=true");
+            // }, 2000);
+        } else {
+            // If it's a brand new claim, use a POST request to the main 'submit' endpoint.
+            await axios.post(
+                "http://3.7.139.212:8080/claims/submit",
+                data,
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
+            setMessage("Expense claim submitted successfully!");
+ 
+            // Navigate to the claims status page after a brief delay.
+            // setTimeout(() => {
+            //     navigate("/claim-status?refresh=true");
+            // }, 2000);
+        }
+ 
+        // Reset the form regardless of whether a new claim or a draft was submitted.
+        setFormData({
+            category: "",
+            amount: "",
+            expenseDescription: "",
+            expenseDate: getTodayDate(),
+            businessPurpose: "",
+            additionalNotes: ""
+        });
+        setReceiptFile(null);
+        setReceiptPreviewUrl(null);
+        if (fileInputRef.current) fileInputRef.current.value = null;
+       
+        // Clear success/error messages after a delay.
+        setTimeout(() => setMessage(""), 2000);
+        setError("");
+       
+    } catch (err) {
+        console.error("Submission error:", err);
+        setError("Submission failed. Try again.");
+        setMessage("");
+    }
+};
+ 
+const handleSaveDraft = async () => {
+  const draftPayload = {
+    expenseId: originalDraftId || null,
+    employeeId: formData.employeeId,
+    name: formData.name,
+    description: formData.expenseDescription,
+    category: formData.category,
+    amount: formData.amount,
+    date: formData.expenseDate,
+    businessPurpose: formData.businessPurpose,
+    additionalNotes: formData.additionalNotes,
+    status: "draft"
   };
  
-  return (
-    <div className="dashboard-container">
-      {/* Sidebar (unchanged) */}
-      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-           {!isCollapsed ? (
-             <>
-               <img
-                 src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")}
-                 alt="office"
-                 className="office-vng"
-               />
-               <img
-                 src={require("../assets/gg_move-left.png")}
-                 alt="collapse"
-                 className="toggle-btn"
-                 onClick={toggleSidebar}
-                 style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
-               />
-              <h3>
-                 <Link
-                   to="/dashboard"
-                   className="side"
-                   style={{
-                     textDecoration: 'none',
-                     color:'#00b4c6',
-                   }}
-                 >
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                     Home
-                   </span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white'}}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
-                 </Link>
-               </h3>
-               
-               <h3>
-                 <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                   <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
-                 </Link>
-               </h3>
-               {allowedUsers.includes(employeeId) && (
-                                                     <>
-                                                       <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
-                                                         <span className="side" style={{  color:'#00b4c6' }}>
-                                                           Contract Management {isContractOpen ? '▾' : '▸'}
-                                                         </span>
-                                                       </h3>
-                                                   
-                                                       {isContractOpen && (
-                                                         <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                                                           <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                             <Link
-                                                               to="/customers"
-                                                               style={{
-                                                                 textDecoration: 'none',
-                                                                color:'#00b4c6',
-                                                                 fontSize: '14px',
-                                                                 display: 'block',
-                                                                 padding: '4px 0',
-                                                               }}
-                                                               onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                               onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                             >
-                                                               Customers
-                                                             </Link>
-                                                           </li>
-                                                           <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                             <Link
-                                                               to="/sows"
-                                                               style={{
-                                                                 textDecoration: 'none',
-                                                                color:'#00b4c6',
-                                                                 fontSize: '14px',
-                                                                 display: 'block',
-                                                                 padding: '4px 0',
-                                                               }}
-                                                               onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                               onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                             >
-                                                               SOWs
-                                                             </Link>
-                                                           </li>
-                                                           <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                             <Link
-                                                               to="/projects"
-                                                               style={{
-                                                                 textDecoration: 'none',
-                                                                color:'#00b4c6',
-                                                                 fontSize: '14px',
-                                                                 display: 'block',
-                                                                 padding: '4px 0',
-                                                               }}
-                                                               onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                               onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                             >
-                                                               Projects
-                                                             </Link>
-                                                           </li>
-                                                           <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                             <Link
-                                                               to="/allocation"
-                                                               style={{
-                                                                 textDecoration: 'none',
-                                                                color:'#00b4c6',
-                                                                 fontSize: '14px',
-                                                                 display: 'block',
-                                                                 padding: '4px 0',
-                                                               }}
-                                                               onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                               onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                             >
-                                                               Allocation
-                                                             </Link>
-                                                           </li>
-                                                         </ul>
-                                                       )}
-                                                     </>
-                                                   )}
-                       
-                       </>
-           ) : (
-             <div className="collapsed-wrapper">
-               <img
-                 src={require("../assets/Group.png")}
-                 alt="expand"
-                 className="collapsed-toggle"
-                 onClick={toggleSidebar}
-               />
-             </div>
-           )}
-         </div>
+  const data = new FormData();
+  data.append("claimDraft", JSON.stringify(draftPayload));
+  if (receiptFile) {
+    data.append("receiptFile", receiptFile);
+  }
+ 
+  try {
+    let res;
+    if (originalDraftId) {
+      // Update existing draft
+      res = await axios.put(
+        `http://3.7.139.212:8080/claims/draft/${originalDraftId}`,
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      setMessage("Draft updated successfully!");
+    } else {
+      // Create a new draft
+      res = await axios.post(
+        "http://3.7.139.212:8080/claims/draft",
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      setMessage("Draft saved successfully!");
+      // Update the state with the new draft's ID
+      setOriginalDraftId(res.data.id);
+    }
+ 
+    setError("");
    
+    // ✅ ADDED: Clear the form and state after successful save
+    setFormData({
+      employeeId: localStorage.getItem("employeeId"),
+      name: localStorage.getItem("employeeName"),
+      expenseDescription: "",
+      category: "",
+      amount: "",
+      expenseDate: getTodayDate(),
+      businessPurpose: "",
+      additionalNotes: ""
+    });
+    setReceiptFile(null);
+    setReceiptPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setOriginalDraftId(null);
  
-      <div className="main-content">
-        {/* ✅ Topbar - Logged-in employee info */}
-        <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2>Welcome, {employeeName} ({loggedInEmployeeId})</h2>
+    setTimeout(() => setMessage(""), 2000);
+  } catch (err) {
+    console.error("Error saving draft:", err);
+    setError("Failed to save draft. Try again.");
+    setMessage("");
+  }
+};
+  return (
+   <Sidebar>
+      <div className="main-area">
  
-          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <img
-              src={require('../assets/Vector.png')}
-              alt="Notifications"
-              className="icon"
-              style={{ cursor: 'pointer' }}
-            />
+        <div className="dashboard-header"   style={{
+    padding: '20px 20px 0px 40px ',
+    paddingLeft: '30px',
+  }}>
+    
  
-            {/* Profile picture with dropdown */}
-            <div className="profile-wrapper" style={{ position: 'relative' }}>
-              <img
-                src={profilePic}
-                alt="Profile"
-                className="profile-pic"
-                onClick={toggleProfileMenu}
-                style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-              />
-              {profileOpen && (
-                <div ref={profileDropdownRef} className="profile-dropdown">
-                  <button onClick={handleEditProfile}>Edit Profile</button>
-                  <button onClick={handleLogout}>Logout</button>
+        </div>
+             
+        <div className="new-claim-wrapper">
+    <button
+    onClick={() => navigate(-1)}
+    style={{
+        padding: "8px 16px", // Slightly reduced padding
+         backgroundColor: "#f0f0f0",
+       color: "#333",
+       fontSize: "16px",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      cursor: "pointer",
+      margin: "0px 20px 20px 45px", // Top and bottom margins only
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+        transition: "background-color 0.3s ease",
+        width: "fit-content", // Make width only as big as content
+        display: "block",
+   // Ensure it respects margin auto if needed
+    }}
+>
+    ⬅ Back
+</button>
+          <h2 className="page-title">New Expense Claim</h2>
+          <p className="page-subtitle">Submit a new expense claim for reimbursement</p>
+ 
+          <div className="form-main-layout">
+            <div className="expense-details">
+              <h3 style={{ marginBottom: "20px" }}>Expense Details</h3>
+         
+              <div className="form-group">
+                <label>Expense Description *</label>
+                <input
+                  name="expenseDescription"
+                  value={formData.expenseDescription}
+                  onChange={handleChange}
+                  placeholder="Enter a brief description of the expense (max 255 characters)"
+                  maxLength={255}
+                />
+                {fieldErrors.expenseDescription && (
+                  <p className="error-text">{fieldErrors.expenseDescription}</p>
+                )}
+              </div>
+ 
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Category *</label>
+                  <select name="category" value={formData.category} onChange={handleChange}>
+                    <option>Select category</option>
+                    {allowedCategories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  {fieldErrors.category && <p className="error-text">{fieldErrors.category}</p>}
                 </div>
-              )}
-              {successMessage && <div className="success-msg">{successMessage}</div>}
-              <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
+                <div className="form-group">
+                  <label>Amount *</label>
+                  <input
+  type="text"
+  name="amount"
+  value={formData.amount}
+  onChange={(e) => {
+    const value = e.target.value;
+    // Check if value contains only digits and length <= 10
+    if (/^\d*$/.test(value) && value.length <= 10) {
+      handleChange(e);
+    }
+  }}
+/>
+ 
+                  {fieldErrors.amount && <p className="error-text">{fieldErrors.amount}</p>}
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Expense Date *</label>
+                <DatePicker
+  selected={formData.expenseDate ? new Date(formData.expenseDate) : null}
+  onChange={(date) => {
+    if (date) {
+      // Format as yyyy-MM-dd for internal state (e.g., backend)
+      const formatted = date.toISOString().split("T")[0];
+      setFormData((prev) => ({ ...prev, expenseDate: formatted }));
+      setFieldErrors((prev) => ({ ...prev, expenseDate: "" }));
+    }
+  }}
+  dateFormat="dd-MM-yyyy"  // ✅ This updates the display format
+  minDate={new Date(getMinDate())}
+  maxDate={new Date(getMaxDate())}
+  showMonthDropdown
+  showYearDropdown
+  dropdownMode="select"
+  placeholderText="Select date"
+  className="your-custom-classname-if-needed"
+/>
+ 
+                {fieldErrors.expenseDate && <p className="error-text">{fieldErrors.expenseDate}</p>}
+              </div>
+         
+              <div className="form-group">
+                <label><h3>Receipt Upload *</h3></label>
+                <div className="custom-file-input-wrapper">
+                  <input
+                    type="text"
+                    className="custom-file-input-display"
+                    value={receiptFile ? receiptFile.name : "No file chosen"}
+                    readOnly
+                    onClick={() => fileInputRef.current.click()}
+                  />
+                  <button
+                    type="button"
+                    className="custom-file-input-button"
+                    onClick={() => fileInputRef.current.click()}
+                  >
+                    Choose File
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*,application/pdf"
+                    style={{ display: 'none' }}
+                  />
+                </div>
+                <p className="receipt-hint" style={{ fontWeight: 'bold' , color: "black", fontSize: "15px"}}>Supported: JPG, PNG, PDF (Max 5MB)</p>
+                {fieldErrors.receiptFile && (
+                 
+  <p style={{ color: 'red', marginTop: '4px', fontSize: '0.9rem' }}>{fieldErrors.receiptFile}</p>
+                )}
+              </div>
+            </div>
+ 
+            <div className="side-widgets">
+              <div className="summary-box">
+                <h3>Expense Summary</h3>
+                <div className="summary-item"><span>Amount:</span> <strong>₹{formData.amount || '0.00'}</strong></div>
+                <div className="summary-item"><span>Category:</span> <strong>{formData.category || 'Not selected'}</strong></div>
+                <div className="summary-item">
+  <span>Expense Date:</span>
+  <strong>
+    {formData.expenseDate
+      ? formData.expenseDate.split('-').reverse().join('-')
+      : 'Not selected'}
+  </strong>
+</div>
+ 
+                <div className="summary-item"><span>Receipts:</span> <strong>{receiptFile ? '1 file' : '0 file'}</strong></div>
+              </div>
+              <div className="actions-box">
+                <button className="btn primary" onClick={handleSubmit}>Submit for Approval</button>
+                <button className="btn secondary" onClick={handleSaveDraft}>Save as Draft</button>
+                <Link to="/home0" className="btn secondary" style={{ textDecoration: 'none' }}>Cancel</Link>
+                {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+                {message && <p style={{ color: 'green', marginTop: '10px' }}>{message}</p>}
+              </div>
             </div>
           </div>
         </div>
- 
-        <hr className="divider-line" />
-  <button
-          onClick={() => navigate(-1)}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#f0f0f0",
-            color: "#333",
-            fontSize: "16px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            cursor: "pointer",
-            margin: "20px 0 20px 0",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-            transition: "background-color 0.3s ease",
-            width: "fit-content",
-            display: "block",
-          }}
-        >
-          ⬅ Back
-        </button>
-        {/* ✅ Below divider - Selected employee workflow */}
-        <div className="goal-container3">
-          <h2>Set Quarterly Goals for {selectedEmployeeName || 'Employee'} ({selectedEmployeeId || 'N/A'})</h2>
-          {/* <h2>Set Quarterly Goals</h2> */}
- 
-          <form onSubmit={handleSubmit}>
-          <div
-  ref={tbodyRef}  // Add ref here
-  style={{
-    maxHeight: "calc(100vh - 350px)", // Fixed height for scroll container
-    overflowY: "auto",
-    display: "block",      // Important to keep table header fixed width
-  }}
-  className="table-wrapper"
->
-  <table className="goals-table1 goals-style" style={{ width: "100%", tableLayout: "fixed" }}>
-              <thead>
-  <tr>
-    <th style={{ width: '300px', textAlign: 'center' }}>Title</th>
-    <th style={{ textAlign: 'center' }}>Description</th>
-    <th style={{ width: '100px', textAlign: 'center' }}>Weightage</th>
-    <th style={{ width: '80px', textAlign: 'center' }}>Target</th>
-  </tr>
-</thead>
- 
-             <tbody>
- 
-                  {goals.map((goal, index) => (
-                    <tr key={index}>
-                     
-<td>
-  <textarea
-    value={goal.goalTitle}
-    onChange={(e) => handleChange(index, 'goalTitle', e.target.value)}
-    maxLength={255}
-    rows={4}
-    wrap="soft"
-    style={{
-      width: "100%",
-      height: "auto",
-      resize: "none",
-      padding: "8px 10px",
-      fontSize: "14px",
-      lineHeight: "1.5",
-      boxSizing: "border-box",
-      overflowY: "scroll",
-      scrollbarWidth: "none",
-      msOverflowStyle: "none"
-    }}
-    required
-  />
-</td>
- 
- 
-<td>
-  <textarea
-    rows={4}
-    value={goal.goalDescription}
-    onChange={(e) => handleChange(index, 'goalDescription', e.target.value)}
-    maxLength={255}
-    wrap="soft" // or "hard" if you want actual line breaks inserted
-    required
-    style={{
-      width: "100%",
-      fontSize: "14px",
-      lineHeight: "1.5",
-      padding: "8px 10px",
-      resize: "none",
-      boxSizing: "border-box",
-      fontFamily: "inherit"
-    }}
-  />
-</td>
- 
- 
-<td style={{ position: "relative" }}>
-  <input
-    type="text"
-    value={goal.metric}
-    onChange={(e) => {
-      const val = e.target.value;
-      if (val === '' || (/^\d{1,3}$/.test(val) && parseInt(val) <= 100)) {
-        handleChange(index, 'metric', val);
-      }
-    }}
-    required
-    style={{
-      width: "100%",
-      height: "100px",       // match textarea height (approx 4 rows)
-      boxSizing: "border-box",
-      padding: "8px 10px",   // same padding as textarea
-      fontSize: "14px",
-      fontFamily: "inherit",
-      resize: "none"         // to visually match textarea style
-    }}
-  />
-  <span style={{
-    position: "absolute",
-    right: "8px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    pointerEvents: "none",
-    color: "#555"
-  }}></span>
-</td>
- 
-<td>
-  <div style={{ display: "flex", flexDirection: "column", width: "100%", alignItems: "center" }}>
-    <input
-      type="text"
-      maxLength={1}
-      value={goal.target || ""}
-      onChange={(e) => {
-        const val = e.target.value;
-        if (val === '' || /^[0-9]$/.test(val)) {
-          handleChange(index, "target", val);
-        }
-      }}
-      required
-      style={{
-        width: "100%",
-        height: "100px",
-        boxSizing: "border-box",
-        padding: "8px 10px",
-        fontSize: "14px",
-        fontFamily: "inherit",
-        marginBottom: "3px"
-      }}
-    />
- 
-    {goals.length > 1 && (
-      <button
-        type="button"
-        onClick={() => removeGoal(index)}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: "black",
-          fontSize: "18px",
-          cursor: "pointer",
-          padding: 0,
-          margin: 0,
-          lineHeight: 1
-        }}
-      >
-        &minus;
-      </button>
-    )}
-  </div>
-</td>
- 
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
- 
-            <div className="goal-actions">
-              <button type="button" onClick={addGoal} className="add-btn">+ Add Another Goal</button>
-              <button type="submit" className="save-btn">Submit</button>
-            </div>
-          </form>
-        </div>
       </div>
-    </div>
+    </Sidebar>
   );
-};
- 
-export default NewGoals;
- 
+}
+export default NewClaim;
  
  
