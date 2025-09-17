@@ -57,6 +57,7 @@
 
 .sidebar .side {
   gap: 20px;
+  
 }
 .sidebar .hom {
   margin-top: 20px;
@@ -70,7 +71,8 @@
   margin-top: 10px;
 }
 .sidebar h3:hover {
-  background-color: #34495e;
+  background-color: rgb(169, 210, 231);
+   padding-top: 3px;
 }
 
 /* Right-side main content */
