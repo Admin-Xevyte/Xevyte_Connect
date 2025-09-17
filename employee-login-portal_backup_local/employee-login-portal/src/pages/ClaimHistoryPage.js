@@ -10,7 +10,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
  
 // Correctly set the workerSrc from your installed package
  
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString();
 function ClaimHistoryPage() {
   const [claims, setClaims] = useState([]);
   const employeeId = localStorage.getItem("employeeId");
