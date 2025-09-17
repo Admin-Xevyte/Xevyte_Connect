@@ -16,15 +16,40 @@ function Performance() {
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
- 
+ const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+   const [isContractOpen, setIsContractOpen] = useState(false);
+ const [canViewTasks, setCanViewTasks] = useState(false);
+ const toggleContractMenu = () => {
+   setIsContractOpen(!isContractOpen);
+ };
   // Get current quarter and year
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
   const currentQuarter = currentMonth <= 2 ? 'Q1' : currentMonth <= 5 ? 'Q2' : currentMonth <= 8 ? 'Q3' : 'Q4';
  
+
+     useEffect(() => {
+    if (employeeId) {
+      fetch(`/access/assigned-ids/${employeeId}`)
+        .then(res => res.json())
+        .then(data => {
+          const { manager, hr } = data;  // only manager and hr
+  
+          // Show tasks only if manager or hr
+          const canView = manager || hr;
+  
+          setCanViewTasks(canView);
+        })
+        .catch(err => {
+          console.error("Error fetching task visibility:", err);
+          setCanViewTasks(false);
+        });
+    }
+  }, [employeeId]);
+  
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
+      fetch(`/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -75,7 +100,7 @@ function Performance() {
     formData.append("profilePic", file);
  
     try {
-      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
+      const res = await fetch(`/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
@@ -133,28 +158,172 @@ function Performance() {
               onClick={toggleSidebar}
               style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
             />
-  <h3>
-                         <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)'}}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.7)'}}>
-                             Home
-                            
-                           </span>
-                         </Link>
-                       </h3>
-                       <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Claims</Link></h3>
-                       <h3><Link to="/home1" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Time Sheet</Link></h3>
-                       <h3><Link to="/home2" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Handbook</Link></h3>
-                       <h3><Link to="/home3" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Employee Directory</Link></h3>
-                       <h3><Link to="/home4" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Exit Management</Link></h3>
-                       <h3><Link to="/home5" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Holiday Calendar</Link></h3>
-                       <h3><Link to="/home6" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Helpdesk</Link></h3>
-                       <h3><Link to="/home7" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Leaves</Link></h3>
-                     
-                       <h3><Link to="/home9" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Pay slips</Link></h3>
-                       <h3><Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white' }}>Performance</Link></h3>
-                       <h3><Link to="/home11" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Training</Link></h3>
-                       <h3><Link to="/home12" className="side" style={{ textDecoration: 'none', color: 'rgba(255, 255, 255, 0.7)' }}>Travel</Link></h3>
-          </>
+     <h3>
+        <Link
+          to="/dashboard"
+          className="side"
+          style={{
+            textDecoration: 'none',
+            color:'#00b4c6',
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            Home
+          </span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home10" className="side" style={{ textDecoration: 'none', color: 'white'}}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+        </Link>
+      </h3>
+      
+      <h3>
+        <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+        </Link>
+      </h3>
+      {allowedUsers.includes(employeeId) && (
+                                            <>
+                                              <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                                <span className="side" style={{  color:'#00b4c6' }}>
+                                                  Contract Management {isContractOpen ? '▾' : '▸'}
+                                                </span>
+                                              </h3>
+                                          
+                                              {isContractOpen && (
+                                                <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                  <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                    <Link
+                                                      to="/customers"
+                                                      style={{
+                                                        textDecoration: 'none',
+                                                       color:'#00b4c6',
+                                                        fontSize: '14px',
+                                                        display: 'block',
+                                                        padding: '4px 0',
+                                                      }}
+                                                      onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                      onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                    >
+                                                      Customers
+                                                    </Link>
+                                                  </li>
+                                                  <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                    <Link
+                                                      to="/sows"
+                                                      style={{
+                                                        textDecoration: 'none',
+                                                       color:'#00b4c6',
+                                                        fontSize: '14px',
+                                                        display: 'block',
+                                                        padding: '4px 0',
+                                                      }}
+                                                      onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                      onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                    >
+                                                      SOWs
+                                                    </Link>
+                                                  </li>
+                                                  <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                    <Link
+                                                      to="/projects"
+                                                      style={{
+                                                        textDecoration: 'none',
+                                                       color:'#00b4c6',
+                                                        fontSize: '14px',
+                                                        display: 'block',
+                                                        padding: '4px 0',
+                                                      }}
+                                                      onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                      onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                    >
+                                                      Projects
+                                                    </Link>
+                                                  </li>
+                                                  <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                    <Link
+                                                      to="/allocation"
+                                                      style={{
+                                                        textDecoration: 'none',
+                                                       color:'#00b4c6',
+                                                        fontSize: '14px',
+                                                        display: 'block',
+                                                        padding: '4px 0',
+                                                      }}
+                                                      onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                      onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                    >
+                                                      Allocation
+                                                    </Link>
+                                                  </li>
+                                                </ul>
+                                              )}
+                                            </>
+                                          )}
+              
+              </>
         ) : (
           <div className="collapsed-wrapper">
             <img
@@ -244,7 +413,8 @@ function Performance() {
         <div className="mainn">
           <h2 className="title2">Performance Dashboard</h2>
           <p>Track your goals and performance metrics</p>
-          <PerformanceMetrics employeeId={employeeId} role={role} /> {/* Pass employeeId and role */}
+      <PerformanceMetrics employeeId={employeeId} role={role} canViewTasks={canViewTasks} />
+{/* Pass employeeId and role */}
           <QuickActions />
         </div>
       </div>
@@ -258,7 +428,7 @@ const MyGoalsCard = () => {
   return (
     <div className="card goals-card mygoals" onClick={() => navigate('/goals')}>
       <h4>My Goals</h4>
-      <small>2 completed this quarter</small>
+      <small>Your Quarterly Goals</small>
     </div>
   );
 };
@@ -275,42 +445,41 @@ const Goalhistory = () => {
   );
 };
  
-const Myteam = ({ employeeId, role }) => {
+const Myteam = ({ employeeId }) => {
   const navigate = useNavigate();
-  const allowedRoles = ['manager', 'reviewer', 'hr'];
-  const isDisabled = employeeId && !allowedRoles.includes(role?.toLowerCase());
  
   const handleClick = () => {
-    if (!isDisabled) {
+    // This button is always enabled for navigation
+    // You may still want a check to ensure employeeId is available
+    if (employeeId) {
       navigate('/myteam');
     }
   };
  
   return (
     <div
-      className={`metric-box card-text ${isDisabled ? 'disabled' : ''}`}
+      className="metric-box card-text"
       onClick={handleClick}
-      style={{ cursor: isDisabled ? 'not-allowed' : 'pointer', opacity: isDisabled ? 0.5 : 1 }}
+      style={{ cursor: 'pointer' }}
     >
       <h4>My Team</h4>
       <div>
-        <p>{isDisabled ? 'Access restricted' : 'View your team'}</p>
+        <p>View your team</p>
       </div>
     </div>
   );
 };
- 
 // New component to group all the metric cards together
-const PerformanceMetrics = ({ employeeId, role }) => {
+const PerformanceMetrics = ({ employeeId, role, canViewTasks }) => {
   return (
     <div className="metrics">
       <MyGoalsCard />
       <Goalhistory />
-      <Myteam employeeId={employeeId} role={role} />
+      {canViewTasks && <Myteam employeeId={employeeId} role={role} />}
     </div>
   );
 };
- 
+
 const QuickActions = () => {
   const navigate = useNavigate();
   return (
