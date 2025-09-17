@@ -254,7 +254,7 @@ const EmployeeGoals = () => {
   };
  
   // ===== FILTERING LOGIC (UPDATED) =====
-const validStatuses = ['submitted', 'rejected'];
+const validStatuses = ['submitted', 'rejected by reviewer'];
   const filteredGoals = useMemo(() => {
     const statusFiltered = goals.filter((g) =>
       validStatuses.includes(g.status?.toLowerCase())
