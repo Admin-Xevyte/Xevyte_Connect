@@ -4,24 +4,17 @@ import DailyEntryForm from "./DailyEntryForm";
 import Alerts from "./Alerts";
 import './Dashboard.css';
 import './AttendancePage.css';
-
+import Sidebar from './Sidebar.js';
 function TimesheetDashboard() {
   const employeeId = localStorage.getItem("employeeId");
   const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
   const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const fileInputRef = useRef(null);
-  const profileDropdownRef = useRef(null);
+ 
+
   const navigate = useNavigate();
-const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
-  const [isContractOpen, setIsContractOpen] = useState(false);
+
  const [canViewTasks, setCanViewTasks] = useState(false);
-const toggleContractMenu = () => {
-  setIsContractOpen(!isContractOpen);
-};
+
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth());
   const [year, setYear] = useState(today.getFullYear());
@@ -111,24 +104,6 @@ useEffect(() => {
     fetchFrozenDates();
   }, [employeeId]);
 
-  // Fetch employee profile info
-  useEffect(() => {
-    if (employeeId) {
-      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.profilePic) {
-            setProfilePic(data.profilePic);
-            localStorage.setItem("employeeProfilePic", data.profilePic);
-          }
-          if (data.name) {
-            setEmployeeName(data.name);
-            localStorage.setItem("employeeName", data.name);
-          }
-        })
-        .catch(err => console.error("Failed to fetch profile info:", err));
-    }
-  }, [employeeId]);
 
   // Fetch approved leave dates
   useEffect(() => {
@@ -175,18 +150,7 @@ useEffect(() => {
     fetchSubmittedEntries();
   }, [employeeId, month, year]);
 
-  // Handle click outside for profile dropdown
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-    }
-    if (profileOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [profileOpen]);
+ 
 
   // Fetch holidays for the current month/year
   useEffect(() => {
@@ -206,52 +170,6 @@ useEffect(() => {
       });
   }, [year, month]);
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-  const toggleProfileMenu = () => setProfileOpen(!profileOpen);
-  const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login");
-  };
-  const handleEditProfile = () => {
-    setProfileOpen(false);
-    fileInputRef.current.click();
-  };
-
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("name", employeeName);
-    formData.append("profilePic", file);
-
-    try {
-      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
-        method: "PUT",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      if (data.profilePic) {
-        setProfilePic(data.profilePic);
-        localStorage.setItem("employeeProfilePic", data.profilePic);
-        setSuccessMessage("Profile picture updated successfully!");
-        setTimeout(() => {
-          setSuccessMessage("");
-          setProfileOpen(false);
-        }, 2000);
-      } else {
-        alert("Failed to update profile picture: no profilePic returned.");
-      }
-    } catch (error) {
-      console.error("Error updating profile picture:", error);
-      alert("Error uploading profile picture. See console for details.");
-    }
-  };
 
   const handlePrev = () => {
     if (month === 0) {
@@ -318,184 +236,8 @@ useEffect(() => {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-        {!isCollapsed ? (
-          <>
-            <img
-              src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")}
-              alt="office"
-              className="office-vng"
-            />
-            <img
-              src={require("../assets/gg_move-left.png")}
-              alt="collapse"
-              className="toggle-btn"
-              onClick={toggleSidebar}
-              style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }}
-            />
-           <h3>
-                  <Link to="/dashboard" className="side" style={{ textDecoration: 'none', color:'#00b4c6'}}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color:'#00b4c6'}}>
-                      Home
-                     
-                    </span>
-                  </Link>
-                </h3>
-                <h3><Link to="/home0" className="hom" style={{ textDecoration: 'none', color:'#00b4c6' }}>Claims</Link></h3>
-                <h3><Link to="/home1" className="side" style={{ textDecoration: 'none',  color: 'white' }}>Time Sheet</Link></h3>
-                <h3><Link to="/home2" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Handbook</Link></h3>
-                <h3><Link to="/home3" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Employee Directory</Link></h3>
-                <h3><Link to="/home4" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Exit Management</Link></h3>
-                <h3><Link to="/home5" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Holiday Calendar</Link></h3>
-                <h3><Link to="/home6" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Helpdesk</Link></h3>
-                <h3><Link to="/home7" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Leaves</Link></h3>
-              
-                <h3><Link to="/home9" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Pay slips</Link></h3>
-                <h3><Link to="/home10" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Performance</Link></h3>
-                <h3><Link to="/home11" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Training</Link></h3>
-                <h3><Link to="/home12" className="side" style={{ textDecoration: 'none',  color:'#00b4c6' }}>Travel</Link></h3>
-          
-            {allowedUsers.includes(employeeId) && (
-                                                  <>
-                                                    <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
-                                                      <span className="side" style={{  color:'#00b4c6' }}>
-                                                        Contract Management {isContractOpen ? '▾' : '▸'}
-                                                      </span>
-                                                    </h3>
-                                                
-                                                    {isContractOpen && (
-                                                      <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                                                        <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                          <Link
-                                                            to="/customers"
-                                                            style={{
-                                                              textDecoration: 'none',
-                                                             color:'#00b4c6',
-                                                              fontSize: '14px',
-                                                              display: 'block',
-                                                              padding: '4px 0',
-                                                            }}
-                                                            onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                            onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                          >
-                                                            Customers
-                                                          </Link>
-                                                        </li>
-                                                        <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                          <Link
-                                                            to="/sows"
-                                                            style={{
-                                                              textDecoration: 'none',
-                                                             color:'#00b4c6',
-                                                              fontSize: '14px',
-                                                              display: 'block',
-                                                              padding: '4px 0',
-                                                            }}
-                                                            onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                            onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                          >
-                                                            SOWs
-                                                          </Link>
-                                                        </li>
-                                                        <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                          <Link
-                                                            to="/projects"
-                                                            style={{
-                                                              textDecoration: 'none',
-                                                             color:'#00b4c6',
-                                                              fontSize: '14px',
-                                                              display: 'block',
-                                                              padding: '4px 0',
-                                                            }}
-                                                            onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                            onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                          >
-                                                            Projects
-                                                          </Link>
-                                                        </li>
-                                                        <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                          <Link
-                                                            to="/allocation"
-                                                            style={{
-                                                              textDecoration: 'none',
-                                                             color:'#00b4c6',
-                                                              fontSize: '14px',
-                                                              display: 'block',
-                                                              padding: '4px 0',
-                                                            }}
-                                                            onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                            onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                          >
-                                                            Allocation
-                                                          </Link>
-                                                        </li>
-                                                      </ul>
-                                                    )}
-                                                  </>
-                                                )}
-                    
-                    </>
-        ) : (
-          <div className="collapsed-wrapper">
-            <img
-              src={require("../assets/Group.png")}
-              alt="expand"
-              className="collapsed-toggle"
-              onClick={toggleSidebar}
-            />
-          </div>
-        )}
-      </div>
-
+     <Sidebar>
       <div className="main-content">
-        <div className="top-header">
-          <h2>Welcome, {employeeName} ({employeeId})</h2>
-          <div className="header-right">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <img
-              src={require('../assets/Vector.png')}
-              alt="Notifications"
-              className="icon"
-              style={{ cursor: 'pointer' }}
-            />
-
-            <div className="profile-wrapper" ref={profileDropdownRef}>
-              <img
-                src={profilePic}
-                alt="Profile"
-                className="profile-pic"
-                onClick={toggleProfileMenu}
-              />
-              {profileOpen && (
-                <div className="profile-dropdown">
-                  <button onClick={handleEditProfile}>Edit Profile</button>
-                  <button onClick={handleLogout}>Logout</button>
-                </div>
-              )}
-              {successMessage && (
-                <div className="success-message">
-                  {successMessage}
-                </div>
-              )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleImageChange}
-              />
-            </div>
-          </div>
-        </div>
-        <hr className="divider-line" />
-
         <div style={{ padding: 20, fontFamily: "Arial" }}>
           <h2 style={{ textAlign: "center" }}>
             <button
@@ -767,7 +509,7 @@ if (isSubmitted) {
           <Alerts alerts={alerts} />
         </div>
       </div>
-    </div>
+  </Sidebar>
   );
 }
 
