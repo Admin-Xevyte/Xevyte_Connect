@@ -512,7 +512,7 @@ function ReviewerApprovedGoalsWithLayout() {
                 Approve All Goals
               </button>
               <button
-                onClick={() => updateAllGoalsStatus('rejected')}
+                onClick={() => updateAllGoalsStatus('rejected by reviewer')}
                 disabled={batchUpdating}
                 style={{
                   backgroundColor: "#dc3545",
