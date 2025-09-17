@@ -36,87 +36,10 @@ const [isAdmin, setIsAdmin] = useState(false);
   }
 }, [employeeId]);
 
-  useEffect(() => {
-    if (employeeId) {
-      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.profilePic) {
-            setProfilePic(data.profilePic);
-            localStorage.setItem("employeeProfilePic", data.profilePic);
-          }
-          if (data.name) {
-            setEmployeeName(data.name);
-            localStorage.setItem("employeeName", data.name);
-          }
-        })
-        .catch(err => console.error("Failed to fetch profile info:", err));
-    }
-  }, [employeeId]);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-    }
-    if (profileOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [profileOpen]);
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-  const toggleProfileMenu = () => setProfileOpen(!profileOpen);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login");
-  };
-
-  const handleEditProfile = () => {
-    setProfileOpen(false);
-    fileInputRef.current.click();
-  };
-
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("name", employeeName);
-    formData.append("profilePic", file);
-
-    try {
-      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
-        method: "PUT",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      if (data.profilePic) {
-        setProfilePic(data.profilePic);
-        localStorage.setItem("employeeProfilePic", data.profilePic);
-        setSuccessMessage("Profile picture updated successfully!");
-        setTimeout(() => {
-          setSuccessMessage("");
-          setProfileOpen(false);
-        }, 2000);
-      } else {
-        alert("Failed to update profile picture: no profilePic returned.");
-      }
-    } catch (error) {
-      console.error("Error updating profile picture:", error);
-      alert("Error uploading profile picture. See console for details.");
-    }
-  };
-
+ 
   // --- MyTeam3 Component Logic Starts Here ---
   const fetchManagerRequests = async () => {
     try {
