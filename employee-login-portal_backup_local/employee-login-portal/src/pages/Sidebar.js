@@ -112,6 +112,7 @@ const Sidebar = ({ children }) => {
     '/home7': ['/manager/tasks', '/hr/tasks', '/saved-drafts', '/leave-history', '/myteam2'],
     '/home10': ['/goals', '/selfassessment', '/myteam', '/myteam/newgoal', '/managergoals', '/reviewer', '/employeegoal', '/inprogressgoals', '/submittedgoals', '/rejectedgoals', '/pendinggoals', '/reviewergoals', '/hrgoals', '/finalhrgoals', '/submitfeedback', '/goalhistory'],
     '/home12': ['/myteam3'],
+     '/contract-management': ['/customers', '/sows', '/projects', '/allocation'],
   };
 
   const associatedPaths = modulePaths[path] || [];
