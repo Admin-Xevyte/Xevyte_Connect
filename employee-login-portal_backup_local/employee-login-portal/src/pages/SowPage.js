@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
-
+import Sidebar from './Sidebar.js';
 // Styles moved outside the component to prevent re-creation on every render
 const cellHeader = {
   padding: '10px',
@@ -197,7 +197,7 @@ const handleDownload = async (sowId, filename) => {
 
 
   return (
-
+ <Sidebar>
       <div className="main-content">
         <div style={{ padding: '30px', backgroundColor: '#f6f8fb', minHeight: 'calc(100vh - 80px)', fontFamily: 'Arial, sans-serif' }}>
   <h2>
@@ -488,7 +488,7 @@ const handleDownload = async (sowId, filename) => {
 
         </div>
       </div>
-
+</Sidebar>
   );
 }
 
