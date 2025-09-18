@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
-
+ import Sidebar from './Sidebar.js';
 function HRDashboard() {
   const hrId = localStorage.getItem("employeeId");
   const token = localStorage.getItem("token");
@@ -180,7 +180,7 @@ const filteredLeaves = useMemo(() => {
   );
 
   return (
-   
+     <Sidebar>
       <div className="main-content">
         <div style={{ flex: 1, padding: 20, overflowY: 'auto' }}>
           <button
@@ -212,7 +212,7 @@ const filteredLeaves = useMemo(() => {
           )}
         </div>
       </div>
- 
+ </Sidebar>
   );
 }
 
