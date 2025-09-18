@@ -72,7 +72,8 @@
 }
 .sidebar h3:hover {
   background-color: rgb(169, 210, 231);
-   padding-top: 3px;
+   padding-top: 6px;
+   padding-bottom: 6px;
 }
 
 /* Right-side main content */
