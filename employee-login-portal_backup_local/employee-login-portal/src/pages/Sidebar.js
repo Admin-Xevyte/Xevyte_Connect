@@ -103,47 +103,28 @@ const Sidebar = ({ children }) => {
   };
 
   const getLinkStyle = (path) => {
-    const currentPath = location.pathname;
-    let isActive = false;
+  const currentPath = location.pathname;
+  let isActive = false;
 
-    switch (path) {
-      case '/home0':
-        const claimsPaths = [
-          '/home0',
-          '/new',
-          '/claims/status',
-          '/claims/history',
-          '/drafts',
-          '/task',
-          '/manager-dashboard',
-          '/finance-dashboard',
-          '/finance',
-        ];
-        isActive = claimsPaths.includes(currentPath);
-        break;
-      case '/home1':
-        isActive = currentPath.startsWith('/home1') || currentPath === '/mngtime' || currentPath === '/mngreq' || currentPath === '/hrgreq' || currentPath === '/timesheets' || currentPath === '/mytimesheets' || currentPath === '/myteam1';
-        break;
-      case '/home10':
-        isActive = currentPath.startsWith('/home10') || currentPath === '/goals' || currentPath === '/selfassessment' || currentPath === '/myteam' || currentPath.startsWith('/myteam/newgoal') || currentPath === '/managergoals' || currentPath === '/reviewer' || currentPath === '/employeegoal' || currentPath === '/inprogressgoals' || currentPath === '/submittedgoals' || currentPath === '/rejectedgoals' || currentPath === '/pendinggoals' || currentPath === '/reviewergoals' || currentPath === '/hrgoals' || currentPath === '/finalhrgoals' || currentPath === '/submitfeedback' || currentPath === '/goalhistory';
-        break;
-      case '/home7':
-        isActive = currentPath.startsWith('/home7') || currentPath === '/manager/tasks' || currentPath === '/hr/tasks' || currentPath === '/saved-drafts' || currentPath === '/leave-history' || currentPath === '/myteam2';
-        break;
-      case '/home12':
-        isActive = currentPath.startsWith('/home12') || currentPath === '/myteam3';
-        break;
-      default:
-        isActive = currentPath.startsWith(path);
-        break;
-    }
-
-    return {
-      textDecoration: 'none',
-      color: isActive ? 'white' : '#00b4c6',
-    };
+  const modulePaths = {
+    '/home0': ['/new', '/claims/status', '/claims/history', '/drafts', '/task', '/manager-dashboard', '/finance-dashboard', '/finance'],
+    '/home1': ['/mngtime', '/mngreq', '/hrgreq', '/timesheets', '/mytimesheets', '/myteam1'],
+    '/home7': ['/manager/tasks', '/hr/tasks', '/saved-drafts', '/leave-history', '/myteam2'],
+    '/home10': ['/goals', '/selfassessment', '/myteam', '/myteam/newgoal', '/managergoals', '/reviewer', '/employeegoal', '/inprogressgoals', '/submittedgoals', '/rejectedgoals', '/pendinggoals', '/reviewergoals', '/hrgoals', '/finalhrgoals', '/submitfeedback', '/goalhistory'],
+    '/home12': ['/myteam3'],
   };
 
+  const associatedPaths = modulePaths[path] || [];
+
+  if (associatedPaths.includes(currentPath) || currentPath === path) {
+    isActive = true;
+  }
+
+  return {
+    textDecoration: 'none',
+    color: isActive ? 'white' : '#00b4c6',
+  };
+};
   const getSubLinkStyle = (path) => {
     const currentPath = location.pathname;
     let isActive = currentPath.startsWith(path);
