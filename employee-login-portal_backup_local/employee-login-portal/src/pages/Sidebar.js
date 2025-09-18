@@ -1,7 +1,7 @@
-// src/components/Sidebar.js
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Dashboard.css';
+
 const Sidebar = ({ children }) => {
   const employeeId = localStorage.getItem("employeeId");
   const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
@@ -13,13 +13,14 @@ const Sidebar = ({ children }) => {
   const fileInputRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const navigate = useNavigate();
-const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
+  const location = useLocation();
+  const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
   const [isContractOpen, setIsContractOpen] = useState(false);
 
-const toggleContractMenu = () => {
-  setIsContractOpen(!isContractOpen);
-};
-  // Fetch updated profile info on mount (optional but recommended)
+  const toggleContractMenu = () => {
+    setIsContractOpen(!isContractOpen);
+  };
+
   useEffect(() => {
     if (employeeId) {
       fetch(`/profile/${employeeId}`)
@@ -38,7 +39,6 @@ const toggleContractMenu = () => {
     }
   }, [employeeId]);
 
-  // Close profile dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
@@ -102,324 +102,363 @@ const toggleContractMenu = () => {
     }
   };
 
+  const getLinkStyle = (path) => {
+    const currentPath = location.pathname;
+    let isActive = false;
+
+    switch (path) {
+      case '/home0':
+        const claimsPaths = [
+          '/home0',
+          '/new',
+          '/claims/status',
+          '/claims/history',
+          '/drafts',
+          '/task',
+          '/manager-dashboard',
+          '/finance-dashboard',
+          '/finance',
+        ];
+        isActive = claimsPaths.includes(currentPath);
+        break;
+      case '/home1':
+        isActive = currentPath.startsWith('/home1') || currentPath === '/mngtime' || currentPath === '/mngreq' || currentPath === '/hrgreq' || currentPath === '/timesheets' || currentPath === '/mytimesheets' || currentPath === '/myteam1';
+        break;
+      case '/home10':
+        isActive = currentPath.startsWith('/home10') || currentPath === '/goals' || currentPath === '/selfassessment' || currentPath === '/myteam' || currentPath.startsWith('/myteam/newgoal') || currentPath === '/managergoals' || currentPath === '/reviewer' || currentPath === '/employeegoal' || currentPath === '/inprogressgoals' || currentPath === '/submittedgoals' || currentPath === '/rejectedgoals' || currentPath === '/pendinggoals' || currentPath === '/reviewergoals' || currentPath === '/hrgoals' || currentPath === '/finalhrgoals' || currentPath === '/submitfeedback' || currentPath === '/goalhistory';
+        break;
+      case '/home7':
+        isActive = currentPath.startsWith('/home7') || currentPath === '/manager/tasks' || currentPath === '/hr/tasks' || currentPath === '/saved-drafts' || currentPath === '/leave-history' || currentPath === '/myteam2';
+        break;
+      case '/home12':
+        isActive = currentPath.startsWith('/home12') || currentPath === '/myteam3';
+        break;
+      default:
+        isActive = currentPath.startsWith(path);
+        break;
+    }
+
+    return {
+      textDecoration: 'none',
+      color: isActive ? 'white' : '#00b4c6',
+    };
+  };
+
+  const getSubLinkStyle = (path) => {
+    const currentPath = location.pathname;
+    let isActive = currentPath.startsWith(path);
+    
+    return {
+      textDecoration: 'none',
+      color: isActive ? 'white' : 'rgba(255, 255, 255, 0.7)',
+      fontSize: '14px',
+      display: 'block',
+      padding: '4px 0',
+    };
+  };
+
   return (
-        <div className="dashboard-container">
-          {/* Sidebar */}
-          <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-            {!isCollapsed ? (
+    <div className="dashboard-container">
+      {/* Sidebar */}
+      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        {!isCollapsed ? (
+          <>
+            <img
+              src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")}
+              alt="office"
+              className="office-vng"
+            />
+            <img
+              src={require("../assets/gg_move-left.png")}
+              alt="collapse"
+              className="toggle-btn"
+              onClick={toggleSidebar}
+              style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px", fill: '#00b4c6' }}
+            />
+            <h3>
+              <Link
+                to="/dashboard"
+                className="side"
+                style={getLinkStyle('/dashboard')}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  Home
+                </span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home0" className="side" style={getLinkStyle('/home0')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home1" className="side" style={getLinkStyle('/home1')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home2" className="side" style={getLinkStyle('/home2')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home3" className="side" style={getLinkStyle('/home3')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home4" className="side" style={getLinkStyle('/home4')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home5" className="side" style={getLinkStyle('/home5')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home6" className="side" style={getLinkStyle('/home6')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home7" className="side" style={getLinkStyle('/home7')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home9" className="side" style={getLinkStyle('/home9')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home10" className="side" style={getLinkStyle('/home10')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home11" className="side" style={getLinkStyle('/home11')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+              </Link>
+            </h3>
+
+            <h3>
+              <Link to="/home12" className="side" style={getLinkStyle('/home12')}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+              </Link>
+            </h3>
+            {allowedUsers.includes(employeeId) && (
               <>
-                <img
-                  src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")}
-                  alt="office"
-                  className="office-vng"
-                />
-                <img
-                  src={require("../assets/gg_move-left.png")}
-                  alt="collapse"
-                  className="toggle-btn"
-                  onClick={toggleSidebar}
-                  style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px", fill: '#00b4c6'  }}
-                />
-      <h3>
-                   <Link
-                     to="/dashboard"
-                     className="side"
-                     style={{
-                       textDecoration: 'none',
-                       color:'#00b4c6',
-                     }}
-                   >
-                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                       Home
-                     </span>
-                   </Link>
-                 </h3>
-    
-    <h3>
-      <Link to="/home0" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
-      </Link>
-    </h3>
-    
-    <h3>
-      <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
-      </Link>
-    </h3>
-          {allowedUsers.includes(employeeId) && (
-                 <>
-                 <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
-      <span
-        className="side"
-        style={{
-          color: isContractOpen ? 'white' : '#00b4c6'
-        }}
-      >
-        Contract Management {isContractOpen ? '▾' : '▸'}
-      </span>
-    </h3>
-    
-               
-                   {isContractOpen && (
-                     <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px'}}>
-                       <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                         <Link
-                           to="/customers"
-                           style={{
-                             textDecoration: 'none',
-                            color:'rgba(255, 255, 255, 0.7)',
-                             fontSize: '14px',
-                             display: 'block',
-                             padding: '4px 0',
-                           }}
-                           onMouseOver={(e) => (e.target.style.color = '#fff')}
-                           onMouseOut={(e) => (e.target.style.color = 'rgba(255, 255, 255, 0.7)')}
-                         >
-                           Customers
-                         </Link>
-                       </li>
-                       <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                         <Link
-                           to="/sows"
-                           style={{
-                             textDecoration: 'none',
-                            color:'rgba(255, 255, 255, 0.7)',
-                             fontSize: '14px',
-                             display: 'block',
-                             padding: '4px 0',
-                           }}
-                           onMouseOver={(e) => (e.target.style.color = '#fff')}
-                           onMouseOut={(e) => (e.target.style.color = 'rgba(255, 255, 255, 0.7)')}
-                         >
-                           SOWs
-                         </Link>
-                       </li>
-                       <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                         <Link
-                           to="/projects"
-                           style={{
-                             textDecoration: 'none',
-                            color:'rgba(255, 255, 255, 0.7)',
-                             fontSize: '14px',
-                             display: 'block',
-                             padding: '4px 0',
-                           }}
-                           onMouseOver={(e) => (e.target.style.color = '#fff')}
-                           onMouseOut={(e) => (e.target.style.color = 'rgba(255, 255, 255, 0.7)')}
-                         >
-                           Projects
-                         </Link>
-                       </li>
-                       <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                         <Link
-                           to="/allocation"
-                           style={{
-                             textDecoration: 'none',
-                            color:'rgba(255, 255, 255, 0.7)',
-                             fontSize: '14px',
-                             display: 'block',
-                             padding: '4px 0',
-                           }}
-                           onMouseOver={(e) => (e.target.style.color = '#fff')}
-                           onMouseOut={(e) => (e.target.style.color = 'rgba(255, 255, 255, 0.7)')}
-                         >
-                           Allocation
-                         </Link>
-                       </li>
-                     </ul>
-                   )}
-                 </>
-               )}
-    
-    
-            
-             
+                <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                  <span
+                    className="side"
+                    style={{
+                      color: isContractOpen ? 'white' : '#00b4c6'
+                    }}
+                  >
+                    Contract Management {isContractOpen ? '▾' : '▸'}
+                  </span>
+                </h3>
+
+                {isContractOpen && (
+                  <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' }}>
+                    <li style={{ marginBottom: '4px', marginLeft: '60px' }}>
+                      <Link
+                        to="/customers"
+                        style={getSubLinkStyle('/customers')}
+                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                        onMouseOut={(e) => {
+                          if (!location.pathname.startsWith('/customers')) {
+                            e.target.style.color = 'rgba(255, 255, 255, 0.7)';
+                          }
+                        }}
+                      >
+                        Customers
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px', marginLeft: '60px' }}>
+                      <Link
+                        to="/sows"
+                        style={getSubLinkStyle('/sows')}
+                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                        onMouseOut={(e) => {
+                          if (!location.pathname.startsWith('/sows')) {
+                            e.target.style.color = 'rgba(255, 255, 255, 0.7)';
+                          }
+                        }}
+                      >
+                        SOWs
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px', marginLeft: '60px' }}>
+                      <Link
+                        to="/projects"
+                        style={getSubLinkStyle('/projects')}
+                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                        onMouseOut={(e) => {
+                          if (!location.pathname.startsWith('/projects')) {
+                            e.target.style.color = 'rgba(255, 255, 255, 0.7)';
+                          }
+                        }}
+                      >
+                        Projects
+                      </Link>
+                    </li>
+                    <li style={{ marginBottom: '4px', marginLeft: '60px' }}>
+                      <Link
+                        to="/allocation"
+                        style={getSubLinkStyle('/allocation')}
+                        onMouseOver={(e) => (e.target.style.color = '#fff')}
+                        onMouseOut={(e) => {
+                          if (!location.pathname.startsWith('/allocation')) {
+                            e.target.style.color = 'rgba(255, 255, 255, 0.7)';
+                          }
+                        }}
+                      >
+                        Allocation
+                      </Link>
+                    </li>
+                  </ul>
+                )}
               </>
-            ) : (
-              <div className="collapsed-wrapper">
-                <img
-                  src={require("../assets/Group.png")}
-                  alt="expand"
-                  className="collapsed-toggle"
-                  onClick={toggleSidebar}
-                />
-              </div>
             )}
+          </>
+        ) : (
+          <div className="collapsed-wrapper">
+            <img
+              src={require("../assets/Group.png")}
+              alt="expand"
+              className="collapsed-toggle"
+              onClick={toggleSidebar}
+            />
           </div>
-    
-          <div className="main-content">
-            <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 >Welcome, {employeeName} ({employeeId})</h2>
-    
-              <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <img
-                  src={require('../assets/Vector.png')}
-                  alt="Notifications"
-                  className="icon"
-                  style={{ cursor: 'pointer' }}
-                />
-    
-                {/* Profile picture with dropdown */}
-                <div className="profile-wrapper" style={{ position: 'relative' }}>
-                  <img
-                    src={profilePic}
-                    alt="Profile"
-                    className="profile-pic"
-                    onClick={toggleProfileMenu}
-                    style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                  />
-                  {profileOpen && (
-                    <div
-                      ref={profileDropdownRef}
-                      className="profile-dropdown"
-                      style={{
-                        position: 'absolute',
-                        top: '50px',
-                        right: '0',
-                        backgroundColor: '#fff',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                        borderRadius: '4px',
-                        zIndex: 1000,
-                        width: '150px',
-                      }}
-                    >
-                      <button
-                        onClick={handleEditProfile}
-                        style={{
-                          display: 'block',
-                          width: '100%',
-                          padding: '10px',
-                          background: 'none',
-                          border: 'none',
-                          textAlign: 'left',
-                          cursor: 'pointer',
-                          borderBottom: '1px solid #eee',
-                        }}
-                      >
-                        Edit Profile
-                      </button>
-                      <button
-                        onClick={handleLogout}
-                        style={{
-                          display: 'block',
-                          width: '100%',
-                          padding: '10px',
-                          background: 'none',
-                          border: 'none',
-                          textAlign: 'left',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-    
-                  {/* Success message */}
-                  {successMessage && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '100%',
-                      right: '0',
-                      marginTop: '5px',
-                      backgroundColor: '#4BB543',
-                      color: 'white',
-                      padding: '8px 12px',
-                      borderRadius: '4px',
-                      fontSize: '14px',
-                      whiteSpace: 'nowrap',
-                      zIndex: 1100,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                    }}>
-                      {successMessage}
-                    </div>
-                  )}
-    
-                  {/* Hidden file input */}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={handleImageChange}
-                  />
+        )}
+      </div>
+
+      <div className="main-content">
+        <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>Welcome, {employeeName} ({employeeId})</h2>
+
+          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <img
+              src={require('../assets/Vector.png')}
+              alt="Notifications"
+              className="icon"
+              style={{ cursor: 'pointer' }}
+            />
+
+            {/* Profile picture with dropdown */}
+            <div className="profile-wrapper" style={{ position: 'relative' }}>
+              <img
+                src={profilePic}
+                alt="Profile"
+                className="profile-pic"
+                onClick={toggleProfileMenu}
+                style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+              />
+              {profileOpen && (
+                <div
+                  ref={profileDropdownRef}
+                  className="profile-dropdown"
+                  style={{
+                    position: 'absolute',
+                    top: '50px',
+                    right: '0',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    borderRadius: '4px',
+                    zIndex: 1000,
+                    width: '150px',
+                  }}
+                >
+                  <button
+                    onClick={handleEditProfile}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '10px',
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid #eee',
+                    }}
+                  >
+                    Edit Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '10px',
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Logout
+                  </button>
                 </div>
-              </div>
+              )}
+
+              {/* Success message */}
+              {successMessage && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: '0',
+                  marginTop: '5px',
+                  backgroundColor: '#4BB543',
+                  color: 'white',
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                  zIndex: 1100,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}>
+                  {successMessage}
+                </div>
+              )}
+
+              {/* Hidden file input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleImageChange}
+              />
             </div>
-    
-            <hr className="divider-line" />
-    
-            {children}
           </div>
         </div>
-      );
+
+        <hr className="divider-line" />
+
+        {children}
+      </div>
+    </div>
+  );
 };
 
 export default Sidebar;
