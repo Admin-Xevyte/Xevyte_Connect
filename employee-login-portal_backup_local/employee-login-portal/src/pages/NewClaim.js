@@ -57,7 +57,7 @@ const [formData, setFormData] = useState({
     setFormData((prev) => ({ ...prev, employeeId: id, name }));
  
     if (id) {
-      fetch(`http://localhost:8082/profile/${id}`)
+      fetch(`http://3.7.139.212:8080/profile/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -75,7 +75,7 @@ const [formData, setFormData] = useState({
       const draftId = location.state.draftId;
       setOriginalDraftId(draftId);
  
-      axios.get(`http://localhost:8082/claims/draft/${draftId}`)
+      axios.get(`http://3.7.139.212:8080/claims/draft/${draftId}`)
         .then(draftRes => {
           const draft = draftRes.data;
           setFormData({
@@ -91,7 +91,7 @@ const [formData, setFormData] = useState({
           setDraftLoaded(true);
  
           if (draft.receiptName) {
-            axios.get(`http://localhost:8082/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
+            axios.get(`http://3.7.139.212:8080/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
               .then(receiptRes => {
                 const fileBlob = receiptRes.data;
                 const fileName = draft.receiptName;
@@ -255,7 +255,7 @@ const handleSubmit = async () => {
             // ✅ Submitting an updated draft
             console.log("Submitting draft with ID:", originalDraftId);
             response = await axios.put(
-                `http://localhost:8082/claims/submit-draft/${originalDraftId}`,
+                `http://3.7.139.212:8080/claims/submit-draft/${originalDraftId}`,
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
@@ -412,7 +412,7 @@ const handleSaveDraft = async () => {
     if (originalDraftId) {
       // Update existing draft
       res = await axios.put(
-        `http://localhost:8082/claims/draft/${originalDraftId}`,
+        `http://3.7.139.212:8080/claims/draft/${originalDraftId}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -420,7 +420,7 @@ const handleSaveDraft = async () => {
     } else {
       // Create a new draft
       res = await axios.post(
-        "http://localhost:8082/claims/draft",
+        "http://3.7.139.212:8080/claims/draft",
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
