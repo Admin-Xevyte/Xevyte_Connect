@@ -267,7 +267,7 @@ const handleSubmit = async () => {
         } else {
             // ✅ Submitting a new claim
             response = await axios.post(
-                "http://localhost:8082/claims/submit",
+                "http://3.7.139.212:8080/claims/submit",
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
