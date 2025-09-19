@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar.js';
 import NewClaim from './NewClaim';
-import Saveddrafts from './Savedddrafts';
+import Saveddrafts from './Saveddrafts';
 import ClaimHistoryPage from './ClaimHistoryPage';
 import MyTasks from './MyTasks';
 import DesignSummary from './DesignSummary';
