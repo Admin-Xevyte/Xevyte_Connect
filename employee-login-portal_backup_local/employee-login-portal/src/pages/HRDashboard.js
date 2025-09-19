@@ -9,7 +9,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import Sidebar from './Sidebar.js';
 pdfjs.GlobalWorkerOptions.workerSrc = `./pdf.worker.min.js`;
  
-function Designhr() {
+function HRDashboard() {
   const [claims, setClaims] = useState([]);
   const [originalClaims, setOriginalClaims] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -344,4 +344,4 @@ const updateStatus = (claimId, status) => {
   );
 }
 
-export default Designhr;
+export default HRDashboard;
