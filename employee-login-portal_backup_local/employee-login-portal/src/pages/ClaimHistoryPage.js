@@ -10,7 +10,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
  
 // Correctly set the workerSrc from your installed package
 pdfjs.GlobalWorkerOptions.workerSrc = `./pdf.worker.min.js`;
-function DesignHistory() {
+function ClaimHistoryPage() {
   const [claims, setClaims] = useState([]);
   const employeeId = localStorage.getItem("employeeId");
   const employeeName = localStorage.getItem("employeeName");
@@ -276,5 +276,5 @@ setLoading(false); // done loading // done loading
   );
 }
  
-export default DesignHistory;
+export default ClaimHistoryPage;
  
