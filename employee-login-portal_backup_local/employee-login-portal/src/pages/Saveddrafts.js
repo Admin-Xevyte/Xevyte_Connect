@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import "./Dashboard.css";
 import axios from 'axios';
 
-function Saveddraft() {
+function Saveddrafts() {
   const [drafts, setDrafts] = useState([]);
   const [message, setMessage] = useState('');
   const [employeeId, setEmployeeId] = useState(null);
@@ -178,4 +178,4 @@ function Saveddraft() {
   );
 }
 
-export default Saveddraft;
+export default Saveddrafts;
