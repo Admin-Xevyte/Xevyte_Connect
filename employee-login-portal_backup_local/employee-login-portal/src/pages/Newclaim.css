@@ -51,7 +51,7 @@ body {
 /* Layout */
 .form-main-layout {
   display: flex;
-  gap: 30px;
+  gap: 20px;
   align-items: flex-start;
   margin-left: 20px;
   margin-bottom: 10px;
@@ -62,9 +62,7 @@ body {
 .expense-details {
   flex: 2;
   background: #fff;
- padding: 10px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  padding: 10px;
 }
 
 .form-group {
@@ -111,10 +109,9 @@ textarea {
 .summary-box,
 .actions-box {
   padding: 20px;
-
   border-radius: 12px;
   border: 1px solid #eee;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+ 
 }
 
 .summary-box h3,
@@ -149,8 +146,8 @@ textarea {
   font-weight: 600;
   font-size: 1rem;
   padding: 0.6rem 1rem;
-  border-radius: 6px;
-  border: none;
+
+  
   cursor: pointer;
   margin-bottom: 0.75rem;
   gap: 0.5rem;
@@ -169,7 +166,7 @@ textarea {
 
 .btn.secondary {
   background-color: #fff;
-  border: 1px solid #ccc;
+
   color: #333;
 }
 
@@ -269,7 +266,7 @@ textarea {
   justify-content: space-between;
   align-items: center;
   background-color: #fff;
-  border-bottom: 2px solid #e0e0e0;
+ 
 }
 
 
@@ -320,7 +317,7 @@ textarea {
   border: none;
   border-top: 2px solid #ccc;  /* Light gray line */
   margin: 20px 0;     
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);         /* Reduced spacing between sections */
+     /* Reduced spacing between sections */
 }
 
 .back-link {
