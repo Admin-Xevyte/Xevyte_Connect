@@ -274,7 +274,7 @@ const [isAdmin, setIsAdmin] = useState(false);
           style={{
             height: "calc(100vh - 200px)",
             overflowY: "auto",
-            border: "1px solid #ccc",
+        
             marginTop: "20px",
           }}
         >
