@@ -1,117 +1,149 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Dashboard.css';
-import Sidebar from './Sidebar.js';
-const MyTeamLeave = () => {
+import React, { useState, useEffect } from "react";
+// Remove `useNavigate` because we are no longer changing pages.
+// import { useNavigate } from "react-router-dom";
+import "./ManagerDashboard.css";
+import "./Dashboard.css";
+import Sidebar from "./Sidebar.js";
+// Import the dashboard components to be rendered in the highlighted area.
+import ManagerTasks from "./ManagerTasks";
+import HrTasks from "./HrTasks";
+function MyTasks() {
   const employeeId = localStorage.getItem("employeeId");
-  const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
+  const [employeeName] = useState(localStorage.getItem("employeeName"));
+  const [assignedRoles, setAssignedRoles] = useState({
+    manager: false,
+    finance: false,
+    hr: false,
+  });
 
-  const [successMessage, setSuccessMessage] = useState("");
+  // Add state to track which dashboard is active
+  const [activeDashboard, setActiveDashboard] = useState(null);
 
-  const navigate = useNavigate();
-const cardStyle = {
-  backgroundColor: '#fff',
-  borderRadius: '12px',
-  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-  padding: '25px',
-  textAlign: 'left',
-  width: '350px',
-  cursor: 'pointer',
-  transition: 'transform 0.2s, box-shadow 0.2s',
-  marginBottom: '20px'
-};
-  const [roles, setRoles] = useState({
-  manager: false,
-  finance: false,
-  hr: false,
-  reviewer: false,
-  admin: false,
-  canViewTasks: false,
-});
+  // Fetch assigned roles from backend
+  useEffect(() => {
+    if (employeeId) {
+      fetch(`http:///access/assigned-ids/${employeeId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAssignedRoles({
+            manager: data.manager || false,
+            finance: data.finance || false,
+            hr: data.hr || false,
+          });
+          // Automatically select the first available dashboard
+          if (data.manager) {
+            setActiveDashboard("manager");
+          } else if (data.hr) {
+            setActiveDashboard("hr");
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch assigned roles:", err);
+        });
+    }
+  }, [employeeId]);
 
-useEffect(() => {
-  if (employeeId) {
-     fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
-      .then(res => res.json())
-      .then(data => {
-        setRoles(data);
-      })
-      .catch(err => console.error("Failed to fetch roles:", err));
-  }
-}, [employeeId]);
-
-
-
-
-
-
-
-  const handleManagerClick = () => {
-    navigate('/manager/tasks');
+  // Update this function to change state instead of navigating
+  const handleCheckboxChange = (role) => {
+    setActiveDashboard(activeDashboard === role ? null : role);
   };
 
-  const handleHRClick = () => {
-    navigate('/hr/tasks');
+  // Create a function to conditionally render the correct dashboard
+  const renderDashboard = () => {
+    switch (activeDashboard) {
+      case "manager":
+        return <ManagerTasks />;
+      case "hr":
+        return <HrTasks />;
+      default:
+        return null; // Or a message like: <p>Select a role to view tasks.</p>
+    }
   };
 
   return (
-       <Sidebar>
-      <div className="main-content">
-                        <button
-    onClick={() => navigate(-1)}
-    style={{
-        padding: "8px 16px", // Slightly reduced padding
-         backgroundColor: "#f0f0f0",
-       color: "#333",
-       fontSize: "16px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      cursor: "pointer",
-      margin: "20px 0 20px 0", // Top and bottom margins only
-        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-        transition: "background-color 0.3s ease",
-        width: "fit-content", // Make width only as big as content
-        display: "block", // Ensure it respects margin auto if needed
-    }}
->
-    ⬅ Back
-</button>
-
-<div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-  {roles.manager && (
-    <div
-      onClick={handleManagerClick}
-      style={cardStyle}
+        <Sidebar>
+<div
+      className="main-content"
+      style={{
+        padding: "5px",
+        display: "flex",
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+      }}
     >
-      <div style={{ fontWeight: '700', fontSize: '18px', marginBottom: '6px' }}>
-        Manager View
-      </div>
-      <div style={{ color: '#888', fontWeight: '400', fontSize: '14px' }}>
-        Go to Manager Panel
-      </div>
-    </div>
-  )}
+          <div
+            style={{
+              display: "flex",
+              gap: "15px",
+             
+            }}
+          >
+            {assignedRoles.manager && (
+              <label
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={activeDashboard === "manager"}
+                  onChange={() => handleCheckboxChange("manager")}
+                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                />
+                Manager
+              </label>
+            )}
 
-  {roles.hr && (
-    <div
-      onClick={handleHRClick}
-         style={cardStyle}
-    >
-      <div style={{ fontWeight: '700', fontSize: '18px', marginBottom: '6px' }}>
-        HR
-      </div>
-      <div style={{ color: '#888', fontWeight: '400', fontSize: '14px' }}>
-        HR Panel & Monitoring
-      </div>
-    </div>
-  )}
+            {assignedRoles.finance && (
+              <label
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={activeDashboard === "finance"}
+                  onChange={() => handleCheckboxChange("finance")}
+                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                />
+                Finance
+              </label>
+            )}
 
-  {/* Add other roles/cards similarly */}
-</div>
+            {assignedRoles.hr && (
+              <label
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={activeDashboard === "hr"}
+                  onChange={() => handleCheckboxChange("hr")}
+                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                />
+                HR
+              </label>
+            )}
+          </div>
 
+          <div className="dashboard-content-container">
+          {renderDashboard()}
+        </div>
+
+      
       </div>
-   </Sidebar>
+ </Sidebar>
   );
-};
+}
 
-export default MyTeamLeave;
+export default MyTasks;
