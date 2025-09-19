@@ -953,7 +953,7 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
     style={{
       height: 'calc(100vh - 200px)',
       overflowY: 'auto',
-      border: '1px solid #ccc',
+  
       padding: '0px',
     }}
   >
