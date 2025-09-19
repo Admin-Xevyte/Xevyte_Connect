@@ -70,7 +70,12 @@ function Leaves() {
   }
 }, [employeeId]);
 
-  
+    const handleModalClick = (e) => {
+    if (modalRef.current && e.target === modalRef.current) {
+      setIsModalToOpen(false);
+    }
+  };
+
   
 
   const fetchHolidays = async () => {
