@@ -23,7 +23,7 @@ function MyTasks() {
   // Fetch assigned roles from backend
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://localhost:8082/claims/assigned-ids/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/claims/assigned-ids/${employeeId}`)
         .then((res) => res.json())
         .then((data) => {
           setAssignedRoles({
