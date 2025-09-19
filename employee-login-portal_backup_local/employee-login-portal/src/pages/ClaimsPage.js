@@ -108,10 +108,10 @@ function ClaimsPage() {
 
       {/* Tab Content */}
       <div style={{ padding: '1rem 0', fontFamily: 'sans-serif' }}>
-        {activeTab === 'New Claim' && <Newdesign draftId={draftIdForEdit} />}
-        {activeTab === 'Drafts' && <Designdraft />}
-        {activeTab === 'History' && <DesignHistory />}
-        {activeTab === 'My Task' && canViewTasks && <DesignTask />}
+        {activeTab === 'New Claim' && <NewClaim draftId={draftIdForEdit} />}
+        {activeTab === 'Drafts' && <Saveddrafts />}
+        {activeTab === 'History' && <ClaimHistoryPage />}
+        {activeTab === 'My Task' && canViewTasks && <MyTasks />}
         {activeTab === 'Summary' && <DesignSummary summary={summary} />}
       </div>
     </Sidebar>
