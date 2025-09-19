@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Sidebar from './Sidebar.js';
+
 function ManagerTasks() {
   const managerId = localStorage.getItem("employeeId");
   const token = localStorage.getItem("token");
@@ -19,9 +20,7 @@ function ManagerTasks() {
   const [pendingLeaves, setPendingLeaves] = useState([]);
   const [loading, setLoading] = useState(false);
 
-
-
-   const employeeId = localStorage.getItem("employeeId");
+  const employeeId = localStorage.getItem("employeeId");
 
   // Fetch updated profile info and pending leaves on mount
   useEffect(() => {
@@ -35,7 +34,7 @@ function ManagerTasks() {
       setLoading(true);
       setApiError("");
       try {
-        const res = await fetch(`http://3.7.139.212:8080/leaves/manager/${managerId}`, {
+        const res = await fetch(`http://localhost:8082/leaves/manager/${managerId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) {
@@ -54,7 +53,7 @@ function ManagerTasks() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://3.7.139.212:8080/profile/${managerId}`, {
+        const res = await fetch(`http://localhost:8082/profile/${managerId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to fetch profile info");
@@ -77,7 +76,6 @@ function ManagerTasks() {
   }, [managerId, token, navigate]);
 
 
- 
   const handleLeaveAction = async (leaveId, action) => {
     let remarks = "Approved by manager.";
     if (action === 'Reject') {
@@ -98,7 +96,7 @@ function ManagerTasks() {
     setLoading(true);
     setApiError("");
     try {
-      const res = await fetch("http://3.7.139.212:8080/leaves/action", {
+      const res = await fetch("http://localhost:8082/leaves/action", {
         method: "POST",
         headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(actionDTO),
@@ -131,7 +129,7 @@ function ManagerTasks() {
       case 'Approved by Manager': return '#4BB543';
       case 'Pending': return '#FFC107';
       case 'Rejected': return '#FF4136';
-      case 'Cancelled': return '#6c757d'; // added cancelled color
+      case 'Cancelled': return '#6c757d'; // cancelled color
       default: return '#000';
     }
   };
@@ -157,141 +155,117 @@ function ManagerTasks() {
     });
   }, [pendingLeaves, searchTerm]);
 
-const renderTable = (leaves, showActions = false) => (
-  <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-    <div style={{ overflowY: 'auto', height: 'calc(100vh - 300px)', width: '100%', border: '1px solid #ddd' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-          <tr>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff',backgroundColor: '#4c82d3' }}>Employee ID</th>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff' , backgroundColor: '#4c82d3'}}>Leave ID</th>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff' , backgroundColor: '#4c82d3'}}>Leave Type</th>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: '#4c82d3' }}>Start Date</th>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: '#4c82d3' }}>End Date</th>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff' , backgroundColor: '#4c82d3'}}>Total Days</th>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff' , backgroundColor: '#4c82d3'}}>Reason</th>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: '#4c82d3' }}>Uploaded File</th>
-            <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff' , backgroundColor: '#4c82d3'}}>Status</th>
-            {showActions && (
-              <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: '#4c82d3' }}>Actions</th>
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {leaves.map((leave) => (
-            <tr key={leave.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.employeeId}</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd',textAlign:'center' }}>{leave.id}</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.type}</td>
-            <td style={{ padding: '15px', border: '1px solid #ddd' }}>
-  {new Date(leave.startDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
-</td>
-<td style={{ padding: '12px', border: '1px solid #ddd' }}>
-  {new Date(leave.endDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
-</td>
+  const renderTable = (leaves, showActions = false) => (
+    <div>
+      <div style={{ overflowY: 'auto', height: 'calc(100vh - 300px)', width: '100%' , marginRight:"40px"}}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+         <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+  <tr>
+    <th style={{ padding: '6px', textAlign: 'center', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Employee ID</th>
+    <th style={{ padding: '12px', textAlign: 'center', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Leave ID</th>
+    <th style={{  padding: '12px', textAlign: 'center', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Leave Type</th>
+    <th style={{  padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Start Date</th>
+    <th style={{  padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>End Date</th>
+    <th style={{ padding: '12px', textAlign: 'center', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Total Days</th>
+    <th style={{  padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Reason</th>
+    <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Uploaded File</th>
+    <th style={{  padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Status</th>
+    {showActions && (
+      <th style={{  padding: '12px', textAlign: 'left', border: '1px solid #ddd', color: '#ffffff', backgroundColor: 'darkblue' }}>Actions</th>
+    )}
+  </tr>
+</thead>
 
-              <td style={{ padding: '12px', border: '1px solid #ddd' ,textAlign:'center'}}>{leave.totalDays}</td>
-  <td style={{
-  padding: '12px',
-  border: '1px solid #ddd',
-  maxWidth: '200px',
-  height: '40px',            // fixed height for all cells
-  overflowY: 'auto',         // vertical scroll if content overflows
-  overflowX: 'hidden',       // hide horizontal scroll
-  whiteSpace: 'normal',      // allow wrapping text
-  wordWrap: 'break-word',    // break long words if needed
-}}>
-  {leave.reason}
-</td>
-
-
-             <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-  {leave.fileName ? (
-    <a
-      href={`http://3.7.139.212:8080/leaves/download/${leave.id}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      download
-      style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-      title={leave.fileName} // Tooltip for full filename
-    >
-      {leave.fileName.length > 10 ? leave.fileName.substring(0, 10) + '...' : leave.fileName}
-    </a>
-  ) : (
-    <span>No File</span>
-  )}
-</td>
-              <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                <span style={{
-                    padding: '5px 10px',
-                    borderRadius: '15px',
-                    color: '#fff',
-                    backgroundColor: getStatusColor(leave.status),
-                    fontWeight: 'bold',
-                    fontSize: '12px',
-                }}>{leave.status}</span>
-              </td>
-              {showActions && (
-                  <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                    {leave.status === 'Pending' ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        <button onClick={() => handleLeaveAction(leave.id, 'Approve')} style={{
-                            padding: '8px 12px', fontSize: '14px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer'
-                        }}>Approve</button>
-                        <button onClick={() => handleLeaveAction(leave.id, 'Reject')} style={{
-                            padding: '8px 12px', fontSize: '14px', backgroundColor: '#dc3545', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer'
-                        }}>Reject</button>
-                      </div>
-                    ) : leave.status === 'Cancelled' ? (
-                      <span style={{ color: '#6c757d', fontStyle: 'italic' }}>Cancelled</span>
-                    ) : null}
-                  </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          <tbody>
+            {leaves.map((leave) => (
+              <tr key={leave.id} style={{ borderBottom: '1px solid #eee' }}>
+                <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.employeeId}</td>
+                <td style={{ padding: '12px', border: '1px solid #ddd',textAlign:'center' }}>{leave.id}</td>
+                <td style={{ padding: '12px', border: '1px solid #ddd' }}>{leave.type}</td>
+                <td style={{ padding: '15px', border: '1px solid #ddd' }}>
+                  {new Date(leave.startDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                  {new Date(leave.endDate).toLocaleDateString('en-GB').replace(/\//g, '-')}
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd' ,textAlign:'center'}}>{leave.totalDays}</td>
+                <td style={{
+                  padding: '12px',
+                  border: '1px solid #ddd',
+                  maxWidth: '200px',
+                  height: '40px',
+                  overflowY: 'auto',
+                  overflowX: 'hidden',
+                  whiteSpace: 'normal',
+                  wordWrap: 'break-word',
+                }}>
+                  {leave.reason}
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                  {leave.fileName ? (
+                    <a
+                      href={`http://localhost:8082/leaves/download/${leave.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+                      title={leave.fileName}
+                    >
+                      {leave.fileName.length > 10 ? leave.fileName.substring(0, 10) + '...' : leave.fileName}
+                    </a>
+                  ) : (
+                    <span>No File</span>
+                  )}
+                </td>
+                <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                  <span style={{
+                      padding: '5px 10px',
+                      borderRadius: '15px',
+                      color: '#fff',
+                      backgroundColor: getStatusColor(leave.status),
+                      fontWeight: 'bold',
+                      fontSize: '12px',
+                  }}>{leave.status}</span>
+                </td>
+                {showActions && (
+                    <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                      {leave.status === 'Pending' ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                          <button onClick={() => handleLeaveAction(leave.id, 'Approve')} style={{
+                              padding: '8px 12px', fontSize: '14px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer'
+                          }}>Approve</button>
+                          <button onClick={() => handleLeaveAction(leave.id, 'Reject')} style={{
+                              padding: '8px 12px', fontSize: '14px', backgroundColor: '#dc3545', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer'
+                          }}>Reject</button>
+                        </div>
+                      ) : leave.status === 'Cancelled' ? (
+                        <span style={{ color: '#6c757d', fontStyle: 'italic' }}>Cancelled</span>
+                      ) : null}
+                    </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-);
+  );
 
   return (
-      <Sidebar>
-      <div className="main-content">
-        <button
-    onClick={() => navigate(-1)}
-    style={{
-        padding: "8px 16px", // Slightly reduced padding
-         backgroundColor: "#f0f0f0",
-       color: "#333",
-       fontSize: "16px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      cursor: "pointer",
-      margin: "20px 0 20px 0", // Top and bottom margins only
-        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-        transition: "background-color 0.3s ease",
-        width: "fit-content", // Make width only as big as content
-        display: "block", // Ensure it respects margin auto if needed
-    }}
->
-    ⬅ Back
-</button>
-        {/* Manager Tasks Content */}
-        <div style={{ padding: '20px' }}>
-          <h2>Manager Leave Requests</h2>
-          {loading && <div>Loading...</div>}
-          {apiError && <div className="error-message" style={{ color: 'red' }}>{apiError}</div>}
-          {successMessage && <div className="success-message" style={{ color: 'green' }}>{successMessage}</div>}
+    <div className="main-content">
+      {/* Manager Tasks Content */}
+      <div style={{ padding: '20px' }}>
+        {loading && <div>Loading...</div>}
+        {apiError && <div className="error-message" style={{ color: 'red' }}>{apiError}</div>}
+        {successMessage && <div className="success-message" style={{ color: 'green' }}>{successMessage}</div>}
 
-          {filteredLeaves.length > 0 ? (
-            renderTable(filteredLeaves, true)
-          ) : (
-            <p>No leave requests found.</p>
-          )}
-        </div>
+        {filteredLeaves.length > 0 ? (
+          renderTable(filteredLeaves, true)
+        ) : (
+          <p>No leave requests found.</p>
+        )}
       </div>
-    </Sidebar>
+    </div>
   );
 }
 
