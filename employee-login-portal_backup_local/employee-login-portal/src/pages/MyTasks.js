@@ -1,125 +1,179 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import ManagerDashBoard from "./ManagerDashBoard";
-import FinanceDashboard from "./FinanceDashboard";
-import HRDashboard from "./HRDashboard";
-import "./ManagerDashboard.css";
-import "./Dashboard.css";
+import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import './ClaimsPage.css';
 import Sidebar from './Sidebar.js';
-function MyTasks() {
+import ClaimsChart from './ClaimsChart'; // This is already present
+
+function DesignSummary() {
   const navigate = useNavigate();
+  const [summary, setSummary] = useState({
+    totalClaims: 0,
+    approved: 0,
+    rejected: 0,
+    paidAmount: 0
+  });
+  const [canViewTasks, setCanViewTasks] = useState(false);
   const employeeId = localStorage.getItem("employeeId");
-  const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
-  const cardStyle = {
-  backgroundColor: '#fff',
-  borderRadius: '12px',
-  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-  padding: '25px',
-  textAlign: 'left',
-  width: '350px',
-  cursor: 'pointer',
-  transition: 'transform 0.2s, box-shadow 0.2s',
-  marginBottom: '20px'
-};
-useEffect(() => {
-  if (employeeId) {
-    fetch(`http://3.7.139.212:8080/claims/assigned-ids/${employeeId}`)
-      .then(res => res.json())
-      .then(data => {
-        // This backend only returns { canViewTasks: true/false }, so you might need to modify backend
-        // But let's assume you update backend to return:
-        // {
-        //   manager: true,
-        //   finance: false,
-        //   hr: true
-        // }
 
-        setAssignedRoles({
-          manager: data.manager || false,
-          finance: data.finance || false,
-          hr: data.hr || false
+  useEffect(() => {
+    if (employeeId) {
+      fetch(`http://localhost:8082/claims/assigned-ids/${employeeId}`)
+        .then(res => res.json())
+        .then(data => {
+          setCanViewTasks(data.canViewTasks === true);
+        })
+        .catch(err => {
+          console.error("Error fetching task visibility:", err);
+          setCanViewTasks(false);
         });
-      })
-      .catch(err => {
-        console.error("Failed to fetch assigned roles:", err);
-      });
-  }
-}, [employeeId]);
-
-  const [assignedRoles, setAssignedRoles] = useState({
-  manager: false,
-  finance: false,
-  hr: false
-});
-
-  const handleCardClick = (dashboard) => {
-    if (dashboard === "Manager") {
-      navigate("/manager-dashboard", { state: { employeeId } });
-    } else if (dashboard === "Finance") {
-      navigate("/finance-dashboard", { state: { employeeId } });
-    } else if (dashboard === "HR") {
-      navigate("/finance", { state: { employeeId } });
     }
-  };
+  }, [employeeId]);
+
+  useEffect(() => {
+    if (employeeId) {
+      fetch(`http://localhost:8082/claims/summary/${employeeId}`)
+        .then(res => res.json())
+        .then(data => {
+          setSummary({
+            totalClaims: data.totalClaims || 0,
+            approved: data.approved || 0,
+            rejected: data.rejected || 0,
+            paidAmount: data.paidAmount || 0
+          });
+        })
+        .catch(err => console.error("Error fetching summary:", err));
+    }
+  }, [employeeId]);
 
   return (
-   <Sidebar>
-      <div className="main-content" style={{ padding: '20px' }}>
-        {/* Header */}
-   <button
-    onClick={() => navigate(-1)}
-    style={{
-        padding: "8px 16px", // Slightly reduced padding
-         backgroundColor: "#f0f0f0",
-       color: "#333",
-       fontSize: "16px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      cursor: "pointer",
-      margin: "20px 0 20px 0", // Top and bottom margins only
-        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-        transition: "background-color 0.3s ease",
-        width: "fit-content", // Make width only as big as content
-        display: "block", // Ensure it respects margin auto if needed
-    }}
->
-    ⬅ Back
-</button>
+    <div style={{ marginTop: "40px" }}>
+      <h2 className="title">Your Claim Updates</h2>
+      {/* <div
+        className="quick-actions-grid"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "16px",
+          marginTop: "10px",
+          padding: "0 20px",
+          boxSizing: "border-box",
+          width: "100%",
+          marginBottom: "40px",
+        }}
+      >
+        <div
+          className="twi"
+          style={{
+            display: "contents",
+          }}
+        >
+          <div
+            className="action-box light-purple"
+            style={{
+              cursor: "default",
+              transition: "none",
+              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              padding: "20px",
+              borderRadius: "12px",
+              background: "#f3ecff",
+              minHeight: "120px",
+              justifyContent: "space-between",
+            }}
+          >
+            <div className="icon" style={{ cursor: 'default' }}>📝</div>
+            <div>
+              <h3>Total Claims Raised</h3>
+              <p>{summary.totalClaims}</p>
+            </div>
+          </div>
 
-  <h2 style={{ marginTop: '20px',}}>Choose Your Dashboard</h2>
-<div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-  {assignedRoles.manager && (
-    <div
-      onClick={() => handleCardClick("Manager")}
-      style={cardStyle}
-    >
-      <h3 style={{ margin: '0 0 10px', fontSize: '18px' }}>Manager Dashboard</h3>
-      <p style={{ margin: 0, color: '#6c757d' }}>Go to Manager Panel</p>
-    </div>
-  )}
-  {assignedRoles.finance && (
-    <div
-      onClick={() => handleCardClick("Finance")}
-      style={cardStyle}
-    >
-      <h3 style={{ margin: '0 0 10px', fontSize: '18px' }}>Finance Dashboard</h3>
-      <p style={{ margin: 0, color: '#6c757d' }}>Go to Finance Panel</p>
-    </div>
-  )}
-  {assignedRoles.hr && (
-    <div
-      onClick={() => handleCardClick("HR")}
-      style={cardStyle}
-    >
-      <h3 style={{ margin: '0 0 10px', fontSize: '18px' }}>HR Dashboard</h3>
-      <p style={{ margin: 0, color: '#6c757d' }}>Go to HR Panel</p>
-    </div>
-  )}
-</div>
+          <div
+            className="action-box light-green"
+            style={{
+              cursor: "default",
+              transition: "none",
+              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              padding: "20px",
+              borderRadius: "12px",
+              background: "#e4f8e9",
+              minHeight: "120px",
+              justifyContent: "space-between",
+            }}
+          >
+            <div className="icon" style={{ cursor: 'default' }}>✅</div>
+            <div>
+              <h3>Approved</h3>
+              <p>{summary.approved}</p>
+            </div>
+          </div>
 
-</div>
-</Sidebar>
+          <div
+            className="action-box light-Gray cardcolor3"
+            style={{
+              cursor: "default",
+              transition: "none",
+              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              padding: "20px",
+              borderRadius: "12px",
+              background: "#f5f5f5",
+              minHeight: "120px",
+              justifyContent: "space-between",
+            }}
+          >
+            <div className="icon" style={{ cursor: 'default' }}>❌</div>
+            <div>
+              <h3>Rejected</h3>
+              <p>{summary.rejected}</p>
+            </div>
+          </div>
+
+          <div
+            className="action-box light-purple cardcolor4"
+            style={{
+              cursor: "default",
+              transition: "none",
+              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              padding: "20px",
+              borderRadius: "12px",
+              background: "#f3ecff",
+              minHeight: "120px",
+              justifyContent: "space-between",
+            }}
+          >
+            <div className="icon" style={{ cursor: 'default' }}>₹</div>
+            <div>
+              <h3>Paid Amount</h3>
+              <p>₹{Math.floor(summary.paidAmount)}</p>
+            </div>
+          </div>
+        </div>
+      </div> */}
+      
+      {/* New section for the chart */}
+      <div style={{ 
+        width: '100%', 
+        margin: 'auto', 
+        padding: '20px', 
+         height: 'calc(100vh - 300px)'
+      }}>
+  
+        <ClaimsChart 
+          approved={summary.approved} 
+          rejected={summary.rejected} 
+          totalClaims={summary.totalClaims} // Add this line
+        paidAmount={summary.paidAmount}  
+        />
+      </div>
+    </div>
   );
 }
 
-export default MyTasks;
+export default DesignSummary;
