@@ -1,4 +1,4 @@
-import "./Newdesign.css";
+import "./Newclaim.css";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from "axios";
