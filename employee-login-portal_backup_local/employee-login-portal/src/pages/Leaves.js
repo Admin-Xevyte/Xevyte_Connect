@@ -3,13 +3,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Dashboard.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-
+import Sidebar from "./Sidebar.js";
 function Leaves() {
   const employeeId = localStorage.getItem("employeeId");
   
   const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
   const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -21,15 +20,12 @@ function Leaves() {
   const [leavesData, setLeavesData] = useState([]);
   const [holidays, setHolidays] = useState([]);
   const [canViewTasks, setCanViewTasks] = useState(false);
-    const allowedUsers = ["H100646", "H100186", "H100118", "EMP111"];
+
    
     const [isContractOpen, setIsContractOpen] = useState(false);
   const [validationErrors, setValidationErrors] = React.useState({});
   const [allocationErrors, setAllocationErrors] = React.useState([]);
-  
-  const toggleContractMenu = () => {
-    setIsContractOpen(!isContractOpen);
-  };
+ 
   const [leaveBalance, setLeaveBalance] = useState({
     casualTotal: 0,
     casualUsed: 0,
@@ -57,7 +53,7 @@ function Leaves() {
 
    useEffect(() => {
   if (employeeId) {
-    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
+    fetch(`/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const { manager, hr } = data;  // only manager and hr
@@ -79,7 +75,7 @@ function Leaves() {
 
   const fetchHolidays = async () => {
     try {
-      const res = await fetch(`http://3.7.139.212:8080/leaves/holidays`);
+      const res = await fetch(`/leaves/holidays`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -94,7 +90,7 @@ function Leaves() {
   const fetchLeaveBalance = async () => {
     if (!employeeId) return;
     try {
-      const res = await fetch(`http://3.7.139.212:8080/leaves/balance/${employeeId}`);
+      const res = await fetch(`/leaves/balance/${employeeId}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -116,7 +112,7 @@ function Leaves() {
     if (!employeeId) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://3.7.139.212:8080/leaves/employee/${employeeId}`);
+      const res = await fetch(`/leaves/employee/${employeeId}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -146,7 +142,7 @@ function Leaves() {
     // ✅ If the draft has a fileName, fetch the actual file
   if (draft.fileName && draft.id) {
   try {
-    const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/download/${draft.id}`);
+    const res = await fetch(`/leaves/drafts/download/${draft.id}`);
     if (res.ok) {
       const blob = await res.blob();
       const file = new File([blob], draft.fileName, { type: blob.type });
@@ -164,7 +160,7 @@ function Leaves() {
 
     loadDraft();
     if (employeeId) {
-      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
+      fetch(`/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -251,68 +247,7 @@ useEffect(() => {
   }
 }, [leaveRequest.type, totalDays]);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
-  const handleModalClick = (e) => {
-    if (modalRef.current && e.target === modalRef.current) {
-      setIsModalToOpen(false);
-    }
-  };
-
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-  const toggleProfileMenu = () => setProfileOpen(!profileOpen);
-
-  const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login");
-  };
-
-  const handleEditProfile = () => {
-    setProfileOpen(false);
-    fileInputRef.current.click();
-  };
-
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("name", employeeName);
-    formData.append("profilePic", file);
-
-    try {
-      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
-        method: "PUT",
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      if (data.profilePic) {
-        setProfilePic(data.profilePic);
-        localStorage.setItem("employeeProfilePic", data.profilePic);
-        setSuccessMessage("Profile picture updated successfully! ✅");
-        setTimeout(() => {
-          setSuccessMessage("");
-          setProfileOpen(false);
-        }, 2000);
-      } else {
-        alert("Failed to update profile picture: no profilePic returned.");
-      }
-    } catch (error) {
-      console.error("Error updating profile picture:", error);
-      alert("Error uploading profile picture. See console for details.");
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -619,6 +554,7 @@ const handleMyTasksClick = () => {
   };
 
   return (
+       <Sidebar>
     <div className="dashboard-container">
       <style>
         {`
@@ -642,206 +578,8 @@ const handleMyTasksClick = () => {
           }
         `}
       </style>
-      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-        {!isCollapsed ? (
-          <>
-            <img src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")} alt="office" className="office-vng" />
-            <img src={require("../assets/gg_move-left.png")} alt="collapse" className="toggle-btn" onClick={toggleSidebar} style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }} />
-                <h3>
-                  <Link
-                    to="/dashboard"
-                    className="side"
-                    style={{
-                      textDecoration: 'none',
-                      color:'#00b4c6',
-                    }}
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      Home
-                    </span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
-                  </Link>
-                </h3>
-                
-                <h3>
-                  <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
-                  </Link>
-                </h3>
-                {allowedUsers.includes(employeeId) && (
-                                                      <>
-                                                        <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
-                                                          <span className="side" style={{  color:'#00b4c6' }}>
-                                                            Contract Management {isContractOpen ? '▾' : '▸'}
-                                                          </span>
-                                                        </h3>
-                                                    
-                                                        {isContractOpen && (
-                                                          <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                                                            <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                              <Link
-                                                                to="/customers"
-                                                                style={{
-                                                                  textDecoration: 'none',
-                                                                 color:'#00b4c6',
-                                                                  fontSize: '14px',
-                                                                  display: 'block',
-                                                                  padding: '4px 0',
-                                                                }}
-                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                              >
-                                                                Customers
-                                                              </Link>
-                                                            </li>
-                                                            <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                              <Link
-                                                                to="/sows"
-                                                                style={{
-                                                                  textDecoration: 'none',
-                                                                 color:'#00b4c6',
-                                                                  fontSize: '14px',
-                                                                  display: 'block',
-                                                                  padding: '4px 0',
-                                                                }}
-                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                              >
-                                                                SOWs
-                                                              </Link>
-                                                            </li>
-                                                            <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                              <Link
-                                                                to="/projects"
-                                                                style={{
-                                                                  textDecoration: 'none',
-                                                                 color:'#00b4c6',
-                                                                  fontSize: '14px',
-                                                                  display: 'block',
-                                                                  padding: '4px 0',
-                                                                }}
-                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                              >
-                                                                Projects
-                                                              </Link>
-                                                            </li>
-                                                            <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                              <Link
-                                                                to="/allocation"
-                                                                style={{
-                                                                  textDecoration: 'none',
-                                                                 color:'#00b4c6',
-                                                                  fontSize: '14px',
-                                                                  display: 'block',
-                                                                  padding: '4px 0',
-                                                                }}
-                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                              >
-                                                                Allocation
-                                                              </Link>
-                                                            </li>
-                                                          </ul>
-                                                        )}
-                                                      </>
-                                                    )}
-                        
-                        </>
-        ) : (
-          <div className="collapsed-wrapper">
-            <img src={require("../assets/Group.png")} alt="expand" className="collapsed-toggle" onClick={toggleSidebar} />
-          </div>
-        )}
-      </div>
+    
       <div className="main-content">
-        <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2>Welcome, {employeeName} ({employeeId})</h2>
-          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
-            <input type="text" className="search-input" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            <img src={require('../assets/Vector.png')} alt="Notifications" className="icon" style={{ cursor: 'pointer' }} />
-            <div className="profile-wrapper" style={{ position: 'relative' }}>
-              <img src={profilePic} alt="Profile" className="profile-pic" onClick={toggleProfileMenu} style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-              {profileOpen && (
-                <div ref={profileDropdownRef} className="profile-dropdown" style={{ position: 'absolute', top: '50px', right: '0', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', borderRadius: '4px', zIndex: 1000, width: '150px' }}>
-                  <button onClick={handleEditProfile} style={{ display: 'block', width: '100%', padding: '10px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee' }}>Edit Profile</button>
-                  <button onClick={handleLogout} style={{ display: 'block', width: '100%', padding: '10px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>Logout</button>
-                </div>
-              )}
-              <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
-            </div>
-          </div>
-        </div>
-
-        <hr className="divider-line" />
-
-        
-
         <div style={{ flex: '1', padding: '20px', overflowY: 'auto' }}>
   {successMessage && (
     <div
@@ -1300,6 +1038,7 @@ const handleMyTasksClick = () => {
 
       </div>
     </div>
+    </Sidebar>
   );
 }
 
