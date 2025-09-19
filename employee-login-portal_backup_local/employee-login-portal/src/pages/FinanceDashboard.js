@@ -39,7 +39,7 @@ function Designfinance() {
 
     if (storedId) {
       fetchClaims(storedId);
-      fetch(`http://localhost:8082/profile/${storedId}`)
+      fetch(`http://3.7.139.212:8080/profile/${storedId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -92,7 +92,7 @@ function Designfinance() {
   const fetchClaims = (financeId) => {
     setLoading(true);
     axios
-      .get(`http://localhost:8082/claims/finance/${financeId}`)
+      .get(`http://3.7.139.212:8080/claims/finance/${financeId}`)
       .then((response) => {
         const claims = response.data;
         const sortedClaims = claims.sort((a, b) => b.id - a.id);
@@ -110,7 +110,7 @@ function Designfinance() {
 
   const handleApprove = async (claimId) => {
     try {
-      await axios.post(`http://localhost:8082/claims/approve/${claimId}?role=Finance`);
+      await axios.post(`http://3.7.139.212:8080/claims/approve/${claimId}?role=Finance`);
       
       setClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
       setOriginalClaims(prevClaims => prevClaims.filter(claim => claim.id !== claimId));
@@ -135,7 +135,7 @@ function Designfinance() {
 
     try {
       await axios.post(
-        `http://localhost:8082/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
+        `http://3.7.139.212:8080/claims/reject/${selectedClaimId}?role=Finance&reason=${encodeURIComponent(rejectionReason)}`
       );
 
       setClaims(prevClaims => prevClaims.filter(claim => claim.id !== selectedClaimId));
@@ -153,7 +153,7 @@ function Designfinance() {
 
   const handleDownloadReceipt = (id, receiptName) => {
     axios
-      .get(`http://localhost:8082/claims/receipt/${id}`, { responseType: "blob" })
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
       .then((res) => {
         const url = window.URL.createObjectURL(new Blob([res.data]));
         const link = document.createElement("a");
