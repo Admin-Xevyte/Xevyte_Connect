@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar.js';
-import Newdesign from './Newdesign';
-import Designdraft from './Designdraft';
-import DesignHistory from './DesignHistory';
-import DesignTask from './DesignTask';
+import NewClaim from './NewClaim';
+import Saveddrafts from './Savedddrafts';
+import ClaimHistoryPage from './ClaimHistoryPage';
+import MyTasks from './MyTasks';
 import DesignSummary from './DesignSummary';
 
 function ClaimsPage() {
