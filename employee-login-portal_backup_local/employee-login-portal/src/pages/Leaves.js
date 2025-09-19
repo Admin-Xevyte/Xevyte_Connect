@@ -57,7 +57,7 @@ function Leaves() {
 
    useEffect(() => {
   if (employeeId) {
-    fetch(`/access/assigned-ids/${employeeId}`)
+    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const { manager, hr } = data;  // only manager and hr
@@ -79,7 +79,7 @@ function Leaves() {
 
   const fetchHolidays = async () => {
     try {
-      const res = await fetch(`/leaves/holidays`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/holidays`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -94,7 +94,7 @@ function Leaves() {
   const fetchLeaveBalance = async () => {
     if (!employeeId) return;
     try {
-      const res = await fetch(`/leaves/balance/${employeeId}`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/balance/${employeeId}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -116,7 +116,7 @@ function Leaves() {
     if (!employeeId) return;
     setLoading(true);
     try {
-      const res = await fetch(`/leaves/employee/${employeeId}`);
+      const res = await fetch(`http://3.7.139.212:8080/leaves/employee/${employeeId}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -146,7 +146,7 @@ function Leaves() {
     // ✅ If the draft has a fileName, fetch the actual file
   if (draft.fileName && draft.id) {
   try {
-    const res = await fetch(`/leaves/drafts/download/${draft.id}`);
+    const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/download/${draft.id}`);
     if (res.ok) {
       const blob = await res.blob();
       const file = new File([blob], draft.fileName, { type: blob.type });
@@ -164,7 +164,7 @@ function Leaves() {
 
     loadDraft();
     if (employeeId) {
-      fetch(`/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -289,7 +289,7 @@ useEffect(() => {
     formData.append("profilePic", file);
 
     try {
-      const res = await fetch(`/profile/update/${employeeId}`, {
+      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
         method: "PUT",
         body: formData,
       });
