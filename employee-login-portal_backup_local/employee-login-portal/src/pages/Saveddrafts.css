@@ -6,7 +6,7 @@ h1 {
   color: #222;
 }
  
-.drafts-table {
+.draftss-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0;
@@ -14,8 +14,8 @@ h1 {
   word-wrap: break-word;
 }
  
-.drafts-table th,
-.drafts-table td {
+.draftss-table th,
+.draftss-table td {
   border: 1px solid #ddd;
   padding: 14px 12px;
   text-align: center;   /* Center text for a cleaner look */
@@ -24,7 +24,7 @@ h1 {
   color: #333;
 }
  
-.drafts-table th {
+.draftss-table th {
   background-color: #433b3b;
   color: white;
   font-weight: 600;
@@ -145,7 +145,7 @@ table td, table th {
 .action-buttons button:hover {
   opacity: 0.9;
 }
-.table-scroll {
+.tableas-scroll {
   max-height: 400px;
   overflow-y: scroll; /* Use scroll to ensure it works always */
   border: 1px solid #ddd;
@@ -156,15 +156,15 @@ table td, table th {
   -ms-overflow-style: none;     /* IE and Edge */
 }
 
-.table-scroll::-webkit-scrollbar {
+.tableas-scroll::-webkit-scrollbar {
   display: none;                /* Chrome, Safari */
 }
 
-.table-scroll::-webkit-scrollbar-thumb {
+.tableas-scroll::-webkit-scrollbar-thumb {
   background-color: #ccc;
   border-radius: 4px;
 }
-.drafts-table thead th {
+.draftss-table thead th {
   position: sticky;
   top: 0;
   background-color: #433b3b;  /* Your existing dark header */
