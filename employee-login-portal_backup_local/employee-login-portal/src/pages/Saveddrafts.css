@@ -148,7 +148,7 @@ table td, table th {
 .tableas-scroll {
   max-height: 400px;
   overflow-y: scroll; /* Use scroll to ensure it works always */
-  border: 1px solid #ddd;
+
   margin-top: 0px;
 
   /* Hide scrollbar (cross-browser) */
@@ -162,7 +162,7 @@ table td, table th {
 
 .tableas-scroll::-webkit-scrollbar-thumb {
   background-color: #ccc;
-  border-radius: 4px;
+
 }
 .draftss-table thead th {
   position: sticky;
