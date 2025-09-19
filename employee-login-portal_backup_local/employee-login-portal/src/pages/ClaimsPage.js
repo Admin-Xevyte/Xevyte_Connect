@@ -1,34 +1,46 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import './ClaimsPage.css';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar.js';
+import Newdesign from './Newdesign';
+import Designdraft from './Designdraft';
+import DesignHistory from './DesignHistory';
+import DesignTask from './DesignTask';
+import DesignSummary from './DesignSummary';
 
 function ClaimsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [activeTab, setActiveTab] = useState('New Claim');
+  const [draftIdForEdit, setDraftIdForEdit] = useState(null);
   const [summary, setSummary] = useState({
     totalClaims: 0,
     approved: 0,
     rejected: 0,
     paidAmount: 0
   });
-const [canViewTasks, setCanViewTasks] = useState(false);
+  const [canViewTasks, setCanViewTasks] = useState(false);
   const employeeId = localStorage.getItem("employeeId");
-  useEffect(() => {
-  if (employeeId) {
-    fetch(`http://3.7.139.212:8080/claims/assigned-ids/${employeeId}`)
-      .then(res => res.json())
-      .then(data => {
-        setCanViewTasks(data.canViewTasks === true);
-      })
-      .catch(err => {
-        console.error("Error fetching task visibility:", err);
-        setCanViewTasks(false);
-      });
-  }
-}, [employeeId]);
+
+  // Load view task permission
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://3.7.139.212:8080/claims/summary/${employeeId}`)
+      fetch(`http://localhost:8082/claims/assigned-ids/${employeeId}`)
+        .then(res => res.json())
+        .then(data => {
+          setCanViewTasks(data.canViewTasks === true);
+        })
+        .catch(err => {
+          console.error("Error fetching task visibility:", err);
+          setCanViewTasks(false);
+        });
+    }
+  }, [employeeId]);
+
+  // Load claim summary
+  useEffect(() => {
+    if (employeeId) {
+      fetch(`http://localhost:8082/claims/summary/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           setSummary({
@@ -41,193 +53,69 @@ const [canViewTasks, setCanViewTasks] = useState(false);
         .catch(err => console.error("Error fetching summary:", err));
     }
   }, [employeeId]);
+
+  // Handle navigation state (e.g. when editing a draft)
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+      setDraftIdForEdit(location.state.draftId || null);
+    }
+  }, [location.state]);
+
+  // Build tab list dynamically
+  const tabItems = ['New Claim', 'Drafts', 'History'];
+  if (canViewTasks) {
+    tabItems.push('My Task');
+  }
+  tabItems.push('Summary');
+
+  // Styles
+  const tabContainerStyle = {
+    display: 'flex',
+    gap: '2rem',
+    padding: '1rem 0',
+    borderBottom: '1px solid #ddd',
+    fontFamily: 'sans-serif'
+  };
+
+  const tabStyle = (tab) => ({
+    cursor: 'pointer',
+    padding: '0.5rem 0',
+    color: activeTab === tab ? '#007bff' : '#333',
+    fontWeight: activeTab === tab ? '600' : 'normal',
+    position: 'relative',
+    borderBottom: activeTab === tab ? '3px solid #add8e6' : 'none',
+    transition: 'color 0.3s ease'
+  });
+
   return (
-     <Sidebar>
-
-<div style={{ marginTop: "40px" }}>
-          <h2 className="title">Your Claim Updates</h2>
-            <div
-  className="quick-actions-grid"
-  style={{
-    display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",  // 4 columns in one row
-    gap: "16px",
-    marginTop: "10px",
-    padding: "0 20px",
-    boxSizing: "border-box",
-    width: "100%",
-     marginBottom: "40px",
-  }}
->
-  <div
-    className="twi"
-    style={{
-      display: "contents", // so inner action-boxes become grid items directly
-    }}
-  >
-    <div
-      className="action-box light-purple"
-      style={{
-        cursor: "default",
-        transition: "none",
-        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-        display: "flex",
-        alignItems: "center",
-        padding: "20px",
-        borderRadius: "12px",
-        background: "#f3ecff", // light-purple background
-        minHeight: "120px",
-        justifyContent: "space-between",
-      }}
-    >
-      <div className="icon" style={{ cursor: 'default' }}>📝</div>
- 
-      <div>
-        <h3>Total Claims Raised</h3>
-        <p>{summary.totalClaims}</p>
-      </div>
-    </div>
- 
-    <div
-      className="action-box light-green"
-      style={{
-        cursor: "default",
-        transition: "none",
-        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-        display: "flex",
-        alignItems: "center",
-        padding: "20px",
-        borderRadius: "12px",
-        background: "#e4f8e9", // light-green background
-        minHeight: "120px",
-        justifyContent: "space-between",
-      }}
-    >
-      <div className="icon" style={{ cursor: 'default' }}>✅</div>
- 
-     
-      <div>
-        <h3>Approved</h3>
-        <p>{summary.approved}</p>
-      </div>
-    </div>
- 
-    <div
-      className="action-box light-Gray cardcolor3"
-      style={{
-        cursor: "default",
-        transition: "none",
-        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-        display: "flex",
-        alignItems: "center",
-        padding: "20px",
-        borderRadius: "12px",
-        background: "#f5f5f5", // light gray
-        minHeight: "120px",
-        justifyContent: "space-between",
-      }}
-    >
-      <div className="icon" style={{ cursor: 'default' }}>❌</div>
-     
-      <div>
-        <h3>Rejected</h3>
-        <p>{summary.rejected}</p>
-      </div>
-    </div>
- 
-    <div
-      className="action-box light-purple cardcolor4"
-      style={{
-        cursor: "default",
-        transition: "none",
-        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-        display: "flex",
-        alignItems: "center",
-        padding: "20px",
-        borderRadius: "12px",
-        background: "#f3ecff",
-        minHeight: "120px",
-        justifyContent: "space-between",
-      }}
-    >
-      <div className="icon"  style={{ cursor: 'default' }}>₹</div>
-      <div>
-        <h3>Paid Amount</h3>
-        <p>₹{Math.floor(summary.paidAmount)}</p>
-      </div>
-    </div>
-  </div>
-</div>
- 
-
-
-
-          <br />
-
-          <h2 className="title" style={{ marginBottom: "40px" }}>Quick Actions</h2>
-          <div className="quick-actions-grid">
-            <div className="action-box light-blue" onClick={() => navigate("/new")}>
-              <div className="icon">₹</div>
-              <div>
-                <h3>New Claims</h3>
-                <p>Create a new claim for reimbursement</p>
-              </div>
-              <div className="arrow">→</div>
-            </div>
-
-            <div className="action-box light-green" onClick={() => navigate("/claims/status")}>
-              <div className="icon">📜</div>
-              <div>
-                <h3>Claims Status</h3>
-                <p>Track your current claims</p>
-              </div>
-              <div className="arrow">→</div>
-            </div>
-
-            <div className="action-box light-yellow" onClick={() => navigate("/claims/history")}>
-              <div className="icon">📊</div>
-              <div>
-                <h3>Claims History</h3>
-                <p>View your past claims</p>
-              </div>
-              <div className="arrow">→</div>
-            </div>
-
-        <div className="action-box saved-drafts" onClick={() => navigate("/drafts")}>
-          <div className="icon">💾</div>
-          <div>
-            <h3>Saved Drafts</h3>
-            <p>Save your claims as drafts</p>
+    <Sidebar>
+      {/* Tab Navigation */}
+      <div style={tabContainerStyle}>
+        {tabItems.map((tab) => (
+          <div
+            key={tab}
+            onClick={() => {
+              setActiveTab(tab);
+              if (tab !== 'New Claim') setDraftIdForEdit(null);
+            }}
+            style={tabStyle(tab)}
+          >
+            {tab}
           </div>
-          <div className="arrow">→</div>
-        </div>
-  <div className="action-box light-purple">
-              <div className="icon">📘</div>
-              <div>
-                <h3>Policy Guidelines</h3>
-                <p>Understand your benefits</p>
-              </div>
-              <div className="arrow">→</div>
-            </div>
-          {canViewTasks && (
-  <div className="action-box light-orange" onClick={() => navigate("/task")}>
-    <div className="icon">🧾</div>
-    <div>
-      <h3>My Tasks</h3>
-      <p>View all claim tasks</p>
-    </div>
-    <div className="arrow">→</div>
-  </div>
-)}
+        ))}
+      </div>
 
-
-          
-          </div>
-        </div>
-      
-      
-       </Sidebar>
-        );
+      {/* Tab Content */}
+      <div style={{ padding: '1rem 0', fontFamily: 'sans-serif' }}>
+        {activeTab === 'New Claim' && <Newdesign draftId={draftIdForEdit} />}
+        {activeTab === 'Drafts' && <Designdraft />}
+        {activeTab === 'History' && <DesignHistory />}
+        {activeTab === 'My Task' && canViewTasks && <DesignTask />}
+        {activeTab === 'Summary' && <DesignSummary summary={summary} />}
+      </div>
+    </Sidebar>
+  );
 }
 
 export default ClaimsPage;
