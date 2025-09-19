@@ -17,7 +17,7 @@ function DesignSummary() {
 
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://localhost:8082/claims/assigned-ids/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/claims/assigned-ids/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           setCanViewTasks(data.canViewTasks === true);
@@ -31,7 +31,7 @@ function DesignSummary() {
 
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://localhost:8082/claims/summary/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/claims/summary/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           setSummary({
