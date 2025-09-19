@@ -10,7 +10,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
  
 // Correctly set the workerSrc from your installed package
 pdfjs.GlobalWorkerOptions.workerSrc = `./pdf.worker.min.js`;
-function ClaimHistoryPage() {
+function DesignHistory() {
   const [claims, setClaims] = useState([]);
   const employeeId = localStorage.getItem("employeeId");
   const employeeName = localStorage.getItem("employeeName");
@@ -51,7 +51,7 @@ const formatDate = (dateString) => {
  
 const fetchClaims = useCallback(() => {
   setLoading(true); // start loading
-  fetch(`http://3.7.139.212:8080/claims/history/${employeeId}`)
+  fetch(`http://localhost:8082/claims/history/${employeeId}`)
     .then((res) => res.json())
     .then((data) => {
    const sortedClaims = data.sort((a, b) => b.id - a.id);
@@ -72,7 +72,7 @@ setLoading(false); // done loading // done loading
  
     // Fetch profile picture
     if (employeeId) {
-      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
+      fetch(`http://localhost:8082/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -100,7 +100,7 @@ setLoading(false); // done loading // done loading
   // Handles viewing a receipt (both image and PDF)
   const handleViewReceipt = (id, receiptName) => {
     axios
-      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "arraybuffer" })
+      .get(`http://localhost:8082/claims/receipt/${id}`, { responseType: "arraybuffer" })
       .then((res) => {
         const fileExtension = receiptName.split('.').pop().toLowerCase();
         const blob = new Blob([res.data]);
@@ -121,7 +121,7 @@ setLoading(false); // done loading // done loading
  
   const handleDownloadReceipt = (id, receiptName) => {
     axios
-      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
+      .get(`http://localhost:8082/claims/receipt/${id}`, { responseType: "blob" })
       .then((res) => {
         const fileUrl = URL.createObjectURL(res.data);
         const link = document.createElement("a");
@@ -183,27 +183,8 @@ setLoading(false); // done loading // done loading
   });
  
   return (
- <Sidebar>
+ 
         <div style={{ padding: "0" }}>
-                <button
-    onClick={() => navigate(-1)}
-    style={{
-        padding: "8px 16px", // Slightly reduced padding
-         backgroundColor: "#f0f0f0",
-       color: "#333",
-       fontSize: "16px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      cursor: "pointer",
-      margin: "20px 0 20px 0", // Top and bottom margins only
-        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-        transition: "background-color 0.3s ease",
-        width: "fit-content", // Make width only as big as content
-        display: "block", // Ensure it respects margin auto if needed
-    }}
->
-    ⬅ Back
-</button>
      {loading ? null : claims.length === 0 ? (
   <p>No claims submitted yet.</p>
 ) : filteredClaims.length === 0 ? (
@@ -211,44 +192,28 @@ setLoading(false); // done loading // done loading
 ) : (
             <div className="tablee">
               <table className="status-table">
-                <thead>
-                  <tr>
-                   
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Description</th>
-                    <th>Expense Date</th>
-                    <th>Receipt</th>
-                    <th>Submitted Date</th>
-                    <th>Status</th>
-                    <th>Rejection Reason</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <thead>
+  <tr>
+    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Claim ID</th>
+    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Category</th>
+    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Amount</th>
+    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Description</th>
+    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Expense Date</th>
+ 
+    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Submitted Date</th>
+    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Status</th>
+    <th style={{ backgroundColor: 'darkblue', color: 'white' }}>Rejection Reason</th>
+  </tr>
+</thead>
+
+                  <tbody style={{  backgroundColor:'#f7f9fa',}}>
                   {filteredClaims.map((claim) => (
                     <tr key={claim.id}>
-                 
+                     <td>{claim.id}</td>
                       <td>{claim.category}</td>
                       <td>{claim.amount}</td>
                       <td>{claim.expenseDescription}</td>
                       <td>{formatDate(claim.expenseDate)}</td>
-                      <td>
-  {claim.receiptName ? (
-    <a
-      href="#"
-      onClick={(e) => {
-        e.preventDefault();
-        // Change from handleViewReceipt to handleDownloadReceipt
-        handleDownloadReceipt(claim.id, claim.receiptName);
-      }}
-      style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-    >
-      <span title={claim.receiptName}>
-        {truncateFileName(claim.receiptName)}
-      </span>
-    </a>
-  ) : "No Receipt"}
-</td>
 <td>{claim.submittedDate ? formatDate(claim.submittedDate) : "N/A"}</td>
                       <td>{claim.status}</td>
                       <td>{claim.rejectionReason || "—"}</td>
@@ -307,9 +272,9 @@ setLoading(false); // done loading // done loading
             </div>
           )}
         </div>
-    </Sidebar>
+  
   );
 }
  
-export default ClaimHistoryPage;
+export default DesignHistory;
  
