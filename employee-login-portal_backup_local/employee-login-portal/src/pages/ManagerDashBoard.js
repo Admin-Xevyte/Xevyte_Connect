@@ -58,7 +58,7 @@ function Designmanger() {
     if (storedId) {
       fetchClaims(storedId);
 
-      fetch(`http://localhost:8082/profile/${storedId}`)
+      fetch(`http://3.7.139.212:8080/profile/${storedId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -114,7 +114,7 @@ function Designmanger() {
   const fetchClaims = (managerId) => {
     setLoading(true);
     axios
-      .get(`http://localhost:8082/claims/manager/${managerId}`)
+      .get(`http://3.7.139.212:8080/claims/manager/${managerId}`)
       .then((res) => {
         const sortedClaims = res.data.sort((a, b) => {
           const dateA = new Date(a.submittedDate);
@@ -135,7 +135,7 @@ function Designmanger() {
 
  const handleApprove = (id) => {
   axios
-    .post(`http://localhost:8082/claims/approve/${id}?role=Manager`)
+    .post(`http://3.7.139.212:8080/claims/approve/${id}?role=Manager`)
     .then(() => {
       // Instead of fetching all claims again, filter the approved claim out of the state.
       setClaims(prevClaims => prevClaims.filter(claim => claim.id !== id));
@@ -159,7 +159,7 @@ function Designmanger() {
 
     axios
       .post(
-        `http://localhost:8082/claims/reject/${selectedClaimId}?role=Manager&reason=${encodeURIComponent(
+        `http://3.7.139.212:8080/claims/reject/${selectedClaimId}?role=Manager&reason=${encodeURIComponent(
           rejectionReason
         )}`
       )
@@ -180,7 +180,7 @@ function Designmanger() {
 
   const handleDownloadReceipt = (id, receiptName) => {
     axios
-      .get(`http://localhost:8082/claims/receipt/${id}`, {
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, {
         responseType: "blob",
       })
       .then((res) => {
