@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import "./Dashboard.css";
 import axios from 'axios';
 
-function Designdraft() {
+function Saveddraft() {
   const [drafts, setDrafts] = useState([]);
   const [message, setMessage] = useState('');
   const [employeeId, setEmployeeId] = useState(null);
@@ -82,7 +82,7 @@ function Designdraft() {
   };
 
   const handleEdit = (draftId) => {
-    navigate('/design', { state: { activeTab: 'New Claim', draftId } });
+    navigate('/home0', { state: { activeTab: 'New Claim', draftId } });
   };
 
   const filteredDrafts = drafts.filter(draft => {
@@ -178,4 +178,4 @@ function Designdraft() {
   );
 }
 
-export default Designdraft;
+export default Saveddraft;
