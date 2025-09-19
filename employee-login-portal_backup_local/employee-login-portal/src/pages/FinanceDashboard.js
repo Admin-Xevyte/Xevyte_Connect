@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Sidebar from './Sidebar.js';
 
-function Designfinance() {
+function FinanceDashboard() {
   const [claims, setClaims] = useState([]);
   const [originalClaims, setOriginalClaims] = useState([]);
   const [employeeId, setEmployeeId] = useState(null);
@@ -315,4 +315,4 @@ function Designfinance() {
   );
 }
 
-export default Designfinance;
+export default FinanceDashboard;
