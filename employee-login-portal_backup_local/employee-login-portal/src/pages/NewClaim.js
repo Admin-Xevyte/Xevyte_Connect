@@ -1,11 +1,12 @@
-import "./Newclaim.css";
+import "./Newdesign.css";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
- 
-function NewClaim() {
+ import Sidebar from './Sidebar.js';
+
+function Newdesign() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -19,13 +20,7 @@ function NewClaim() {
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [originalDraftId, setOriginalDraftId] = useState(null);
  
- const allowedUsers = ["H100646", "H100186", "H100118","EMP111"];
-   const [isContractOpen, setIsContractOpen] = useState(false);
- 
- const toggleContractMenu = () => {
-   setIsContractOpen(!isContractOpen);
- };
- 
+
   const employeeId = localStorage.getItem("employeeId");
   const employeeName = localStorage.getItem("employeeName");
   const allowedCategories = ["Food", "Accomodation", "Travel", "Medical", "Mobile", "Office", "Others"];
@@ -62,7 +57,7 @@ const [formData, setFormData] = useState({
     setFormData((prev) => ({ ...prev, employeeId: id, name }));
  
     if (id) {
-      fetch(`http://3.7.139.212:8080/profile/${id}`)
+      fetch(`http://localhost:8082/profile/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -80,7 +75,7 @@ const [formData, setFormData] = useState({
       const draftId = location.state.draftId;
       setOriginalDraftId(draftId);
  
-      axios.get(`http://3.7.139.212:8080/claims/draft/${draftId}`)
+      axios.get(`http://localhost:8082/claims/draft/${draftId}`)
         .then(draftRes => {
           const draft = draftRes.data;
           setFormData({
@@ -96,7 +91,7 @@ const [formData, setFormData] = useState({
           setDraftLoaded(true);
  
           if (draft.receiptName) {
-            axios.get(`http://3.7.139.212:8080/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
+            axios.get(`http://localhost:8082/claims/draft/receipt/${draftId}`, { responseType: 'blob' })
               .then(receiptRes => {
                 const fileBlob = receiptRes.data;
                 const fileName = draft.receiptName;
@@ -125,62 +120,9 @@ const [formData, setFormData] = useState({
     }
   }, [location.state]);
  
-  useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (
-        profileDropdownRef.current &&
-        !profileDropdownRef.current.contains(e.target) &&
-        !profileInputRef.current?.contains(e.target)
-      ) {
-        setIsProfileMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
- 
-  const toggleProfileMenu = () => {
-    setIsProfileMenuOpen(!isProfileMenuOpen);
-  };
- 
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("name", employeeName);
-    formData.append("profilePic", file);
- 
-    try {
-      const res = await fetch(`http://3.7.139.212:8080/profile/update/${employeeId}`, {
-        method: "PUT",
-        body: formData,
-      });
- 
-      const data = await res.json();
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
- 
-      if (data.profilePic) {
-        setProfilePic(data.profilePic);
-        localStorage.setItem("employeeProfilePic", data.profilePic);
-        setSuccessMessage("Profile picture updated!");
-        setTimeout(() => setSuccessMessage(""), 2000);
-      }
-    } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Failed to upload profile image");
-    }
-  };
- 
-  const handleEditProfile = () => {
-    setIsProfileMenuOpen(false);
-    profileInputRef.current.click();
-  };
- 
-  const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/login");
-  };
+
+
+
  
   const getMaxDate = () => new Date().toISOString().split("T")[0];
   const getMinDate = () => {
@@ -278,92 +220,173 @@ const validateRequired = () => {
   setError("");
   return true;
 };
- 
 const handleSubmit = async () => {
-    // Validate that all required fields are filled.
+    // 1️⃣ Validate required fields
     if (!validateRequired()) return;
- 
-    // Create a data object with property names that EXACTLY match
-    // the field names of your 'Claim' entity on the backend.
+
+    // 2️⃣ Ensure draft ID is valid if editing a draft
+    if (originalDraftId && !draftLoaded) {
+        setError("Draft data not loaded. Please refresh the page.");
+        return;
+    }
+
+    // 3️⃣ Prepare claim data exactly as backend expects
     const claimData = {
         employeeId: formData.employeeId,
         name: formData.name,
-        // The backend expects expenseDescription and expenseDate,
-        // but the 'submitUpdatedDraft' method will correctly map these from the Claim entity.
         expenseDescription: formData.expenseDescription,
         category: formData.category,
         amount: formData.amount,
-        expenseDate: formData.expenseDate,
-        businessPurpose: formData.businessPurpose,
         additionalNotes: formData.additionalNotes,
     };
- 
+
+    // 4️⃣ Build FormData for multipart/form-data
     const data = new FormData();
-    // Append the correctly structured data object as a JSON string.
     data.append("claim", JSON.stringify(claimData));
-   
-    // Attach the receipt file to the FormData object if it exists.
+
     if (receiptFile) {
         data.append("receiptFile", receiptFile);
     }
- 
+
     try {
+        let response;
+
         if (originalDraftId) {
-            // ✅ CORRECTED: Use axios.put for submitting an updated draft
-            await axios.put(
-                `http://3.7.139.212:8080/claims/submit-draft/${originalDraftId}`,
+            // ✅ Submitting an updated draft
+            console.log("Submitting draft with ID:", originalDraftId);
+            response = await axios.put(
+                `http://localhost:8082/claims/submit-draft/${originalDraftId}`,
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
             setMessage("Expense claim submitted successfully from draft!");
-           
-            // Clear the draft-related state variables after successful submission.
+
+            // Clear draft-related state
             setOriginalDraftId(null);
             setDraftLoaded(false);
- 
-            // Navigate to the claims status page after a brief delay.
-            // setTimeout(() => {
-            //     navigate("/claim-status?refresh=true");
-            // }, 2000);
         } else {
-            // If it's a brand new claim, use a POST request to the main 'submit' endpoint.
-            await axios.post(
-                "http://3.7.139.212:8080/claims/submit",
+            // ✅ Submitting a new claim
+            response = await axios.post(
+                "http://localhost:8082/claims/submit",
                 data,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
             setMessage("Expense claim submitted successfully!");
- 
-            // Navigate to the claims status page after a brief delay.
-            // setTimeout(() => {
-            //     navigate("/claim-status?refresh=true");
-            // }, 2000);
         }
- 
-        // Reset the form regardless of whether a new claim or a draft was submitted.
-        setFormData({
-            category: "",
-            amount: "",
-            expenseDescription: "",
-            expenseDate: getTodayDate(),
-            businessPurpose: "",
-            additionalNotes: ""
-        });
-        setReceiptFile(null);
-        setReceiptPreviewUrl(null);
-        if (fileInputRef.current) fileInputRef.current.value = null;
-       
-        // Clear success/error messages after a delay.
-        setTimeout(() => setMessage(""), 2000);
-        setError("");
-       
+
+        // 5️⃣ Reset the form only if submission was successful
+        if (response.status === 200 || response.status === 201) {
+            setFormData({
+                category: "",
+                amount: "",
+                expenseDescription: "",
+                expenseDate: getTodayDate(),
+                
+                employeeId: formData.employeeId, // keep employeeId
+                name: formData.name,             // keep name
+            });
+
+            setReceiptFile(null);
+            setReceiptPreviewUrl(null);
+            if (fileInputRef.current) fileInputRef.current.value = null;
+
+            setError("");
+            setTimeout(() => setMessage(""), 2000);
+        } else {
+            setError("Submission failed. Try again.");
+            setMessage("");
+        }
     } catch (err) {
         console.error("Submission error:", err);
-        setError("Submission failed. Try again.");
+        setError(err.response?.data || "Submission failed. Try again.");
         setMessage("");
     }
 };
+
+// const handleSubmit = async () => {
+//     // Validate that all required fields are filled.
+//     if (!validateRequired()) return;
  
+//     // Create a data object with property names that EXACTLY match
+//     // the field names of your 'Claim' entity on the backend.
+//     const claimData = {
+//         employeeId: formData.employeeId,
+//         name: formData.name,
+//         // The backend expects expenseDescription and expenseDate,
+//         // but the 'submitUpdatedDraft' method will correctly map these from the Claim entity.
+//         expenseDescription: formData.expenseDescription,
+//         category: formData.category,
+//         amount: formData.amount,
+//         expenseDate: formData.expenseDate,
+//         businessPurpose: formData.businessPurpose,
+//         additionalNotes: formData.additionalNotes,
+//     };
+ 
+//     const data = new FormData();
+//     // Append the correctly structured data object as a JSON string.
+//     data.append("claim", JSON.stringify(claimData));
+   
+//     // Attach the receipt file to the FormData object if it exists.
+//     if (receiptFile) {
+//         data.append("receiptFile", receiptFile);
+//     }
+ 
+//     try {
+//         if (originalDraftId) {
+//             // ✅ CORRECTED: Use axios.put for submitting an updated draft
+//             await axios.put(
+//                 `http://localhost:8082/claims/submit-draft/${originalDraftId}`,
+//                 data,
+//                 { headers: { "Content-Type": "multipart/form-data" } }
+//             );
+//             setMessage("Expense claim submitted successfully from draft!");
+           
+//             // Clear the draft-related state variables after successful submission.
+//             setOriginalDraftId(null);
+//             setDraftLoaded(false);
+ 
+//             // Navigate to the claims status page after a brief delay.
+//             // setTimeout(() => {
+//             //     navigate("/claim-status?refresh=true");
+//             // }, 2000);
+//         } else {
+//             // If it's a brand new claim, use a POST request to the main 'submit' endpoint.
+//             await axios.post(
+//                 "http://localhost:8082/claims/submit",
+//                 data,
+//                 { headers: { "Content-Type": "multipart/form-data" } }
+//             );
+//             setMessage("Expense claim submitted successfully!");
+ 
+//             // Navigate to the claims status page after a brief delay.
+//             // setTimeout(() => {
+//             //     navigate("/claim-status?refresh=true");
+//             // }, 2000);
+//         }
+ 
+//         // Reset the form regardless of whether a new claim or a draft was submitted.
+//         setFormData({
+//             category: "",
+//             amount: "",
+//             expenseDescription: "",
+//             expenseDate: getTodayDate(),
+//             businessPurpose: "",
+//             additionalNotes: ""
+//         });
+//         setReceiptFile(null);
+//         setReceiptPreviewUrl(null);
+//         if (fileInputRef.current) fileInputRef.current.value = null;
+       
+//         // Clear success/error messages after a delay.
+//         setTimeout(() => setMessage(""), 2000);
+//         setError("");
+       
+//     } catch (err) {
+//         console.error("Submission error:", err);
+//         setError("Submission failed. Try again.");
+//         setMessage("");
+//     }
+// };
 const handleSaveDraft = async () => {
   const draftPayload = {
     expenseId: originalDraftId || null,
@@ -389,7 +412,7 @@ const handleSaveDraft = async () => {
     if (originalDraftId) {
       // Update existing draft
       res = await axios.put(
-        `http://3.7.139.212:8080/claims/draft/${originalDraftId}`,
+        `http://localhost:8082/claims/draft/${originalDraftId}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -397,7 +420,7 @@ const handleSaveDraft = async () => {
     } else {
       // Create a new draft
       res = await axios.post(
-        "http://3.7.139.212:8080/claims/draft",
+        "http://localhost:8082/claims/draft",
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -432,288 +455,10 @@ const handleSaveDraft = async () => {
   }
 };
   return (
+
     <div className="claims-container">
-      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-        {!isCollapsed ? (
-          <>
-            <img src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")} alt="logo" className="office-vng" />
-            <img src={require("../assets/gg_move-left.png")} alt="collapse" className="toggle-btn" onClick={toggleSidebar} style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }} />
-                       <h3>
-                         <Link
-                           to="/dashboard"
-                           className="side"
-                           style={{
-                             textDecoration: 'none',
-                             color:'#00b4c6',
-                           }}
-                         >
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                             Home
-                           </span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
-                         </Link>
-                       </h3>
-                       
-                       <h3>
-                         <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
-                           <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
-                         </Link>
-                       </h3>
-                       {allowedUsers.includes(employeeId) && (
-                                                             <>
-                                                               <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
-                                                                 <span className="side" style={{  color:'#00b4c6' }}>
-                                                                   Contract Management {isContractOpen ? '▾' : '▸'}
-                                                                 </span>
-                                                               </h3>
-                                                           
-                                                               {isContractOpen && (
-                                                                 <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
-                                                                   <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                                     <Link
-                                                                       to="/customers"
-                                                                       style={{
-                                                                         textDecoration: 'none',
-                                                                        color:'#00b4c6',
-                                                                         fontSize: '14px',
-                                                                         display: 'block',
-                                                                         padding: '4px 0',
-                                                                       }}
-                                                                       onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                                       onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                                     >
-                                                                       Customers
-                                                                     </Link>
-                                                                   </li>
-                                                                   <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                                     <Link
-                                                                       to="/sows"
-                                                                       style={{
-                                                                         textDecoration: 'none',
-                                                                        color:'#00b4c6',
-                                                                         fontSize: '14px',
-                                                                         display: 'block',
-                                                                         padding: '4px 0',
-                                                                       }}
-                                                                       onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                                       onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                                     >
-                                                                       SOWs
-                                                                     </Link>
-                                                                   </li>
-                                                                   <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
-                                                                     <Link
-                                                                       to="/projects"
-                                                                       style={{
-                                                                         textDecoration: 'none',
-                                                                        color:'#00b4c6',
-                                                                         fontSize: '14px',
-                                                                         display: 'block',
-                                                                         padding: '4px 0',
-                                                                       }}
-                                                                       onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                                       onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                                     >
-                                                                       Projects
-                                                                     </Link>
-                                                                   </li>
-                                                                   <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
-                                                                     <Link
-                                                                       to="/allocation"
-                                                                       style={{
-                                                                         textDecoration: 'none',
-                                                                        color:'#00b4c6',
-                                                                         fontSize: '14px',
-                                                                         display: 'block',
-                                                                         padding: '4px 0',
-                                                                       }}
-                                                                       onMouseOver={(e) => (e.target.style.color = '#fff')}
-                                                                       onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
-                                                                     >
-                                                                       Allocation
-                                                                     </Link>
-                                                                   </li>
-                                                                 </ul>
-                                                               )}
-                                                             </>
-                                                           )}
-                               
-                               </>
-        ) : (
-          <div className="collapsed-wrapper">
-            <img src={require("../assets/Group.png")} alt="expand" className="collapsed-toggle" onClick={toggleSidebar} />
-          </div>
-        )}
-      </div>
- 
-      <div className="main-area">
- 
-        <div className="dashboard-header"   style={{
-    padding: '20px 20px 0px 40px ',
-    paddingLeft: '30px',
-  }}>
-        <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2>Welcome, {employeeName} ({employeeId})</h2>
-          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <img
-              src={require('../assets/Vector.png')}
-              alt="Notifications"
-              className="icon"
-              style={{ cursor: 'pointer' }}
-            />
-            <div className="profile-wrapper" style={{ position: 'relative' }}>
-              <img
-                src={profilePic}
-                alt="Profile"
-                className="profile-pic"
-                onClick={toggleProfileMenu}
-                style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-              />
-            {isProfileMenuOpen && (
-                <div
-                  ref={profileDropdownRef}
-                  className="profile-dropdown"
-                  style={{
-                    position: 'absolute',
-                    top: '50px',
-                    right: '0',
-                    backgroundColor: '#fff',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    borderRadius: '4px',
-                    zIndex: 1000,
-                    width: '150px',
-                  }}
-                >
-                  <button onClick={handleEditProfile} style={{ padding: '10px', width: '100%', border: 'none', background: 'none', textAlign: 'left', borderBottom: '1px solid #eee' }}>Edit Profile</button>
-                  <button onClick={handleLogout} style={{ padding: '10px', width: '100%', border: 'none', background: 'none', textAlign: 'left' }}>Logout</button>
-                </div>
-              )}
-              {successMessage && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: '0',
-                  marginTop: '5px',
-                  backgroundColor: '#4BB543',
-                  color: 'white',
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  whiteSpace: 'nowrap',
-                  zIndex: 1100,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                }}>
-                  {successMessage}
-                </div>
-              )}
-             <input
-                type="file"
-                ref={profileInputRef}   // ✅ FIXED HERE
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleImageChange}
-              />
- 
-            </div>
-          </div>
-        </div>
-<hr className="divider-line" style={{ marginTop: "10px" }} />
- 
-        </div>
-             
-        <div className="new-claim-wrapper">
-    <button
-    onClick={() => navigate(-1)}
-    style={{
-        padding: "8px 16px", // Slightly reduced padding
-         backgroundColor: "#f0f0f0",
-       color: "#333",
-       fontSize: "16px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      cursor: "pointer",
-      margin: "0px 20px 20px 45px", // Top and bottom margins only
-        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-        transition: "background-color 0.3s ease",
-        width: "fit-content", // Make width only as big as content
-        display: "block",
-   // Ensure it respects margin auto if needed
-    }}
->
-    ⬅ Back
-</button>
+      <div className="main-content"> 
+        <div className="">
           <h2 className="page-title">New Expense Claim</h2>
           <p className="page-subtitle">Submit a new expense claim for reimbursement</p>
  
@@ -763,8 +508,7 @@ const handleSaveDraft = async () => {
  
                   {fieldErrors.amount && <p className="error-text">{fieldErrors.amount}</p>}
                 </div>
-              </div>
-              <div className="form-group">
+                 <div className="form-group">
                 <label>Expense Date *</label>
                 <DatePicker
   selected={formData.expenseDate ? new Date(formData.expenseDate) : null}
@@ -788,7 +532,8 @@ const handleSaveDraft = async () => {
  
                 {fieldErrors.expenseDate && <p className="error-text">{fieldErrors.expenseDate}</p>}
               </div>
-         
+              </div>
+            
               <div className="form-group">
                 <label><h3>Receipt Upload *</h3></label>
                 <div className="custom-file-input-wrapper">
@@ -850,9 +595,10 @@ const handleSaveDraft = async () => {
         </div>
       </div>
     </div>
+ 
   );
 }
  
-export default NewClaim;
+export default Newdesign;
  
  
