@@ -4,7 +4,7 @@ import './ClaimsPage.css';
 import Sidebar from './Sidebar.js';
 import ClaimsChart from './ClaimsChart'; // This is already present
 
-function DesignSummary() {
+function MyTasks() {
   const navigate = useNavigate();
   const [summary, setSummary] = useState({
     totalClaims: 0,
@@ -176,4 +176,4 @@ function DesignSummary() {
   );
 }
 
-export default DesignSummary;
+export default MyTasks;
