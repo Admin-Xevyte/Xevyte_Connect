@@ -31,7 +31,7 @@ function HRDashboard() {
   setLoading(true);
   setApiError("");
   try {
-    const res = await fetch(`http://localhost:8082/leaves/hr/${hrId}`, {
+    const res = await fetch(`http://3.7.139.212:8080/leaves/hr/${hrId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
@@ -60,7 +60,7 @@ function HRDashboard() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:8082/profile/${hrId}`, {
+        const res = await fetch(`http://3.7.139.212:8080/profile/${hrId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to fetch profile info");
@@ -150,7 +150,7 @@ const filteredLeaves = useMemo(() => {
             <td style={{ padding: "12px", border: "1px solid #ddd" }}>
               {leave.fileName ? (
                 <a
-                  href={`/leaves/download/${leave.id}`}
+                  href={`http://3.7.139.212:8080/leaves/download/${leave.id}`}
                   download={leave.fileName}
                   style={{ color: "#007bff", textDecoration: "underline" }}
                   title={leave.fileName}
