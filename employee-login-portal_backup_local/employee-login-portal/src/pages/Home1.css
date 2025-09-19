@@ -2,7 +2,7 @@
   display: flex;
   
   height: 100vh;          /* Full screen height */
-  overflow: visible;       /* No scrollbars */
+  overflow: hidden;       /* No scrollbars */
   font-family: sans-serif;
 }
 
