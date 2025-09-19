@@ -34,7 +34,7 @@ function ManagerTasks() {
       setLoading(true);
       setApiError("");
       try {
-        const res = await fetch(`http://localhost:8082/leaves/manager/${managerId}`, {
+        const res = await fetch(`http://3.7.139.212:8080/leaves/manager/${managerId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) {
@@ -53,7 +53,7 @@ function ManagerTasks() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:8082/profile/${managerId}`, {
+        const res = await fetch(`http://3.7.139.212:8080/profile/${managerId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error("Failed to fetch profile info");
@@ -96,7 +96,7 @@ function ManagerTasks() {
     setLoading(true);
     setApiError("");
     try {
-      const res = await fetch("http://localhost:8082/leaves/action", {
+      const res = await fetch("http://3.7.139.212:8080/leaves/action", {
         method: "POST",
         headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(actionDTO),
@@ -204,7 +204,7 @@ function ManagerTasks() {
                 <td style={{ padding: '12px', border: '1px solid #ddd' }}>
                   {leave.fileName ? (
                     <a
-                      href={`http://localhost:8082/leaves/download/${leave.id}`}
+                      href={`http://3.7.139.212:8080/leaves/download/${leave.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       download
