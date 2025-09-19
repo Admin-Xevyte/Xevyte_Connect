@@ -3,8 +3,7 @@
 
 /* Adjusting divider space */
 .manager-dashboard .divider-line {
-  border: none;
-  border-top: 2px solid #ccc;  /* Light gray line */
+  /* Light gray line */
   margin:20px 0 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
     width: 100%;           /* Reduced spacing between sections */
@@ -30,8 +29,7 @@
 .action-buttons button {
   padding: 6px 10px;
   font-size: 14px;
-  border: none;
-  border-radius: 4px;
+
   cursor: pointer;
   color: white;
   transition: background-color 0.3s;
@@ -57,14 +55,16 @@
 
 table {
   width: 100%;
-  border-collapse: collapse;
+
+  
   background: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+ 
 }
 
 th, td {
   padding: 12px;
-  border: 1px solid #ddd;
+
+  
   text-align: left;
 }
 
@@ -132,7 +132,8 @@ html, body {
   padding: 20px;
   background-color: #f7f9fa;
   height: 100vh;
-  box-sizing: border-box;
+
+  
   overflow:hidden;
 }
 
@@ -154,7 +155,7 @@ max-width: 100%;
 /* Table layout */
 .status-table {
   width: 100%;
-  border-collapse: collapse;
+
   table-layout: fixed;
 }
 
@@ -162,7 +163,8 @@ max-width: 100%;
 .status-table td {
   padding: 12px;
   text-align: center;
-  border: 1px solid #ddd;
+
+  
   word-wrap: break-word;
   font-size: 14px;
 }
