@@ -1,19 +1,16 @@
-
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Dashboard.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import Sidebar from './Sidebar.js';
+
 function Leaves() {
   const employeeId = localStorage.getItem("employeeId");
   
   const [employeeName, setEmployeeName] = useState(localStorage.getItem("employeeName"));
   const [profilePic, setProfilePic] = useState(localStorage.getItem("employeeProfilePic") || require('../assets/SKKKK.JPG.jpg'));
   const [isCollapsed, setIsCollapsed] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef(null);
@@ -60,7 +57,7 @@ function Leaves() {
 
    useEffect(() => {
   if (employeeId) {
-    fetch(`http://3.7.139.212:8080/access/assigned-ids/${employeeId}`)
+    fetch(`/access/assigned-ids/${employeeId}`)
       .then(res => res.json())
       .then(data => {
         const { manager, hr } = data;  // only manager and hr
@@ -82,7 +79,7 @@ function Leaves() {
 
   const fetchHolidays = async () => {
     try {
-      const res = await fetch(`http://3.7.139.212:8080/leaves/holidays`);
+      const res = await fetch(`/leaves/holidays`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -97,7 +94,7 @@ function Leaves() {
   const fetchLeaveBalance = async () => {
     if (!employeeId) return;
     try {
-      const res = await fetch(`http://3.7.139.212:8080/leaves/balance/${employeeId}`);
+      const res = await fetch(`/leaves/balance/${employeeId}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -119,7 +116,7 @@ function Leaves() {
     if (!employeeId) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://3.7.139.212:8080/leaves/employee/${employeeId}`);
+      const res = await fetch(`/leaves/employee/${employeeId}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -149,7 +146,7 @@ function Leaves() {
     // ✅ If the draft has a fileName, fetch the actual file
   if (draft.fileName && draft.id) {
   try {
-    const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/download/${draft.id}`);
+    const res = await fetch(`/leaves/drafts/download/${draft.id}`);
     if (res.ok) {
       const blob = await res.blob();
       const file = new File([blob], draft.fileName, { type: blob.type });
@@ -246,6 +243,7 @@ useEffect(() => {
   
 }, [leaveRequest, leaveBalance, holidays]); // ✅ include leaveRequest
 
+
 useEffect(() => {
   // Clear the file error if the conditions for mandatory upload are no longer met
   if (leaveRequest.type !== "Sick" || totalDays <= 2) {
@@ -253,6 +251,15 @@ useEffect(() => {
   }
 }, [leaveRequest.type, totalDays]);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleModalClick = (e) => {
     if (modalRef.current && e.target === modalRef.current) {
@@ -260,7 +267,52 @@ useEffect(() => {
     }
   };
 
+  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const toggleProfileMenu = () => setProfileOpen(!profileOpen);
 
+  const handleLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/login");
+  };
+
+  const handleEditProfile = () => {
+    setProfileOpen(false);
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("name", employeeName);
+    formData.append("profilePic", file);
+
+    try {
+      const res = await fetch(`/profile/update/${employeeId}`, {
+        method: "PUT",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      if (data.profilePic) {
+        setProfilePic(data.profilePic);
+        localStorage.setItem("employeeProfilePic", data.profilePic);
+        setSuccessMessage("Profile picture updated successfully! ✅");
+        setTimeout(() => {
+          setSuccessMessage("");
+          setProfileOpen(false);
+        }, 2000);
+      } else {
+        alert("Failed to update profile picture: no profilePic returned.");
+      }
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+      alert("Error uploading profile picture. See console for details.");
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -282,7 +334,7 @@ useEffect(() => {
   };
 
   const applyLeaveWithExistingFile = async (leaveData) => {
-  const response = await fetch("http://3.7.139.212:8080/leaves/apply-with-existing-file", {
+  const response = await fetch("/leaves/apply-with-existing-file", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -351,7 +403,7 @@ const handleFileChange = (e) => {
   
 const fetchDraftById = async (draftId) => {
   try {
-    const res = await fetch(`http://3.7.139.212:8080/leaves/drafts/single/${draftId}`);
+    const res = await fetch(`/leaves/drafts/single/${draftId}`);
     if (!res.ok) throw new Error("Failed to fetch draft");
 
     const draft = await res.json();
@@ -500,7 +552,7 @@ const handleSubmitLeave = async (e) => {
         if (file) {
             formData.append("document", file);
         } else if (leaveRequest.fileName) {
-            const fileBlobRes = await fetch(`http://3.7.139.212:8080/leaves/drafts/download/${leaveRequest.id}`);
+            const fileBlobRes = await fetch(`/leaves/drafts/download/${leaveRequest.id}`);
             if (!fileBlobRes.ok) {
                 throw new Error("Failed to retrieve draft file for submission.");
             }
@@ -509,7 +561,7 @@ const handleSubmitLeave = async (e) => {
             formData.append("document", draftFile);
         }
 
-        const res = await fetch("http://3.7.139.212:8080/leaves/apply", {
+        const res = await fetch("/leaves/apply", {
             method: "POST",
             body: formData,
         });
@@ -567,7 +619,6 @@ const handleMyTasksClick = () => {
   };
 
   return (
-      <Sidebar>
     <div className="dashboard-container">
       <style>
         {`
@@ -591,248 +642,666 @@ const handleMyTasksClick = () => {
           }
         `}
       </style>
-   
+      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        {!isCollapsed ? (
+          <>
+            <img src={require("../assets/c6647346d2917cff706243bfdeacb83b413c72d1.png")} alt="office" className="office-vng" />
+            <img src={require("../assets/gg_move-left.png")} alt="collapse" className="toggle-btn" onClick={toggleSidebar} style={{ width: '35px', height: '35px', top: '76px', marginLeft: "200px" }} />
+                <h3>
+                  <Link
+                    to="/dashboard"
+                    className="side"
+                    style={{
+                      textDecoration: 'none',
+                      color:'#00b4c6',
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      Home
+                    </span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home0" className="side" style={{ textDecoration: 'none', color: 'white' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Claims</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home1" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Time Sheet</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home2" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Handbook</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home3" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Employee Directory</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home4" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Exit Management</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home5" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Holiday Calendar</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home6" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Helpdesk</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home7" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Leaves</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home9" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Pay slips</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home10" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Performance</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home11" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Training</span>
+                  </Link>
+                </h3>
+                
+                <h3>
+                  <Link to="/home12" className="side" style={{ textDecoration: 'none', color: '#00b4c6' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>Travel</span>
+                  </Link>
+                </h3>
+                {allowedUsers.includes(employeeId) && (
+                                                      <>
+                                                        <h3 onClick={toggleContractMenu} style={{ cursor: 'pointer' }}>
+                                                          <span className="side" style={{  color:'#00b4c6' }}>
+                                                            Contract Management {isContractOpen ? '▾' : '▸'}
+                                                          </span>
+                                                        </h3>
+                                                    
+                                                        {isContractOpen && (
+                                                          <ul style={{ listStyle: 'disc', paddingLeft: '16px', marginTop: '4px' ,}}>
+                                                            <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                              <Link
+                                                                to="/customers"
+                                                                style={{
+                                                                  textDecoration: 'none',
+                                                                 color:'#00b4c6',
+                                                                  fontSize: '14px',
+                                                                  display: 'block',
+                                                                  padding: '4px 0',
+                                                                }}
+                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                              >
+                                                                Customers
+                                                              </Link>
+                                                            </li>
+                                                            <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                              <Link
+                                                                to="/sows"
+                                                                style={{
+                                                                  textDecoration: 'none',
+                                                                 color:'#00b4c6',
+                                                                  fontSize: '14px',
+                                                                  display: 'block',
+                                                                  padding: '4px 0',
+                                                                }}
+                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                              >
+                                                                SOWs
+                                                              </Link>
+                                                            </li>
+                                                            <li style={{ marginBottom: '4px' ,marginLeft:'60px'}}>
+                                                              <Link
+                                                                to="/projects"
+                                                                style={{
+                                                                  textDecoration: 'none',
+                                                                 color:'#00b4c6',
+                                                                  fontSize: '14px',
+                                                                  display: 'block',
+                                                                  padding: '4px 0',
+                                                                }}
+                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                              >
+                                                                Projects
+                                                              </Link>
+                                                            </li>
+                                                            <li style={{ marginBottom: '4px',marginLeft:'60px' }}>
+                                                              <Link
+                                                                to="/allocation"
+                                                                style={{
+                                                                  textDecoration: 'none',
+                                                                 color:'#00b4c6',
+                                                                  fontSize: '14px',
+                                                                  display: 'block',
+                                                                  padding: '4px 0',
+                                                                }}
+                                                                onMouseOver={(e) => (e.target.style.color = '#fff')}
+                                                                onMouseOut={(e) => (e.target.style.color = '#00b4c6')}
+                                                              >
+                                                                Allocation
+                                                              </Link>
+                                                            </li>
+                                                          </ul>
+                                                        )}
+                                                      </>
+                                                    )}
+                        
+                        </>
+        ) : (
+          <div className="collapsed-wrapper">
+            <img src={require("../assets/Group.png")} alt="expand" className="collapsed-toggle" onClick={toggleSidebar} />
+          </div>
+        )}
+      </div>
       <div className="main-content">
+        <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>Welcome, {employeeName} ({employeeId})</h2>
+          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
+            <input type="text" className="search-input" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <img src={require('../assets/Vector.png')} alt="Notifications" className="icon" style={{ cursor: 'pointer' }} />
+            <div className="profile-wrapper" style={{ position: 'relative' }}>
+              <img src={profilePic} alt="Profile" className="profile-pic" onClick={toggleProfileMenu} style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+              {profileOpen && (
+                <div ref={profileDropdownRef} className="profile-dropdown" style={{ position: 'absolute', top: '50px', right: '0', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', borderRadius: '4px', zIndex: 1000, width: '150px' }}>
+                  <button onClick={handleEditProfile} style={{ display: 'block', width: '100%', padding: '10px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid #eee' }}>Edit Profile</button>
+                  <button onClick={handleLogout} style={{ display: 'block', width: '100%', padding: '10px', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>Logout</button>
+                </div>
+              )}
+              <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
+            </div>
+          </div>
+        </div>
+
+        <hr className="divider-line" />
+
+        
+
         <div style={{ flex: '1', padding: '20px', overflowY: 'auto' }}>
-          {successMessage && <div style={{ textAlign: 'center', color: '#4BB543', margin: '20px', fontWeight: 'bold' }}>{successMessage}</div>}
-          <h2 style={{ marginBottom: '20px', color: '#333' }}>Leaves Dashboard </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-            {/* Casual Leaves Card */}
-            <div style={{ padding: '20px', backgroundColor: '#e6f7ff', borderRadius: '8px', borderLeft: '5px solid #1890ff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h4 style={{ margin: '0 0 10px 0', color: '#1890ff' }}>Casual Leaves</h4>
-              <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#1890ff' }}> {Math.max(0, (+leaveBalance.casualTotal || 0) - (+leaveBalance.casualUsed || 0))}</div>
-              <p style={{ margin: '0', color: '#666' }}>
-                days available
-                <span style={{ display: 'block', fontSize: '12px', color: '#555' }}>
-                  Used: {leaveBalance.casualUsed} / Total: {leaveBalance.casualTotal}
-                </span>
-              </p>
-            </div>
-            {/* Sick Leaves Card */}
-            <div style={{ padding: '20px', backgroundColor: '#fffbe6', borderRadius: '8px', borderLeft: '5px solid #faad14', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h4 style={{ margin: '0 0 10px 0', color: '#faad14' }}>Sick Leaves</h4>
-              <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#faad14' }}>{Math.max(0, (+leaveBalance.sickTotal || 0) - (+leaveBalance.sickUsed || 0))}
-              </div>
-              <p style={{ margin: '0', color: '#666' }}>
-                days available
-                <span style={{ display: 'block', fontSize: '12px', color: '#555' }}>
-                  Used: {leaveBalance.sickUsed} / Total: {leaveBalance.sickTotal}
-                </span>
-              </p>
-            </div>
-            {/* LOP Card */}
-            <div style={{ padding: '20px', backgroundColor: '#f0f9eb', borderRadius: '8px', borderLeft: '5px solid #52c41a', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h4 style={{ margin: '0 0 10px 0', color: '#52c41a' }}>LOP</h4>
-              <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#52c41a' }}>{leaveBalance.lopUsed}</div>
-              <p style={{ margin: '0', color: '#666' }}>
-                days used
-              </p>
-            </div>
-          </div>
-          <div style={{ marginBottom: '20px', display: 'flex', gap: '15px' }}>
-            <button onClick={() => { setIsModalToOpen(true); resetForm(); }} style={{ padding: '10px 20px', fontSize: '16px', backgroundColor: '#1890ff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>Apply for Leave</button>
-            <button onClick={() => navigate('/saved-drafts')} style={{ padding: '10px 20px', fontSize: '16px', backgroundColor: '#1890ff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>Saved Drafts</button>
-            <button onClick={handleLeaveHistoryClick} style={{ padding: '10px 20px', fontSize: '16px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>Leave History</button>
-           {canViewTasks && (<button onClick={handleMyTasksClick} style={{ padding: '10px 20px', fontSize: '16px', backgroundColor:  "#1890ff", color: 'white', border: 'none', borderRadius: '5px',  boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>My Tasks</button>)}
-          </div>
+  {successMessage && (
+    <div
+      style={{
+        textAlign: 'center',
+        color: '#4BB543',
+        margin: '20px',
+        fontWeight: 'bold',
+      }}
+    >
+      {successMessage}
+    </div>
+  )}
 
-          {isModalOpen && (
-            <div ref={modalRef} onClick={handleModalClick} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000 }}>
-              <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '10px', width: '90%', maxWidth: '500px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', position: 'relative' }}>
-                <h3 style={{ marginBottom: '20px' }}>Apply for Leave</h3>
-                <button onClick={() => setIsModalToOpen(false)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#aaa' }}>&times;</button>
-                <form onSubmit={handleSubmitLeave}>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                      Leave Type<span style={{ color: 'red' }}> *</span>
-                    </label>
-                    <select name="type" value={leaveRequest.type} onChange={handleInputChange} style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }}>
-                      <option value="Select" disabled>Select</option>
-                      <option value="Casual">Casual Leave</option>
-                      <option value="Sick">Sick Leave</option>
-                      <option value="Paternity">Paternity Leave</option>
-                      <option value="Maternity">Maternity Leave</option>
-                      <option value="LOP">LOP</option>
-                    </select>
-                  </div>
+  {/* ✅ Buttons First */}
+  <div style={{ marginBottom: '20px', display: 'flex', gap: '15px' }}>
+    <button
+      onClick={() => {
+        setIsModalToOpen(true);
+        resetForm();
+      }}
+      style={{
+        background: "darkblue",
+         border: "none",
+         fontWeight: "bold",
+         fontSize: "14px",
+         cursor: "pointer",
+         padding: "6px 10px",
+         borderRadius: "4px",
+         color: "white"
+      }}
+    >
+      Apply for Leave
+    </button>
 
-<div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
-  {/* Start Date */}
-  <div style={{ flex: 1 }}>
-    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-      Start Date<span style={{ color: 'red' }}> *</span>
-    </label>
-    <DatePicker
-      selected={leaveRequest.startDate}
-      onChange={handleStartDateChange}
-      selectsStart
-      startDate={leaveRequest.startDate}
-      endDate={leaveRequest.endDate}
-      minDate={null}
-      maxDate={leaveRequest.type === 'Sick' ? new Date() : null}
-      dayClassName={highlightDates}
-      dateFormat="dd-MM-yyyy"
-      placeholderText="DD-MM-YYYY"
-      className="date-picker-input"
-      strictParsing
-    />
-  </div>
+    <button
+      onClick={() => navigate('/saved-drafts')}
+      style={{
+        background: "darkblue",
+         border: "none",
+         fontWeight: "bold",
+         fontSize: "14px",
+         cursor: "pointer",
+         padding: "6px 10px",
+         borderRadius: "4px",
+         color: "white"
+      }}
+    >
+      Drafts
+    </button>
 
-  {/* End Date */}
-  <div style={{ flex: 1 }}>
-    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-      End Date<span style={{ color: 'red' }}> *</span>
-    </label>
-    <DatePicker
-      selected={leaveRequest.endDate}
-      onChange={handleEndDateChange}
-      selectsEnd
-      startDate={leaveRequest.startDate}
-      endDate={leaveRequest.endDate}
-      minDate={leaveRequest.startDate}
-      dayClassName={highlightDates}
-      dateFormat="dd-MM-yyyy"
-      placeholderText="DD-MM-YYYY"
-      className="date-picker-input"
-      strictParsing
-    />
-    {formError && (
-      <p style={{ color: '#FF4136', fontSize: '12px', marginTop: '5px' }}>
-        {formError}
-      </p>
+    <button
+      onClick={handleLeaveHistoryClick}
+      style={{
+         background: "darkblue",
+         border: "none",
+         fontWeight: "bold",
+         fontSize: "14px",
+         cursor: "pointer",
+         padding: "6px 10px",
+         borderRadius: "4px",
+         color: "white"
+      }}
+    >
+       History
+    </button>
+
+    {canViewTasks && (
+      <button
+        onClick={handleMyTasksClick}
+        style={{
+          background: "darkblue",
+         border: "none",
+         fontWeight: "bold",
+         fontSize: "14px",
+         cursor: "pointer",
+         padding: "6px 10px",
+         borderRadius: "4px",
+         color: "white"
+        }}
+      >
+        My Tasks
+      </button>
     )}
   </div>
-</div>
 
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                      Total Days<span style={{ color: 'red' }}> *</span>
-                    </label>
-                    <input type="text" name="totalDays" value={totalDays} readOnly style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd', backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} />
-                    {showLOPAlert && (
-                      <p style={{ color: '#FF4136', fontSize: '14px', marginTop: '10px', fontWeight: 'bold' }}>
-                        Note: You have already utilized your allocated leaves. Excess leaves will be marked as LOP.
-                      </p>
-                    )}
-                  </div>
-                 
-                    {/* File Upload */}
-<div style={{ marginBottom: "10px" }}>
-  <label style={{ display: "block", marginBottom: "5px" }}>
-    Upload Document (PDF, JPG, JPEG, PNG, max 5MB){" "}
-    {leaveRequest.type === "Sick" && totalDays > 2 && (
-      <span style={{ color: "red" }}>*</span>
-    )}
-
-  </label>
-
-  {/* Custom File Upload */}
+  {/* ✅ Leaves Balance Second */}
+  <h2 style={{ marginBottom: '20px', color: '#333' }}>Leaves Balance</h2>
   <div
     style={{
-      display: "flex",
-      alignItems: "center",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      overflow: "hidden",
-      width: "100%",
-       height: "40px",
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: '20px',
+      marginBottom: '30px',
     }}
   >
-    {/* Hidden actual file input */}
-    <input
-      type="file"
-      id="fileInput"
-      name="document"
-      onChange={handleFileChange}
-      style={{ display: "none" }}
-    />
-
-    {/* Custom button to trigger input */}
-    <label
-      htmlFor="fileInput"
+    {/* Casual Leaves Card */}
+    <div
       style={{
-        backgroundColor: "#f0f0f0",
-      padding: "6px 12px",
-        cursor: "pointer",
-        borderRight: "1px solid #ccc",
+        padding: '20px',
+        backgroundColor: '#e6f7ff',
+        borderRadius: '8px',
+        borderLeft: '5px solid #1890ff',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
       }}
     >
-      Choose File
-    </label>
+      <h4 style={{ margin: '0 0 10px 0', color: '#1890ff' }}>Casual Leaves</h4>
+      <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#1890ff' }}>
+        {Math.max(
+          0,
+          (+leaveBalance.casualTotal || 0) - (+leaveBalance.casualUsed || 0)
+        )}
+      </div>
+      <p style={{ margin: '0', color: '#666' }}>
+        days available
+        <span style={{ display: 'block', fontSize: '12px', color: '#555' }}>
+          Used: {leaveBalance.casualUsed} / Total: {leaveBalance.casualTotal}
+        </span>
+      </p>
+    </div>
 
-    {/* Filename (draft or uploaded) */}
-    <span
+    {/* Sick Leaves Card */}
+    <div
       style={{
-        flex: "1",
-        padding: "5px 10px",
-        fontSize: "13px",
-        color: file || leaveRequest.fileName ? "#333" : "gray",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
+        padding: '20px',
+        backgroundColor: '#fffbe6',
+        borderRadius: '8px',
+        borderLeft: '5px solid #faad14',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
       }}
     >
-      {file
-        ? file.name
-        : leaveRequest.fileName
-        ? leaveRequest.fileName
-        : "No file chosen"}
-    </span>
+      <h4 style={{ margin: '0 0 10px 0', color: '#faad14' }}>Sick Leaves</h4>
+      <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#faad14' }}>
+        {Math.max(
+          0,
+          (+leaveBalance.sickTotal || 0) - (+leaveBalance.sickUsed || 0)
+        )}
+      </div>
+      <p style={{ margin: '0', color: '#666' }}>
+        days available
+        <span style={{ display: 'block', fontSize: '12px', color: '#555' }}>
+          Used: {leaveBalance.sickUsed} / Total: {leaveBalance.sickTotal}
+        </span>
+      </p>
+    </div>
 
-    
+    {/* LOP Card */}
+    <div
+      style={{
+        padding: '20px',
+        backgroundColor: '#f0f9eb',
+        borderRadius: '8px',
+        borderLeft: '5px solid #52c41a',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
+      <h4 style={{ margin: '0 0 10px 0', color: '#52c41a' }}>LOP</h4>
+      <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#52c41a' }}>
+        {leaveBalance.lopUsed}
+      </div>
+      <p style={{ margin: '0', color: '#666' }}>days used</p>
+    </div>
   </div>
-{/* ✅ ADD THIS LINE to display the error */}
-  {fileError && (
-    <p style={{ color: '#FF4136', fontSize: '12px', marginTop: '5px' }}>
-      {fileError}
-    </p>
+
+  {/* ✅ Modal with Form */}
+  {isModalOpen && (
+    <div
+      ref={modalRef}
+      onClick={handleModalClick}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 2000,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: '#fff',
+          padding: '30px',
+          borderRadius: '10px',
+          width: '90%',
+          maxWidth: '500px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+          position: 'relative',
+        }}
+      >
+        <h3 style={{ marginBottom: '20px' }}>Apply for Leave</h3>
+        <button
+          onClick={() => setIsModalToOpen(false)}
+          style={{
+            position: 'absolute',
+            top: '15px',
+            right: '15px',
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            color: '#aaa',
+          }}
+        >
+          &times;
+        </button>
+
+        <form onSubmit={handleSubmitLeave}>
+          {/* Leave Type */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Leave Type<span style={{ color: 'red' }}> *</span>
+            </label>
+            <select
+              name="type"
+              value={leaveRequest.type}
+              onChange={handleInputChange}
+              style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: '5px',
+                border: '1px solid #ddd',
+              }}
+            >
+              <option value="Select" disabled>
+                Select
+              </option>
+              <option value="Casual">Casual Leave</option>
+              <option value="Sick">Sick Leave</option>
+              <option value="Paternity">Paternity Leave</option>
+              <option value="Maternity">Maternity Leave</option>
+              <option value="LOP">LOP</option>
+            </select>
+          </div>
+
+          {/* Dates */}
+          <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+            {/* Start Date */}
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Start Date<span style={{ color: 'red' }}> *</span>
+              </label>
+              <DatePicker
+                selected={leaveRequest.startDate}
+                onChange={handleStartDateChange}
+                selectsStart
+                startDate={leaveRequest.startDate}
+                endDate={leaveRequest.endDate}
+                minDate={null}
+                maxDate={leaveRequest.type === 'Sick' ? new Date() : null}
+                dayClassName={highlightDates}
+                dateFormat="dd-MM-yyyy"
+                placeholderText="DD-MM-YYYY"
+                className="date-picker-input"
+                strictParsing
+              />
+            </div>
+
+            {/* End Date */}
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                End Date<span style={{ color: 'red' }}> *</span>
+              </label>
+              <DatePicker
+                selected={leaveRequest.endDate}
+                onChange={handleEndDateChange}
+                selectsEnd
+                startDate={leaveRequest.startDate}
+                endDate={leaveRequest.endDate}
+                minDate={leaveRequest.startDate}
+                dayClassName={highlightDates}
+                dateFormat="dd-MM-yyyy"
+                placeholderText="DD-MM-YYYY"
+                className="date-picker-input"
+                strictParsing
+              />
+              {formError && (
+                <p style={{ color: '#FF4136', fontSize: '12px', marginTop: '5px' }}>
+                  {formError}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Total Days */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Total Days<span style={{ color: 'red' }}> *</span>
+            </label>
+            <input
+              type="text"
+              name="totalDays"
+              value={totalDays}
+              readOnly
+              style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: '5px',
+                border: '1px solid #ddd',
+                backgroundColor: '#f0f0f0',
+                cursor: 'not-allowed',
+              }}
+            />
+            {showLOPAlert && (
+              <p style={{ color: '#FF4136', fontSize: '14px', marginTop: '10px', fontWeight: 'bold' }}>
+                Note: You have already utilized your allocated leaves. Excess leaves will be marked as LOP.
+              </p>
+            )}
+          </div>
+
+          {/* File Upload */}
+          <div style={{ marginBottom: '10px' }}>
+            <label style={{ display: 'block', marginBottom: '5px' }}>
+              Upload Document (PDF, JPG, JPEG, PNG, max 5MB){' '}
+              {leaveRequest.type === 'Sick' && totalDays > 2 && (
+                <span style={{ color: 'red' }}>*</span>
+              )}
+            </label>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                width: '100%',
+                height: '40px',
+              }}
+            >
+              <input
+                type="file"
+                id="fileInput"
+                name="document"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+              <label
+                htmlFor="fileInput"
+                style={{
+                  backgroundColor: '#f0f0f0',
+                  padding: '6px 12px',
+                  cursor: 'pointer',
+                  borderRight: '1px solid #ccc',
+                }}
+              >
+                Choose File
+              </label>
+              <span
+                style={{
+                  flex: '1',
+                  padding: '5px 10px',
+                  fontSize: '13px',
+                  color: file || leaveRequest.fileName ? '#333' : 'gray',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {file
+                  ? file.name
+                  : leaveRequest.fileName
+                  ? leaveRequest.fileName
+                  : 'No file chosen'}
+              </span>
+            </div>
+            {fileError && (
+              <p style={{ color: '#FF4136', fontSize: '12px', marginTop: '5px' }}>
+                {fileError}
+              </p>
+            )}
+          </div>
+
+          {/* Reason */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Reason<span style={{ color: 'red' }}> *</span>
+            </label>
+            <textarea
+              name="reason"
+              value={leaveRequest.reason}
+              onChange={handleInputChange}
+              required
+              maxLength={255}
+              style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: '5px',
+                border: '1px solid #ddd',
+                height: '100px',
+                resize: 'none',
+                overflow: 'auto',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            />
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              style={{
+                flex: 1,
+                padding: '12px',
+                fontSize: '16px',
+                backgroundColor: '#1890ff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+              }}
+            >
+              Save Draft
+            </button>
+            <button
+              type="submit"
+              disabled={loading || fileError || leaveRequest.type === 'Select' || formError}
+              style={{
+                flex: 1,
+                padding: '12px',
+                fontSize: '16px',
+                backgroundColor:
+                  loading || fileError || leaveRequest.type === 'Select' || formError
+                    ? '#ccc'
+                    : '#28a745',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '5px',
+                cursor:
+                  loading || fileError || leaveRequest.type === 'Select' || formError
+                    ? 'not-allowed'
+                    : 'pointer',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+              }}
+            >
+              {loading ? 'Submitting...' : 'Submit Leave'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   )}
 </div>
 
-<div style={{ marginBottom: '20px' }}>
-  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-    Reason<span style={{ color: 'red' }}> *</span>
-  </label>
-  <textarea
-    name="reason"
-    value={leaveRequest.reason}
-    onChange={handleInputChange}
-    required
-    maxLength={255}
-    style={{
-      width: '100%',
-      padding: '10px',
-      borderRadius: '5px',
-      border: '1px solid #ddd',
-      height: '100px',
-      resize: 'none',
-      overflow: 'auto',
-      scrollbarWidth: 'none', // For Firefox
-      msOverflowStyle: 'none', // For Internet Explorer and Edge
-      WebkitOverflowScrolling: 'touch', // For iOS
-    }}
-  />
-</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
-                    <button type="button" onClick={handleSaveDraft} style={{ flex: 1, padding: '12px', fontSize: '16px', backgroundColor: '#1890ff', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>Save Draft</button>
-                    <button type="submit" disabled={loading || fileError || leaveRequest.type === "Select" || formError} style={{ flex: 1, padding: '12px', fontSize: '16px', backgroundColor: (loading || fileError || leaveRequest.type === "Select" || formError) ? '#ccc' : '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: (loading || fileError || leaveRequest.type === "Select" || formError) ? 'not-allowed' : 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.15)' }}>{loading ? 'Submitting...' : 'Submit Leave'}</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </div>
-    </Sidebar>
   );
 }
 
 export default Leaves;
-
-
-
-
-
-  
 
