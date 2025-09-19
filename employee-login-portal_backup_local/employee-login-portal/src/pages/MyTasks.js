@@ -1,178 +1,153 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import './ClaimsPage.css';
-import Sidebar from './Sidebar.js';
-import ClaimsChart from './ClaimsChart'; // This is already present
-
+import React, { useState, useEffect } from "react";
+// Remove `useNavigate` because we are no longer changing pages.
+// import { useNavigate } from "react-router-dom";
+import "./ManagerDashboard.css";
+import "./Dashboard.css";
+import Sidebar from "./Sidebar.js";
+// Import the dashboard components to be rendered in the highlighted area.
+import ManagerDashBoard from "./ManagerDashBoard";
+import FinanceDashboard from "./FinanceDashboard";
+import HRDashboard from "./HRDashboard";
 function MyTasks() {
-  const navigate = useNavigate();
-  const [summary, setSummary] = useState({
-    totalClaims: 0,
-    approved: 0,
-    rejected: 0,
-    paidAmount: 0
-  });
-  const [canViewTasks, setCanViewTasks] = useState(false);
   const employeeId = localStorage.getItem("employeeId");
+  const [employeeName] = useState(localStorage.getItem("employeeName"));
+  const [assignedRoles, setAssignedRoles] = useState({
+    manager: false,
+    finance: false,
+    hr: false,
+  });
 
+  // Add state to track which dashboard is active
+  const [activeDashboard, setActiveDashboard] = useState(null);
+
+  // Fetch assigned roles from backend
   useEffect(() => {
     if (employeeId) {
-      fetch(`http://3.7.139.212:8080/claims/assigned-ids/${employeeId}`)
-        .then(res => res.json())
-        .then(data => {
-          setCanViewTasks(data.canViewTasks === true);
+      fetch(`http://localhost:8082/claims/assigned-ids/${employeeId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAssignedRoles({
+            manager: data.manager || false,
+            finance: data.finance || false,
+            hr: data.hr || false,
+          });
+          // Automatically select the first available dashboard
+          if (data.manager) {
+            setActiveDashboard("manager");
+          } else if (data.finance) {
+            setActiveDashboard("finance");
+          } else if (data.hr) {
+            setActiveDashboard("hr");
+          }
         })
-        .catch(err => {
-          console.error("Error fetching task visibility:", err);
-          setCanViewTasks(false);
+        .catch((err) => {
+          console.error("Failed to fetch assigned roles:", err);
         });
     }
   }, [employeeId]);
 
-  useEffect(() => {
-    if (employeeId) {
-      fetch(`http://3.7.139.212:8080/claims/summary/${employeeId}`)
-        .then(res => res.json())
-        .then(data => {
-          setSummary({
-            totalClaims: data.totalClaims || 0,
-            approved: data.approved || 0,
-            rejected: data.rejected || 0,
-            paidAmount: data.paidAmount || 0
-          });
-        })
-        .catch(err => console.error("Error fetching summary:", err));
+  // Update this function to change state instead of navigating
+  const handleCheckboxChange = (role) => {
+    setActiveDashboard(activeDashboard === role ? null : role);
+  };
+
+  // Create a function to conditionally render the correct dashboard
+  const renderDashboard = () => {
+    switch (activeDashboard) {
+      case "manager":
+        return <ManagerDashBoard />;
+      case "finance":
+        return <FinanceDashboard />;
+      case "hr":
+        return <HRDashboard />;
+      default:
+        return null; // Or a message like: <p>Select a role to view tasks.</p>
     }
-  }, [employeeId]);
+  };
 
   return (
-    <div style={{ marginTop: "40px" }}>
-      <h2 className="title">Your Claim Updates</h2>
-      {/* <div
-        className="quick-actions-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "16px",
-          marginTop: "10px",
-          padding: "0 20px",
-          boxSizing: "border-box",
-          width: "100%",
-          marginBottom: "40px",
-        }}
-      >
-        <div
-          className="twi"
-          style={{
-            display: "contents",
-          }}
-        >
+    
+<div
+      className="main-content"
+      style={{
+        padding: "5px",
+        display: "flex",
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+      }}
+    >
           <div
-            className="action-box light-purple"
             style={{
-              cursor: "default",
-              transition: "none",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
               display: "flex",
-              alignItems: "center",
-              padding: "20px",
-              borderRadius: "12px",
-              background: "#f3ecff",
-              minHeight: "120px",
-              justifyContent: "space-between",
+              gap: "15px",
+             
             }}
           >
-            <div className="icon" style={{ cursor: 'default' }}>📝</div>
-            <div>
-              <h3>Total Claims Raised</h3>
-              <p>{summary.totalClaims}</p>
-            </div>
+            {assignedRoles.manager && (
+              <label
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={activeDashboard === "manager"}
+                  onChange={() => handleCheckboxChange("manager")}
+                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                />
+                Manager
+              </label>
+            )}
+
+            {assignedRoles.finance && (
+              <label
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={activeDashboard === "finance"}
+                  onChange={() => handleCheckboxChange("finance")}
+                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                />
+                Finance
+              </label>
+            )}
+
+            {assignedRoles.hr && (
+              <label
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={activeDashboard === "hr"}
+                  onChange={() => handleCheckboxChange("hr")}
+                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                />
+                HR
+              </label>
+            )}
           </div>
 
-          <div
-            className="action-box light-green"
-            style={{
-              cursor: "default",
-              transition: "none",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-              display: "flex",
-              alignItems: "center",
-              padding: "20px",
-              borderRadius: "12px",
-              background: "#e4f8e9",
-              minHeight: "120px",
-              justifyContent: "space-between",
-            }}
-          >
-            <div className="icon" style={{ cursor: 'default' }}>✅</div>
-            <div>
-              <h3>Approved</h3>
-              <p>{summary.approved}</p>
-            </div>
-          </div>
-
-          <div
-            className="action-box light-Gray cardcolor3"
-            style={{
-              cursor: "default",
-              transition: "none",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-              display: "flex",
-              alignItems: "center",
-              padding: "20px",
-              borderRadius: "12px",
-              background: "#f5f5f5",
-              minHeight: "120px",
-              justifyContent: "space-between",
-            }}
-          >
-            <div className="icon" style={{ cursor: 'default' }}>❌</div>
-            <div>
-              <h3>Rejected</h3>
-              <p>{summary.rejected}</p>
-            </div>
-          </div>
-
-          <div
-            className="action-box light-purple cardcolor4"
-            style={{
-              cursor: "default",
-              transition: "none",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-              display: "flex",
-              alignItems: "center",
-              padding: "20px",
-              borderRadius: "12px",
-              background: "#f3ecff",
-              minHeight: "120px",
-              justifyContent: "space-between",
-            }}
-          >
-            <div className="icon" style={{ cursor: 'default' }}>₹</div>
-            <div>
-              <h3>Paid Amount</h3>
-              <p>₹{Math.floor(summary.paidAmount)}</p>
-            </div>
-          </div>
+          <div className="dashboard-content-container">
+          {renderDashboard()}
         </div>
-      </div> */}
+
       
-      {/* New section for the chart */}
-      <div style={{ 
-        width: '100%', 
-        margin: 'auto', 
-        padding: '20px', 
-         height: 'calc(100vh - 300px)'
-      }}>
-  
-        <ClaimsChart 
-          approved={summary.approved} 
-          rejected={summary.rejected} 
-          totalClaims={summary.totalClaims} // Add this line
-        paidAmount={summary.paidAmount}  
-        />
       </div>
-    </div>
+ 
   );
 }
 
