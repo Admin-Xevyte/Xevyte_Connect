@@ -11,7 +11,7 @@ import "./Dashboard.css";
 import Sidebar from './Sidebar.js';
 // pdfjs.GlobalWorkerOptions.workerSrc = `./pdf.worker.min.js`; // Remove this line
 
-function Designmanger() {
+function ManagerDashBoard() {
   const [claims, setClaims] = useState([]);
   const [originalClaims, setOriginalClaims] = useState([]);
   const [selectedClaimId, setSelectedClaimId] = useState(null);
@@ -341,4 +341,4 @@ function Designmanger() {
   );
 }
 
-export default Designmanger;
+export default ManagerDashBoard;
