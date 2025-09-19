@@ -121,6 +121,25 @@ const [formData, setFormData] = useState({
   }, [location.state]);
  
 
+const handleCancel = () => {
+  setFormData({
+    employeeId: localStorage.getItem("employeeId"),
+    expenseDescription: "",
+    category: "",
+    amount: "",
+    expenseDate: getTodayDate(),
+    businessPurpose: "",
+    additionalNotes: ""
+  });
+  setReceiptFile(null);
+  setReceiptPreviewUrl(null);
+  if (fileInputRef.current) fileInputRef.current.value = null;
+  setError("");
+  setMessage("");
+  setOriginalDraftId(null);
+  setDraftLoaded(false);
+};
+
 
 
  
@@ -586,7 +605,7 @@ const handleSaveDraft = async () => {
               <div className="actions-box">
                 <button className="btn primary" onClick={handleSubmit}>Submit for Approval</button>
                 <button className="btn secondary" onClick={handleSaveDraft}>Save as Draft</button>
-                <Link to="/home0" className="btn secondary" style={{ textDecoration: 'none' }}>Cancel</Link>
+                     <button className="btn secondary" onClick={handleCancel}>Cancel</button>
                 {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
                 {message && <p style={{ color: 'green', marginTop: '10px' }}>{message}</p>}
               </div>
