@@ -51,7 +51,7 @@ const formatDate = (dateString) => {
  
 const fetchClaims = useCallback(() => {
   setLoading(true); // start loading
-  fetch(`http://localhost:8082/claims/history/${employeeId}`)
+  fetch(`http://3.7.139.212:8080/claims/history/${employeeId}`)
     .then((res) => res.json())
     .then((data) => {
    const sortedClaims = data.sort((a, b) => b.id - a.id);
@@ -72,7 +72,7 @@ setLoading(false); // done loading // done loading
  
     // Fetch profile picture
     if (employeeId) {
-      fetch(`http://localhost:8082/profile/${employeeId}`)
+      fetch(`http://3.7.139.212:8080/profile/${employeeId}`)
         .then(res => res.json())
         .then(data => {
           if (data.profilePic) {
@@ -100,7 +100,7 @@ setLoading(false); // done loading // done loading
   // Handles viewing a receipt (both image and PDF)
   const handleViewReceipt = (id, receiptName) => {
     axios
-      .get(`http://localhost:8082/claims/receipt/${id}`, { responseType: "arraybuffer" })
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "arraybuffer" })
       .then((res) => {
         const fileExtension = receiptName.split('.').pop().toLowerCase();
         const blob = new Blob([res.data]);
@@ -121,7 +121,7 @@ setLoading(false); // done loading // done loading
  
   const handleDownloadReceipt = (id, receiptName) => {
     axios
-      .get(`http://localhost:8082/claims/receipt/${id}`, { responseType: "blob" })
+      .get(`http://3.7.139.212:8080/claims/receipt/${id}`, { responseType: "blob" })
       .then((res) => {
         const fileUrl = URL.createObjectURL(res.data);
         const link = document.createElement("a");
