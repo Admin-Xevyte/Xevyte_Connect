@@ -957,7 +957,6 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
       padding: '0px',
     }}
   >
-    <h3>Active Travel Requests</h3>
     {/* Use filteredActiveTickets here */}
     {filteredActiveTickets.length === 0 ? (
       <p>No active requests found.</p>
@@ -1102,10 +1101,10 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
   <div style={{
     height: 'calc(100vh - 200px)',
     overflowY: 'auto',
-    border: '1px solid #ccc',
+
     padding: '0px',
   }}>
-    <h3>Booking History</h3>
+
     
     <table
       border="1"
@@ -1379,12 +1378,11 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
     style={{
       height: 'calc(100vh - 200px)',
       overflowY: 'auto',
-      border: '1px solid #ccc',
+   
       padding: '0px',
     }}
   >
-  
-    <h3>Pending Travel Requests</h3>
+
     
     {/* Use filteredPendingRequests for the length check */}
     {filteredPendingRequests.length === 0 ? (
@@ -1496,11 +1494,11 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
     style={{
       height: 'calc(100vh - 200px)',
       overflowY: 'auto',
-      border: '1px solid #ccc',
+
       padding: '0px',
     }}
   >
-    <h3>Pending Travel Requests</h3>
+
     {/* Use filteredPendingRequests for the length check */}
     {filteredPendingRequests.length === 0 ? (
       <p>No pending requests found.</p>
@@ -1655,11 +1653,11 @@ const handleRemoveFile = (requestId, fileIndexToRemove) => {
     style={{
       height: 'calc(100vh - 200px)',
       overflowY: 'auto',
-      border: '1px solid #ccc',
+
       padding: '0px',
     }}
   >
-    <h3>Saved Drafts</h3>
+
     {/* Use filteredDrafts for the length check */}
     {filteredDrafts.length === 0 ? (
       <p>No drafts found.</p>
